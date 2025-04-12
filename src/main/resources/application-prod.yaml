@@ -1,0 +1,22 @@
+server:
+  port: 80
+
+spring:
+  datasource:
+    url: "${spring_datasource_url}"
+    username: "${spring_datasource_username}"
+    password: "${spring_datasource_password}"
+    driver-class-name: "${spring_datasource_driver_class_name}"
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: never
+  output:
+    ansi:
+      enabled: always
+  mvc:
+    pathmatch:
+      matching-strategy: PATH_PATTERN_PARSER
