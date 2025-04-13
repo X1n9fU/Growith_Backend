@@ -1,0 +1,24 @@
+spring:
+  security:
+    oauth2:
+      client:
+        # OAuth2 인증 제공자에 대한 설정 정보를 포함합니다.
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+        # 클라이언트 애플리케이션(Spring Boot)에 대한 설정을 포함합니다.
+        registration:
+          kakao:
+            client-id: "${oauth2_client_id}"
+            client-secret: "${oauth2_client_secret}"
+            redirect-uri: "${oauth2_redirect_uri}"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            client-name: kakao
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
