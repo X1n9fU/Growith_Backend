@@ -14,6 +14,7 @@ import java.util.List;
 
 import static dev.book.challenge.entity.QChallenge.challenge;
 
+
 @Repository
 @RequiredArgsConstructor
 public class ChallengeRepositoryImpl implements ChallengeJpaRepositiory {
@@ -23,8 +24,8 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepositiory {
 
     @Override
     public Page<ChallengeReadResponse> search(String title, String text, Pageable pageable) {
-
         List<ChallengeReadResponse> content = jpaQueryFactory.select(Projections.constructor(ChallengeReadResponse.class,
+
                         challenge.id,
                         challenge.title,
                         challenge.capacity,

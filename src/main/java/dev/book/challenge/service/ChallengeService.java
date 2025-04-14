@@ -6,8 +6,12 @@ import dev.book.challenge.dto.response.ChallengeCreateResponse;
 import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
+import dev.book.challenge.dummy.DummyUser;
+import dev.book.challenge.dummy.DummyUserRepository;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.user_challenge.entity.UserChallenge;
+import dev.book.user_challenge.repository.UserChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,11 +24,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
+    private final DummyUserRepository dummyUserRepository;
+    private final UserChallengeRepository userChallengeRepository;
 
     public ChallengeCreateResponse createChallenge(ChallengeCreateRequest challengeCreateRequest) {
-        // todo 유저 생성 로직 추가
-        Challenge challenge = Challenge.of(challengeCreateRequest);
+
+        DummyUser dummyUser = dummyUserRepository.findById(1L).orElseThrow(() -> new RuntimeException());
+        Challenge challenge = Challenge.of(challengeCreateRequest, dummyUser);
         Challenge savedChallenge = challengeRepository.save(challenge);
+        UserChallenge userChallenge = UserChallenge.of(dummyUser, savedChallenge);
+        userChallengeRepository.save(userChallenge);
         return ChallengeCreateResponse.fromEntity(savedChallenge);
     }
 
@@ -34,7 +43,7 @@ public class ChallengeService {
     }
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
-        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException());
+        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new IllegalArgumentException());
         return ChallengeReadDetailResponse.fromEntity(challenge);
     }
 

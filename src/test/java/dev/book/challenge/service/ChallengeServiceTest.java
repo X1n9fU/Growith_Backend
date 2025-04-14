@@ -6,8 +6,11 @@ import dev.book.challenge.dto.response.ChallengeCreateResponse;
 import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
+import dev.book.challenge.dummy.DummyUser;
+import dev.book.challenge.dummy.DummyUserRepository;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.user_challenge.repository.UserChallengeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +43,13 @@ class ChallengeServiceTest {
     @Mock
     private ChallengeRepository challengeRepository;
 
+    @Mock
+    private UserChallengeRepository userChallengeRepository;
+
+    @Mock
+    private DummyUserRepository dummyUserRepository;
+
+
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 2, 1);
@@ -52,12 +62,13 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        Challenge challenge = Challenge.of(challengeCreateRequest);
+        DummyUser creator = DummyUser.of("사용자");
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.save(any())).willReturn(challenge);
+        given(dummyUserRepository.findById(any())).willReturn(Optional.of(creator));
 
         // when
         ChallengeCreateResponse response = challengeService.createChallenge(challengeCreateRequest);
-
         //then
         assertThat(response.title()).isEqualTo("제목");
 
@@ -70,7 +81,8 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        Challenge challenge = Challenge.of(challengeCreateRequest);
+        DummyUser creator = DummyUser.of("사용자");
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         ChallengeReadResponse challengeReadResponse = ChallengeReadResponse.fromEntity(challenge);
         Pageable pageRequest = PageRequest.of(0, 10);
         Page<ChallengeReadResponse> mockPage = new PageImpl<>(List.of(challengeReadResponse), pageRequest, 1);
@@ -90,8 +102,9 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        Challenge challenge = Challenge.of(challengeCreateRequest);
-        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        DummyUser creator = DummyUser.of("사용자");
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
+        given(challengeRepository.findWithCreatorById(any())).willReturn(Optional.of(challenge));
 
         // when
         ChallengeReadDetailResponse response = challengeService.searchChallengeById(1L);
@@ -105,7 +118,7 @@ class ChallengeServiceTest {
     void notSearchChallengeById() {
 
         // given
-        given(challengeRepository.findById(any())).willReturn(Optional.empty());
+        given(challengeRepository.findWithCreatorById(any())).willReturn(Optional.empty());
 
         // when
         // then
@@ -118,7 +131,8 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        Challenge challenge = Challenge.of(challengeCreateRequest);
+        DummyUser creator = DummyUser.of("사용자");
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
 
         LocalDate start = LocalDate.of(2024, 2, 1);
@@ -138,7 +152,8 @@ class ChallengeServiceTest {
     void deleteChallenge() {
         //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        Challenge challenge = Challenge.of(challengeCreateRequest);
+        DummyUser creator = DummyUser.of("사용자");
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
 
         //when
