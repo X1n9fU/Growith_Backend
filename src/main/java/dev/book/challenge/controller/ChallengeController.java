@@ -7,6 +7,7 @@ import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.service.ChallengeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @PostMapping("/challenges")
-    public ResponseEntity<?> createChallenge(@RequestBody ChallengeCreateRequest challengeCreateRequest) {
+    public ResponseEntity<?> createChallenge(@Valid @RequestBody ChallengeCreateRequest challengeCreateRequest) {
         ChallengeCreateResponse challengeCreateResponse = challengeService.createChallenge(challengeCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(challengeCreateResponse);
     }
@@ -41,7 +42,7 @@ public class ChallengeController {
     }
 
     @PutMapping("/challenges/{id}")
-    public ResponseEntity<?> updateChallenge(@PathVariable Long id, @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
+    public ResponseEntity<?> updateChallenge(@PathVariable Long id, @Valid @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
         ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(id, challengeUpdateRequest);
         return ResponseEntity.ok().body(challengeUpdateResponse);
     }
