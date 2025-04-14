@@ -45,4 +45,11 @@ public class ChallengeService {
         challengeRepository.flush();
         return ChallengeUpdateResponse.fromEntity(challenge);
     }
+
+
+    public void deleteChallenge(Long id) {
+        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException());
+        challengeRepository.delete(challenge);
+
+    }
 }
