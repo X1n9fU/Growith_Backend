@@ -7,9 +7,10 @@ import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.repository.ChallengeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +25,9 @@ public class ChallengeService {
         return ChallengeCreateResponse.fromEntity(savedChallenge);
     }
 
-    //todo 필터링 및 검색 기능 추가,페이징
-    public List<ChallengeReadResponse> searchChallenge() {
-        List<Challenge> challenges = challengeRepository.findAll();
-        List<ChallengeReadResponse> challengeReadResponses = challenges.stream().map(ChallengeReadResponse::fromEntity).toList();
-        return challengeReadResponses;
+    public Page<ChallengeReadResponse> searchChallenge(String title, String text, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return challengeRepository.search(title, text, pageable);
     }
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {

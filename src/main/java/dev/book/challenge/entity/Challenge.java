@@ -2,7 +2,6 @@ package dev.book.challenge.entity;
 
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.type.Category;
-import dev.book.challenge.type.Period;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
 import jakarta.persistence.*;
@@ -26,8 +25,7 @@ public class Challenge {
 
     private String title;
 
-    @Enumerated(EnumType.STRING)
-    private Period period;
+    private String text;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "release_type")
@@ -49,9 +47,9 @@ public class Challenge {
     @LastModifiedDate
     private LocalDateTime modifyDate;
 
-    private Challenge(String title, String period, String release, int amount, String status, String category, Integer capacity) {
+    private Challenge(String title, String text, String release, int amount, String status, String category, Integer capacity) {
         this.title = title;
-        this.period = Period.valueOf(period);
+        this.text = text;
         this.release = Release.valueOf(release);
         this.amount = amount;
         this.capacity = capacity;
@@ -60,8 +58,8 @@ public class Challenge {
     }
 
     public static Challenge of(ChallengeCreateRequest challengeCreateRequest) {
-        return new Challenge(challengeCreateRequest.title(),
-                challengeCreateRequest.period(), challengeCreateRequest.release(),
+        return new Challenge(challengeCreateRequest.title(), challengeCreateRequest.text(),
+                challengeCreateRequest.release(),
                 challengeCreateRequest.amount(), challengeCreateRequest.status(), challengeCreateRequest.category(), challengeCreateRequest.capacity());
     }
 

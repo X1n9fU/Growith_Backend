@@ -6,11 +6,10 @@ import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,8 +24,11 @@ public class ChallengeController {
     }
 
     @GetMapping("/challenges")
-    public ResponseEntity<List<ChallengeReadResponse>> searchChallenge() {
-        List<ChallengeReadResponse> challengeReadResponses = challengeService.searchChallenge();
+    public ResponseEntity<Page<ChallengeReadResponse>> searchChallenge(@RequestParam(required = false) String title,
+                                                                       @RequestParam(required = false) String text,
+                                                                       @RequestParam(required = false, defaultValue = "1") int page,
+                                                                       @RequestParam(required = false, defaultValue = "10") int size) {
+        Page<ChallengeReadResponse> challengeReadResponses = challengeService.searchChallenge(title, text, page, size);
         return ResponseEntity.ok().body(challengeReadResponses);
     }
 
