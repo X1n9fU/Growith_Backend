@@ -1,6 +1,6 @@
 package dev.book.global.config.security.handler;
 
-import dev.book.global.config.security.service.Oauth2AuthService;
+import dev.book.global.config.security.service.OAuth2AuthService;
 import dev.book.user.enums.UserLoginState;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,14 +19,14 @@ OAuth2 로그인 성공 시
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final Oauth2AuthService oauth2AuthService;
+    private final OAuth2AuthService oauth2AuthService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
         //가져온 인증 정보를 통해 유저 존재 여부 확인 후 리다이렉션 진행
-        UserLoginState userLoginState = oauth2AuthService.getAttributes(authentication, response);
+        UserLoginState userLoginState = oauth2AuthService.getAttributes(authentication);
 
         switch(userLoginState){ //todo 반환되는 화면 경로 정하기
             case LOGIN_SUCCESS ->

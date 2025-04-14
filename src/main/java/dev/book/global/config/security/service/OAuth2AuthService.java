@@ -6,7 +6,6 @@ import dev.book.global.config.security.exception.UnValidatedProviderException;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.enums.UserLoginState;
 import dev.book.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -21,11 +20,11 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor
-public class Oauth2AuthService {
+public class OAuth2AuthService {
 
     private final UserRepository userRepository;
 
-    public UserLoginState getAttributes(Authentication authentication, HttpServletResponse response){
+    public UserLoginState getAttributes(Authentication authentication){
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
 
