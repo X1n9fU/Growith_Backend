@@ -12,6 +12,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,26 +42,33 @@ public class Challenge {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
     @CreatedDate
     private LocalDateTime createDate;
 
     @LastModifiedDate
     private LocalDateTime modifyDate;
 
-    private Challenge(String title, String text, String release, int amount, String status, String category, Integer capacity) {
+    private Challenge(String title, String text, String release, int amount, String category, Integer capacity, LocalDate startDate, LocalDate endDate) {
         this.title = title;
         this.text = text;
         this.release = Release.valueOf(release);
         this.amount = amount;
         this.capacity = capacity;
-        this.status = Status.valueOf(status);
+        this.status = Status.RECRUITING;
         this.category = Category.valueOf(category);
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public static Challenge of(ChallengeCreateRequest challengeCreateRequest) {
         return new Challenge(challengeCreateRequest.title(), challengeCreateRequest.text(),
                 challengeCreateRequest.release(),
-                challengeCreateRequest.amount(), challengeCreateRequest.status(), challengeCreateRequest.category(), challengeCreateRequest.capacity());
+                challengeCreateRequest.amount(), challengeCreateRequest.category(), challengeCreateRequest.capacity(),
+                challengeCreateRequest.startDate(), challengeCreateRequest.endDate());
     }
 
 }
