@@ -1,6 +1,7 @@
 package dev.book.challenge.entity;
 
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
+import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.type.Category;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
@@ -71,4 +72,15 @@ public class Challenge {
                 challengeCreateRequest.startDate(), challengeCreateRequest.endDate());
     }
 
+    public void updateInfo(ChallengeUpdateRequest request) {
+        this.title = request.title();
+        this.text = request.text();
+        this.release = Release.valueOf(request.release());
+        this.amount = request.amount();
+        this.capacity = request.capacity();
+        this.status = Status.RECRUITING;
+        this.category = Category.valueOf(request.category());
+        this.startDate = request.startDate();
+        this.endDate = request.endDate();
+    }
 }

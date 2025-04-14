@@ -1,9 +1,11 @@
 package dev.book.challenge.controller;
 
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
+import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
 import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
+import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +38,12 @@ public class ChallengeController {
     public ResponseEntity<ChallengeReadDetailResponse> searchById(@PathVariable Long id) {
         ChallengeReadDetailResponse challengeReadResponse = challengeService.searchChallengeById(id);
         return ResponseEntity.ok().body(challengeReadResponse);
+    }
+
+    @PutMapping("/challenges/{id}")
+    public ResponseEntity<?> updateChallenge(@PathVariable Long id, @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
+        ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(id, challengeUpdateRequest);
+        return ResponseEntity.ok().body(challengeUpdateResponse);
     }
 
 }
