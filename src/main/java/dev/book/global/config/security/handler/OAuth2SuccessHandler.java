@@ -1,6 +1,9 @@
 package dev.book.global.config.security.handler;
 
+import dev.book.global.config.security.dto.TokenDto;
+import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.OAuth2AuthService;
+import dev.book.global.config.security.util.CookieUtil;
 import dev.book.user.enums.UserLoginState;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +23,7 @@ OAuth2 로그인 성공 시
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final OAuth2AuthService oauth2AuthService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -29,8 +33,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         UserLoginState userLoginState = oauth2AuthService.getAttributes(authentication);
 
         switch(userLoginState){ //todo 반환되는 화면 경로 정하기
-            case LOGIN_SUCCESS ->
+            case LOGIN_SUCCESS ->{
+                TokenDto tokenDto = jwtUtil.generateToken(authentication);
+                //todo 토큰 처리
                 getRedirectStrategy().sendRedirect(request, response, "/main");
+            }
             case PROFILE_INCOMPLETE ->
                 getRedirectStrategy().sendRedirect(request, response, "/signup");
         }
