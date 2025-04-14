@@ -40,6 +40,11 @@ public class JwtUtil {
         SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    /**
+     * access + refresh 토큰 생성
+     * @param authentication
+     * @return
+     */
     public TokenDto generateToken(Authentication authentication){
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -78,6 +83,11 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * 정상적인 토큰이라면 Subject 반환
+     * @param token
+     * @return user의 email
+     */
     public String validateToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
@@ -88,4 +98,4 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    }
+}
