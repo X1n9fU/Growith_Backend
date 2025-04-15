@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * OAuth2User에서 attributes를 통해 유저의 상태 파악 후 UserLoginState 반환
@@ -48,8 +47,10 @@ public class OAuth2AuthService {
         UserEntity user = userRepository.findByEmail(OAuth2Attributes.email())
                 .orElseGet(() -> UserEntity.of(OAuth2Attributes));
 
-        if (user.getNickname().isBlank())
+        if (user.getNickname().isBlank()){
+            userRepository.save(user);
             return UserLoginState.PROFILE_INCOMPLETE;
+        }
         return UserLoginState.LOGIN_SUCCESS;
     }
 

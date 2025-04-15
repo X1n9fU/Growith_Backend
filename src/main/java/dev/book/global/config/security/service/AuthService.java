@@ -49,7 +49,7 @@ public class AuthService {
 
         TokenDto tokenDto = getTokenDto(response, authentication);
 
-        refreshTokenService.saveRefreshToken(user, tokenDto.refreshToken());
+        refreshTokenService.saveAndUpdateRefreshToken(user, tokenDto.refreshToken());
     }
 
 

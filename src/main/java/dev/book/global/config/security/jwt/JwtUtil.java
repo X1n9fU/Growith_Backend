@@ -55,7 +55,7 @@ public class JwtUtil {
         String refreshToken = generateRefreshToken(authorities, authentication.getName());
 
         //refreshToken 저장
-        refreshTokenService.saveRefreshToken(authentication.getName(), refreshToken);
+        refreshTokenService.saveAndUpdateRefreshToken(authentication.getName(), refreshToken);
 
         return new TokenDto(accessToken, refreshToken);
 

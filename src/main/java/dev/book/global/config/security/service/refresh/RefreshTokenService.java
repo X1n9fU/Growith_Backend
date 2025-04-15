@@ -17,20 +17,19 @@ public class RefreshTokenService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void saveRefreshToken(String email, String refreshToken){
+    public void saveAndUpdateRefreshToken(String email, String refreshToken){
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("이메일에 해당하는 유저가 존재하지 않습니다. : " + email));
 
-        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser(user)
-                .orElseGet(() -> new RefreshToken(user ,refreshToken));
-        refreshTokenEntity.updateToken(refreshToken);
-        refreshTokenRepository.save(refreshTokenEntity);
+        saveAndUpdateRefreshToken(user, refreshToken);
     }
 
-    public void saveRefreshToken(UserEntity user, String refreshToken){
+    public void saveAndUpdateRefreshToken(UserEntity user, String refreshToken){
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser(user)
                 .orElseGet(() -> new RefreshToken(user ,refreshToken));
         refreshTokenEntity.updateToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
+
+        user.updateRefreshToken(refreshTokenEntity);
     }
 }
