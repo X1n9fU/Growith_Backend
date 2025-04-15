@@ -1,5 +1,6 @@
 package dev.book.global.config.security.service;
 
+import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
@@ -63,5 +64,15 @@ public class AuthService {
     public void validateNickname(String nickname) {
         boolean isExisted = userRepository.existsByNickname(nickname);
         if (isExisted) throw new DuplicateNicknameException("이미 사용하고 있는 닉네임입니다. : " + nickname);
+    }
+
+    /**
+     * RefreshToken 삭제
+     * @param userDetails
+     */
+    @Transactional
+    public void logout(CustomUserDetails userDetails) {
+        userDetails.user().deleteRefreshToken();
+        userRepository.save(userDetails.user());
     }
 }
