@@ -7,5 +7,7 @@ spring:
     group:
       local:
         - local
+        - oauth2
+        - jwt
       prod:
         - prod
