@@ -6,8 +6,8 @@ import dev.book.accountbook.dto.request.AccountBookSpendRequest;
 import dev.book.accountbook.dto.response.AccountBookIncomeResponse;
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.accountbook.entity.AccountBook;
-import dev.book.accountbook.exception.AccountBookErrorCode;
-import dev.book.accountbook.exception.AccountBookErrorException;
+import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
+import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.user.entity.UserEntity;
@@ -46,10 +46,12 @@ public class AccountBookService {
     public AccountBookSpendResponse modifySpend(AccountBookSpendRequest request, Long id, Long userId) {
         AccountBook accountBook = findAccountBookOrThrow(id, userId, AccountBookErrorCode.NOT_FOUND_SPEND);
         updateAccountBook(accountBook, request);
+        accountBookRepository.flush();
 
         return AccountBookSpendResponse.from(accountBook);
     }
 
+    @Transactional
     public boolean deleteSpend(Long id, Long userId) {
         AccountBook accountBook = findAccountBookOrThrow(id, userId, AccountBookErrorCode.NOT_FOUND_SPEND);
         accountBookRepository.deleteById(accountBook.getId());
@@ -85,6 +87,7 @@ public class AccountBookService {
         return AccountBookIncomeResponse.from(accountBook);
     }
 
+    @Transactional
     public boolean deleteIncome(Long id, Long userId) {
         AccountBook accountBook = findAccountBookOrThrow(id, userId, AccountBookErrorCode.NOT_FOUND_INCOME);
         accountBookRepository.deleteById(accountBook.getId());
@@ -101,7 +104,6 @@ public class AccountBookService {
         accountBook.modifyTitle(request.title());
         accountBook.modifyCategory(request.category());
         accountBook.modifyAmount(request.amount());
-        accountBook.modifyDate();
         accountBook.modifyMemo(request.memo());
         accountBook.modifyFrequency(request.repeat().frequency());
         accountBook.modifyMonth(request.repeat().month());
