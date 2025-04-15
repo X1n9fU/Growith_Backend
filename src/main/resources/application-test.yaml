@@ -5,10 +5,10 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: "${spring.datasource.url}"
-    username: "${spring.datasource.username}"
-    password: "${spring.datasource.password}"
-    driver-class-name: "${spring.datasource.driver-class-name}"
+    url: "${spring_datasource_url}"
+    username: "${spring_datasource_username}"
+    password: "${spring_datasource_password}"
+    driver-class-name: "${spring_datasource_driver-class-name}"
   jpa:
     open-in-view: false
     hibernate:
