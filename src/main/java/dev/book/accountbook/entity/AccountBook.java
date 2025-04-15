@@ -3,23 +3,23 @@ package dev.book.accountbook.entity;
 import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
+import dev.book.global.entity.BaseTimeEntity;
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class AccountBook {
+public class AccountBook extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +30,6 @@ public class AccountBook {
     @Enumerated(value = EnumType.STRING)
     private CategoryType type;
     private int amount;
-    @CreatedDate
-    private LocalDateTime createDate;
-    @LastModifiedDate
-    private LocalDateTime modifyDate;
     private LocalDateTime endDate;
     private String memo;
     @ManyToOne
@@ -55,10 +51,6 @@ public class AccountBook {
 
     public void modifyAmount(int amount) {
         this.amount = amount;
-    }
-
-    public void modifyDate() {
-        this.modifyDate = LocalDateTime.now();
     }
 
     public void modifyMemo(String memo) {

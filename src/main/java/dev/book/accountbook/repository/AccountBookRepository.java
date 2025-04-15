@@ -24,7 +24,7 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
             SELECT new dev.book.accountbook.dto.response.AccountBookStatResponse(a.category, SUM(a.amount))
                         FROM AccountBook a
                         WHERE a.user.id = :userId
-                        AND a.modifyDate BETWEEN :startDate AND :endDate
+                        AND a.updatedAt BETWEEN :startDate AND :endDate
                         GROUP BY a.category
                         ORDER BY SUM(a.amount) DESC
             """)
@@ -36,7 +36,7 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
                   WHERE a.user.id = :userId
                   AND a.type = :categoryType
                   AND a.category = :category
-            AND a.modifyDate BETWEEN :startDate AND :endDate
+            AND a.updatedAt BETWEEN :startDate AND :endDate
             """)
     List<AccountBook> findByCategory(Long userId, CategoryType categoryType, Category category, LocalDateTime startDate, LocalDateTime endDate);
 
@@ -46,7 +46,7 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
                     WHERE a.user.id = :userId
                     AND a.type = :categoryType
                     AND a.category = :category
-                    AND a.modifyDate BETWEEN :startDate AND :endDate
+                    AND a.updatedAt BETWEEN :startDate AND :endDate
             """)
     Integer sumSpending(
             @Param("userId") Long userId,

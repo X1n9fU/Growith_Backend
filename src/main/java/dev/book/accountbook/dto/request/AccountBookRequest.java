@@ -28,20 +28,6 @@ public interface AccountBookRequest {
             day = repeat().day();
         }
 
-        return new AccountBook(
-                null,
-                title(),
-                category(),
-                categoryType(),
-                amount(),
-                null,
-                null,
-                endDate(),
-                memo(),
-                user,
-                frequency,
-                month,
-                day
-        );
+        return new AccountBook(null, title(), category(), categoryType(), amount(), endDate(), memo(), user, frequency, month, day);
     }
 }
