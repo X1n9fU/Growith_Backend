@@ -9,6 +9,7 @@ import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.dummy.DummyUser;
 import dev.book.challenge.dummy.DummyUserRepository;
 import dev.book.challenge.entity.Challenge;
+import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.user_challenge.repository.UserChallengeRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -122,7 +123,7 @@ class ChallengeServiceTest {
 
         // when
         // then
-        assertThatThrownBy(() -> challengeService.searchChallengeById(99L)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> challengeService.searchChallengeById(99L)).isInstanceOf(ChallengeException.class);
     }
 
     @Test

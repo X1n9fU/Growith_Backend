@@ -16,17 +16,18 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/challenges")
 public class ChallengeController {
 
     private final ChallengeService challengeService;
 
-    @PostMapping("/challenges")
+    @PostMapping
     public ResponseEntity<?> createChallenge(@Valid @RequestBody ChallengeCreateRequest challengeCreateRequest) {
         ChallengeCreateResponse challengeCreateResponse = challengeService.createChallenge(challengeCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(challengeCreateResponse);
     }
 
-    @GetMapping("/challenges")
+    @GetMapping
     public ResponseEntity<Page<ChallengeReadResponse>> searchChallenge(@RequestParam(required = false) String title,
                                                                        @RequestParam(required = false) String text,
                                                                        @RequestParam(required = false, defaultValue = "1") int page,
@@ -35,19 +36,19 @@ public class ChallengeController {
         return ResponseEntity.ok().body(challengeReadResponses);
     }
 
-    @GetMapping("/challenges/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ChallengeReadDetailResponse> searchById(@PathVariable Long id) {
         ChallengeReadDetailResponse challengeReadResponse = challengeService.searchChallengeById(id);
         return ResponseEntity.ok().body(challengeReadResponse);
     }
 
-    @PutMapping("/challenges/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateChallenge(@PathVariable Long id, @Valid @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
         ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(id, challengeUpdateRequest);
         return ResponseEntity.ok().body(challengeUpdateResponse);
     }
 
-    @DeleteMapping("/challenges/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteChallenge(@PathVariable Long id) {
         challengeService.deleteChallenge(id);
         return ResponseEntity.ok().build();
