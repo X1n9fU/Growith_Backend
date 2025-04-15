@@ -1,6 +1,6 @@
 package dev.book.accountbook.exception.accountbook;
 
-import dev.book.accountbook.exception.ErrorCode;
+import dev.book.global.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
