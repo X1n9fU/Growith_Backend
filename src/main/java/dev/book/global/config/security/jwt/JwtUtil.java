@@ -1,7 +1,7 @@
 package dev.book.global.config.security.jwt;
 
 import dev.book.global.config.security.dto.TokenDto;
-import dev.book.global.config.security.service.RefreshTokenService;
+import dev.book.global.config.security.service.refresh.RefreshTokenService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

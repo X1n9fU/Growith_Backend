@@ -2,8 +2,7 @@ package dev.book.global.config.security.handler;
 
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.jwt.JwtUtil;
-import dev.book.global.config.security.service.OAuth2AuthService;
-import dev.book.global.config.security.util.CookieUtil;
+import dev.book.global.config.security.service.oauth2.OAuth2AuthService;
 import dev.book.user.enums.UserLoginState;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

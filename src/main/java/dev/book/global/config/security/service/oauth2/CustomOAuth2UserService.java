@@ -1,7 +1,7 @@
-package dev.book.global.config.security.service;
+package dev.book.global.config.security.service.oauth2;
 
-import dev.book.global.config.security.dto.CustomOAuth2User;
-import dev.book.global.config.security.dto.OAuth2Attributes;
+import dev.book.global.config.security.dto.oauth2.CustomOAuth2User;
+import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.config.security.exception.CustomOAuth2Error;
 import dev.book.global.config.security.exception.UnValidatedProviderException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

@@ -1,6 +1,6 @@
-package dev.book.global.config.security.service;
+package dev.book.global.config.security.service.oauth2;
 
-import dev.book.global.config.security.dto.OAuth2Attributes;
+import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.config.security.exception.CustomOAuth2Error;
 import dev.book.global.config.security.exception.UnValidatedProviderException;
 import dev.book.user.entity.UserEntity;
