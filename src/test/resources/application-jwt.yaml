@@ -1,6 +1,0 @@
-spring:
-  jwt:
-    expiration:
-      access: 1800 #30분
-      refresh: 86400 #1일
-    secret: "${JWT_SECRET}"
