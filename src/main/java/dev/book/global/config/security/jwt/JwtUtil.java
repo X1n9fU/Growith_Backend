@@ -61,7 +61,7 @@ public class JwtUtil {
 
     }
 
-    public String generateAccessToken(String authorities, String authName){
+    private String generateAccessToken(String authorities, String authName){
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(authName)
@@ -72,7 +72,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(String authorities, String authName){
+    private String generateRefreshToken(String authorities, String authName){
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(authName)

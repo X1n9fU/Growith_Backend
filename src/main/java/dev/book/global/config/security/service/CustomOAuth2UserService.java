@@ -27,10 +27,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (provider.equals("kakao")){
             OAuth2Attributes kakaoAttributes = OAuth2Attributes.toKakao(attributes);
             return new CustomOAuth2User(kakaoAttributes.email(), attributes);
-        } else {
-            CustomOAuth2Error oAuth2Error = new CustomOAuth2Error("Invalid_Provider", "지원되지 않는 공급자입니다.", null, 403);
-            throw new UnValidatedProviderException(oAuth2Error);
         }
+        CustomOAuth2Error oAuth2Error = new CustomOAuth2Error("Invalid_Provider", "지원되지 않는 공급자입니다.", null, 403);
+        throw new UnValidatedProviderException(oAuth2Error);
     }
 
 }
