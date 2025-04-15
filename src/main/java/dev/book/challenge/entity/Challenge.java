@@ -2,10 +2,10 @@ package dev.book.challenge.entity;
 
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
-import dev.book.challenge.dummy.DummyUser;
 import dev.book.challenge.type.Category;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
+import dev.book.user.entity.UserEntity;
 import dev.book.user_challenge.entity.UserChallenge;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -55,7 +55,7 @@ public class Challenge {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
-    private DummyUser creator;
+    private UserEntity creator;
 
     @CreatedDate
     private LocalDateTime createDate;
@@ -63,7 +63,7 @@ public class Challenge {
     @LastModifiedDate
     private LocalDateTime modifyDate;
 
-    private Challenge(String title, String text, String release, int amount, String category, Integer capacity, LocalDate startDate, LocalDate endDate, DummyUser creator) {
+    private Challenge(String title, String text, String release, int amount, String category, Integer capacity, LocalDate startDate, LocalDate endDate, UserEntity creator) {
         this.title = title;
         this.text = text;
         this.release = Release.valueOf(release);
@@ -76,7 +76,7 @@ public class Challenge {
         this.creator = creator;
     }
 
-    public static Challenge of(ChallengeCreateRequest challengeCreateRequest, DummyUser creator) {
+    public static Challenge of(ChallengeCreateRequest challengeCreateRequest, UserEntity creator) {
         return new Challenge(challengeCreateRequest.title(), challengeCreateRequest.text(),
                 challengeCreateRequest.release(),
                 challengeCreateRequest.amount(), challengeCreateRequest.category(), challengeCreateRequest.capacity(),

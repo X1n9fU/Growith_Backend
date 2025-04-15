@@ -6,11 +6,10 @@ import dev.book.challenge.dto.response.ChallengeCreateResponse;
 import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
-import dev.book.challenge.dummy.DummyUser;
-import dev.book.challenge.dummy.DummyUserRepository;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.user.entity.UserEntity;
 import dev.book.user_challenge.repository.UserChallengeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,9 +46,6 @@ class ChallengeServiceTest {
     @Mock
     private UserChallengeRepository userChallengeRepository;
 
-    @Mock
-    private DummyUserRepository dummyUserRepository;
-
 
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
@@ -63,13 +59,15 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        DummyUser creator = DummyUser.of("사용자");
+        UserEntity creator = UserEntity.builder()
+                .name("사용자")
+                .email("이메일")
+                .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.save(any())).willReturn(challenge);
-        given(dummyUserRepository.findById(any())).willReturn(Optional.of(creator));
 
         // when
-        ChallengeCreateResponse response = challengeService.createChallenge(challengeCreateRequest);
+        ChallengeCreateResponse response = challengeService.createChallenge(creator, challengeCreateRequest);
         //then
         assertThat(response.title()).isEqualTo("제목");
 
@@ -82,7 +80,9 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        DummyUser creator = DummyUser.of("사용자");
+        UserEntity creator = UserEntity.builder()
+                .name("사용자")
+                .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         ChallengeReadResponse challengeReadResponse = ChallengeReadResponse.fromEntity(challenge);
         Pageable pageRequest = PageRequest.of(0, 10);
@@ -103,7 +103,9 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        DummyUser creator = DummyUser.of("사용자");
+        UserEntity creator = UserEntity.builder()
+                .name("사용자")
+                .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findWithCreatorById(any())).willReturn(Optional.of(challenge));
 
@@ -132,16 +134,18 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        DummyUser creator = DummyUser.of("사용자");
+        UserEntity creator = UserEntity.builder()
+                .name("사용자")
+                .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.of(challenge));
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
         ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "A", start, end);
 
         //when
-        ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(1L, updateRequest);
+        ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(creator, 1L, updateRequest);
 
         //then
         assertThat(challenge.getTitle()).isEqualTo("수정");
@@ -149,18 +153,66 @@ class ChallengeServiceTest {
     }
 
     @Test
-    @DisplayName("챌린지를 삭제 할수 있다.")
-    void deleteChallenge() {
-        //given
+    @DisplayName("만든 사람만 챌린지를 수정 할수 있다.")
+    void updateNotChallenge() {
+
+        // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        DummyUser creator = DummyUser.of("사용자");
+        UserEntity creator = UserEntity.builder()
+                .name("작성자")
+                .build();
+        UserEntity noCreator = UserEntity.builder()
+                .name("사용자")
+                .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.empty());
+
+        LocalDate start = LocalDate.of(2024, 2, 1);
+        LocalDate end = LocalDate.of(2024, 3, 1);
+        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "A", start, end);
 
         //when
-        challengeService.deleteChallenge(1L);
+        //then
+        assertThatThrownBy(() -> challengeService.updateChallenge(noCreator, 1L, updateRequest)).isInstanceOf(ChallengeException.class)
+                .hasMessage("수정 및 삭제 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("챌린지를 삭제 할수 있다.")
+    void deleteNotChallenge() {
+        //given
+        ChallengeCreateRequest challengeCreateRequest = createRequest();
+        UserEntity creator = UserEntity.builder()
+                .name("작성자")
+                .build();
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
+        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.of(challenge));
+
+        //when
+        challengeService.deleteChallenge(creator, 1L);
 
         //then
         verify(challengeRepository, times(1)).delete(challenge);
+    }
+
+    @Test
+    @DisplayName("만든 사람만 챌린지를 삭제 할수 있다.")
+    void deleteChallenge() {
+        //given
+        ChallengeCreateRequest challengeCreateRequest = createRequest();
+        UserEntity creator = UserEntity.builder()
+                .name("작성자")
+                .build();
+        UserEntity noCreator = UserEntity.builder()
+                .name("사용자")
+                .build();
+
+        Challenge challenge = Challenge.of(challengeCreateRequest, noCreator);
+        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> challengeService.deleteChallenge(noCreator, 1L)).isInstanceOf(ChallengeException.class)
+                .hasMessage("수정 및 삭제 권한이 없습니다.");
     }
 }

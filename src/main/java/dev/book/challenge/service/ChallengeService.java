@@ -6,12 +6,11 @@ import dev.book.challenge.dto.response.ChallengeCreateResponse;
 import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
-import dev.book.challenge.dummy.DummyUser;
-import dev.book.challenge.dummy.DummyUserRepository;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.user.entity.UserEntity;
 import dev.book.user_challenge.entity.UserChallenge;
 import dev.book.user_challenge.repository.UserChallengeRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
-    private final DummyUserRepository dummyUserRepository;
     private final UserChallengeRepository userChallengeRepository;
 
-    public ChallengeCreateResponse createChallenge(ChallengeCreateRequest challengeCreateRequest) {
+    public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
 
-        DummyUser dummyUser = dummyUserRepository.findById(1L).orElseThrow(() -> new RuntimeException());
-        Challenge challenge = Challenge.of(challengeCreateRequest, dummyUser);
+        Challenge challenge = Challenge.of(challengeCreateRequest, user);
         Challenge savedChallenge = challengeRepository.save(challenge);
-        UserChallenge userChallenge = UserChallenge.of(dummyUser, savedChallenge);
+        UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
         userChallengeRepository.save(userChallenge);
         return ChallengeCreateResponse.fromEntity(savedChallenge);
     }
@@ -50,16 +47,21 @@ public class ChallengeService {
     }
 
     @Transactional
-    public ChallengeUpdateResponse updateChallenge(Long id, ChallengeUpdateRequest challengeUpdateRequest) {
-        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+    public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
+        Challenge challenge = getMyChallenge(user, id);
         challenge.updateInfo(challengeUpdateRequest);
         return ChallengeUpdateResponse.fromEntity(challenge);
     }
 
 
-    public void deleteChallenge(Long id) {
-        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+    public void deleteChallenge(UserEntity user, Long id) {
+        Challenge challenge = getMyChallenge(user, id);
         challengeRepository.delete(challenge);
 
+    }
+
+    private Challenge getMyChallenge(UserEntity user, Long id) {
+        Challenge challenge = challengeRepository.findByIdAndCreator(id, user).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
+        return challenge;
     }
 }

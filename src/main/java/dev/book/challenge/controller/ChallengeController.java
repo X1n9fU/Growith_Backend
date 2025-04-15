@@ -7,11 +7,13 @@ import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.service.ChallengeService;
+import dev.book.global.config.security.dto.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,8 +24,8 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @PostMapping
-    public ResponseEntity<?> createChallenge(@Valid @RequestBody ChallengeCreateRequest challengeCreateRequest) {
-        ChallengeCreateResponse challengeCreateResponse = challengeService.createChallenge(challengeCreateRequest);
+    public ResponseEntity<?> createChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChallengeCreateRequest challengeCreateRequest) {
+        ChallengeCreateResponse challengeCreateResponse = challengeService.createChallenge(userDetails.getUser(), challengeCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(challengeCreateResponse);
     }
 
@@ -43,14 +45,14 @@ public class ChallengeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateChallenge(@PathVariable Long id, @Valid @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
-        ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(id, challengeUpdateRequest);
+    public ResponseEntity<?> updateChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, @Valid @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
+        ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(userDetails.getUser(), id, challengeUpdateRequest);
         return ResponseEntity.ok().body(challengeUpdateResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChallenge(@PathVariable Long id) {
-        challengeService.deleteChallenge(id);
+    public ResponseEntity<Void> deleteChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
+        challengeService.deleteChallenge(userDetails.getUser(), id);
         return ResponseEntity.ok().build();
     }
 
