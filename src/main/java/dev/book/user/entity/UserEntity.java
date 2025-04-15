@@ -64,4 +64,17 @@ public class UserEntity extends BaseTimeEntity {
                 .profileImageUrl(oAuth2Attributes.profileImageUrl())
                 .build();
     }
+
+    public void updateNickname(String nickname){
+        this.nickname = nickname;
+    }
+
+    public void updateCategory(String userCategory){
+        this.userCategory = userCategory;
+    }
+
+    public void updateProfileImage(String profileImageUrl){
+        this.profileImageUrl = profileImageUrl;
+    }
+
 }

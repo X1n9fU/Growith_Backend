@@ -1,4 +1,4 @@
-package dev.book.global.config.security.service;
+package dev.book.global.config.security.service.refresh;
 
 import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.config.security.repository.RefreshTokenRepository;
@@ -23,9 +23,14 @@ public class RefreshTokenService {
 
         RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser(user)
                 .orElseGet(() -> new RefreshToken(user ,refreshToken));
-
         refreshTokenEntity.updateToken(refreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
+    }
 
+    public void saveRefreshToken(UserEntity user, String refreshToken){
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser(user)
+                .orElseGet(() -> new RefreshToken(user ,refreshToken));
+        refreshTokenEntity.updateToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
     }
 }
