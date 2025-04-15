@@ -33,10 +33,9 @@ public class OAuth2AuthService {
         if (provider.equals("kakao")){
             OAuth2Attributes kakaoAttributes = OAuth2Attributes.toKakao(attributes);
             return getUserLoginState(kakaoAttributes);
-        } else {
-            CustomOAuth2Error oAuth2Error = new CustomOAuth2Error("Invalid_Provider", "지원되지 않는 공급자입니다.", null, 403);
-            throw new UnValidatedProviderException(oAuth2Error);
         }
+        CustomOAuth2Error oAuth2Error = new CustomOAuth2Error("Invalid_Provider", "지원되지 않는 공급자입니다.", null, 403);
+        throw new UnValidatedProviderException(oAuth2Error);
     }
 
     /**
@@ -46,22 +45,12 @@ public class OAuth2AuthService {
      * @return
      */
     private UserLoginState getUserLoginState(OAuth2Attributes OAuth2Attributes) {
-        Optional<UserEntity> user = userRepository.findByEmail(OAuth2Attributes.email());
-        if (user.isPresent()){
-            if (user.get().getNickname().isBlank())
-                return UserLoginState.PROFILE_INCOMPLETE;
-            else return UserLoginState.LOGIN_SUCCESS;
-        }
-        else {
-            UserEntity newUser = UserEntity.builder()
-                    .email(OAuth2Attributes.email())
-                    .name(OAuth2Attributes.nickname())
-                    .nickname("")
-                    .profileImageUrl(OAuth2Attributes.profileImageUrl())
-                    .build();
-            userRepository.save(newUser);
+        UserEntity user = userRepository.findByEmail(OAuth2Attributes.email())
+                .orElseGet(() -> UserEntity.of(OAuth2Attributes));
+
+        if (user.getNickname().isBlank())
             return UserLoginState.PROFILE_INCOMPLETE;
-        }
+        return UserLoginState.LOGIN_SUCCESS;
     }
 
 }

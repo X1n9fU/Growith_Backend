@@ -1,5 +1,6 @@
 package dev.book.user.entity;
 
+import dev.book.global.config.security.dto.OAuth2Attributes;
 import dev.book.global.entity.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -53,5 +54,14 @@ public class UserEntity extends BaseTimeEntity {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
         this.userCategory = userCategory;
+    }
+
+    public static UserEntity of(OAuth2Attributes oAuth2Attributes){
+        return UserEntity.builder()
+                .email(oAuth2Attributes.email())
+                .name(oAuth2Attributes.nickname())
+                .nickname("")
+                .profileImageUrl(oAuth2Attributes.profileImageUrl())
+                .build();
     }
 }
