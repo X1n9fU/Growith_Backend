@@ -3,9 +3,8 @@ package dev.book.global.config.security.service;
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
-import dev.book.global.config.security.repository.RefreshTokenRepository;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
-import dev.book.user.dto.UserSignUpRequest;
+import dev.book.user.dto.request.UserSignUpRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.DuplicateNicknameException;
 import dev.book.user.exception.UserNotFoundException;
@@ -46,7 +45,6 @@ public class AuthService {
 
         user.updateNickname(userSignupRequest.nickname());
         user.updateCategory(userSignupRequest.category());
-        user.setUpdatedBy(userSignupRequest.email());
         userRepository.save(user);
 
         TokenDto tokenDto = getTokenDto(response, authentication);

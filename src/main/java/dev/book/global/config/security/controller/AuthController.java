@@ -1,7 +1,7 @@
 package dev.book.global.config.security.controller;
 
 import dev.book.global.config.security.service.AuthService;
-import dev.book.user.dto.UserSignUpRequest;
+import dev.book.user.dto.request.UserSignUpRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
