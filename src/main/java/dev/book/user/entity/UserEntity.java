@@ -30,8 +30,7 @@ public class UserEntity extends BaseTimeEntity {
     @NotNull
     private String nickname;
 
-    @NotNull
-    private String profileImageUrl;
+    private String profileImageUrl; //null인 경우 프로필 없음
 
     private String userCategory; //추후 enum으로 변경
 
