@@ -33,4 +33,10 @@ public class UserService {
 
         return UserProfileResponse.fromEntity(user);
     }
+
+    @Transactional
+    public void deleteUser(CustomUserDetails userDetails) {
+        userRepository.delete(userDetails.user());
+        //todo 연관된 entity 대하여 삭제 처리
+    }
 }

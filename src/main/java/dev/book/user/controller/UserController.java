@@ -32,4 +32,11 @@ public class UserController {
     }
 
     //todo 카테고리 변경
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails){
+        userService.deleteUser(userDetails);
+        return ResponseEntity.ok()
+                .build();
+    }
 }

@@ -1,11 +1,9 @@
 package dev.book.user.entity;
 
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
+import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -39,6 +37,9 @@ public class UserEntity extends BaseTimeEntity {
     private int completedChallenges = 0;
 
     private int participatingChallenges = 0;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private RefreshToken refreshToken;
 
     //todo 알림 설정 필요
 //    private NotificationPreference notificationPreference;
@@ -76,4 +77,7 @@ public class UserEntity extends BaseTimeEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public void updateRefreshToken(RefreshToken refreshTokenEntity) {
+        this.refreshToken = refreshTokenEntity;
+    }
 }
