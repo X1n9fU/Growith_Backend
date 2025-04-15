@@ -1,4 +1,4 @@
-package dev.book.accountbook.exception;
+package dev.book.global.exception;
 
 import org.springframework.http.HttpStatus;
 
