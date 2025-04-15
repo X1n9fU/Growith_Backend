@@ -19,14 +19,14 @@ public class RefreshToken {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    private String refrehToken;
+    private String refreshToken;
 
-    public RefreshToken(UserEntity user, String refrehToken) {
+    public RefreshToken(UserEntity user, String refreshToken) {
         this.user = user;
-        this.refrehToken = refrehToken;
+        this.refreshToken = refreshToken;
     }
 
     public void updateToken(String refreshToken) {
-        this.refrehToken = refreshToken;
+        this.refreshToken = refreshToken;
     }
 }
