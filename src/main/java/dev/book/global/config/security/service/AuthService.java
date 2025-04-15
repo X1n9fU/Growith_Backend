@@ -10,6 +10,7 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.DuplicateNicknameException;
 import dev.book.user.exception.UserNotFoundException;
 import dev.book.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -56,8 +57,7 @@ public class AuthService {
 
     private TokenDto getTokenDto(HttpServletResponse response, Authentication authentication) {
         TokenDto tokenDto = jwtUtil.generateToken(authentication);
-        response.addHeader("access_token", tokenDto.accessToken());
-        response.addHeader("refresh_token", tokenDto.refreshToken());
+        jwtUtil.addTokenInCookie(response, tokenDto);
         return tokenDto;
     }
 
@@ -71,8 +71,9 @@ public class AuthService {
      * @param userDetails
      */
     @Transactional
-    public void logout(CustomUserDetails userDetails) {
+    public void logout(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
         userDetails.user().deleteRefreshToken();
+        jwtUtil.deleteAccessTokenAndRefreshToken(request, response); //쿠키에서 refreshToken 지우기
         userRepository.save(userDetails.user());
     }
 }

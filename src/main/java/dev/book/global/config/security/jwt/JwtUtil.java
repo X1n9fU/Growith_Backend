@@ -2,11 +2,14 @@ package dev.book.global.config.security.jwt;
 
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
+import dev.book.global.config.security.util.CookieUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -31,6 +34,8 @@ public class JwtUtil {
 
     @Value("${spring.jwt.expiration.refresh}")
     private long REFRESH_TOKEN_EXPIRATION;
+    private final String ACCESS_TOKEN = "access_token";
+    private final String REFRESH_TOKEN = "refresh_token";
     private Key SECRET_KEY;
 
     private final RefreshTokenService refreshTokenService;
@@ -98,4 +103,14 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public void addTokenInCookie(HttpServletResponse response, TokenDto tokenDto) {
+        CookieUtil.addCookie(response, ACCESS_TOKEN, tokenDto.accessToken(), (int) ACCESS_TOKEN_EXPIRATION * 1000);
+        CookieUtil.addCookie(response, REFRESH_TOKEN, tokenDto.refreshToken(), (int) REFRESH_TOKEN_EXPIRATION * 1000);
+    }
+
+    public void deleteAccessTokenAndRefreshToken(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
+        CookieUtil.deleteCookie(request, response, ACCESS_TOKEN);
+    }
 }
+

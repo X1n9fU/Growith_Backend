@@ -3,6 +3,7 @@ package dev.book.global.config.security.controller;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.service.AuthService;
 import dev.book.user.dto.request.UserSignUpRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,10 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails){
-        authService.logout(userDetails);
+    public ResponseEntity<?> logout(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails){
+        authService.logout(request, response, userDetails);
         return ResponseEntity.ok().build();
     }
 }
