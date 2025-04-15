@@ -46,7 +46,6 @@ class ChallengeServiceTest {
     @Mock
     private UserChallengeRepository userChallengeRepository;
 
-
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 2, 1);
@@ -138,7 +137,7 @@ class ChallengeServiceTest {
                 .name("사용자")
                 .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.of(challenge));
+        given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.of(challenge));
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
@@ -165,7 +164,7 @@ class ChallengeServiceTest {
                 .name("사용자")
                 .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.empty());
+        given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.empty());
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
@@ -186,7 +185,7 @@ class ChallengeServiceTest {
                 .name("작성자")
                 .build();
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.of(challenge));
+        given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.of(challenge));
 
         //when
         challengeService.deleteChallenge(creator, 1L);
@@ -208,7 +207,7 @@ class ChallengeServiceTest {
                 .build();
 
         Challenge challenge = Challenge.of(challengeCreateRequest, noCreator);
-        given(challengeRepository.findByIdAndCreator(any(), any())).willReturn(Optional.empty());
+        given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.empty());
 
         //when
         //then

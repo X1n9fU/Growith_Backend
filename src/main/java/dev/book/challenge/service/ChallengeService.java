@@ -48,20 +48,20 @@ public class ChallengeService {
 
     @Transactional
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
-        Challenge challenge = getMyChallenge(user, id);
+        Challenge challenge = getMyChallenge(user.getId(), id);
         challenge.updateInfo(challengeUpdateRequest);
         return ChallengeUpdateResponse.fromEntity(challenge);
     }
 
-
+    @Transactional
     public void deleteChallenge(UserEntity user, Long id) {
-        Challenge challenge = getMyChallenge(user, id);
+        Challenge challenge = getMyChallenge(user.getId(), id);
         challengeRepository.delete(challenge);
 
     }
 
-    private Challenge getMyChallenge(UserEntity user, Long id) {
-        Challenge challenge = challengeRepository.findByIdAndCreator(id, user).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
+    private Challenge getMyChallenge(Long userId, Long id) {
+        Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
         return challenge;
     }
 }
