@@ -79,17 +79,17 @@ class AuthControllerTest {
     @Test
     public void signUp() throws Exception {
 
-        final String url = "/auth/signup";
+        final String url = "/api/v1/auth/signup";
 
         final ResultActions result = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new UserSignUpRequest("test@test.com", "nickname", "category"))));
 
-        result.andExpect(status().isOk());
+        result.andExpect(status().isCreated());
 
         final Optional<UserEntity> user = userRepository.findByEmail("test@test.com");
 
-        assertThat(user.get().getNickname().equals("nickname"));
+        assertThat(user.get().getNickname()).equals("nickname");
 
         // 응답 쿠키 가져오기
         MockHttpServletResponse response = result.andReturn().getResponse();
@@ -115,7 +115,7 @@ class AuthControllerTest {
     @DisplayName("logout : 로그아웃을 하고 토큰을 삭제한다")
     @Test
     public void logout() throws Exception {
-        final String url = "/auth/logout";
+        final String url = "/api/v1/auth/logout";
 
         final ResultActions result = mockMvc.perform(get(url));
 

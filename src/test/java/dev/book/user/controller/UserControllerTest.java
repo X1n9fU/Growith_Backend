@@ -1,6 +1,5 @@
 package dev.book.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
@@ -8,7 +7,10 @@ import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -81,7 +83,7 @@ class UserControllerTest {
     @Test
     void getUserProfile() throws Exception {
 
-        final String url = "/users/profile";
+        final String url = "/api/v1/users/profile";
 
         final ResultActions result = mockMvc.perform(get(url));
 
@@ -97,7 +99,7 @@ class UserControllerTest {
     @Test
     void updateUserProfile() throws Exception {
 
-        final String url = "/users/profile";
+        final String url = "/api/v1/users/profile";
 
         final ResultActions result = mockMvc.perform(put(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +118,7 @@ class UserControllerTest {
     @WithMockUser(username = "test@test.com")
     @Test
     void deleteUser() throws Exception {
-        final String url = "/users";
+        final String url = "/api/v1/users";
 
         final ResultActions result = mockMvc.perform(delete(url));
 
@@ -124,7 +126,7 @@ class UserControllerTest {
 
         final Optional<UserEntity> user = userRepository.findByEmail(userDetails.getUsername());
 
-        assertThat(user.isEmpty());
+        assertThat(user).isEmpty();
 
         // 응답 쿠키 가져오기
         MockHttpServletResponse response = result.andReturn().getResponse();
