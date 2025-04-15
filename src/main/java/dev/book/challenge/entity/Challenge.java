@@ -93,5 +93,6 @@ public class Challenge {
         this.category = Category.valueOf(request.category());
         this.startDate = request.startDate();
         this.endDate = request.endDate();
+        this.modifyDate = LocalDateTime.now();
     }
 }

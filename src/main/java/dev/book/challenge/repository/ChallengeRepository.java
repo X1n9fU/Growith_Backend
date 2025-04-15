@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ChallengeRepository extends JpaRepository<Challenge, Long>, ChallengeJpaRepositiory {
+public interface ChallengeRepository extends JpaRepository<Challenge, Long>, ChallengeJpaRepository {
 
     @Query("SELECT c FROM Challenge c JOIN FETCH c.creator where c.id=:id")
     Optional<Challenge> findWithCreatorById(Long id);

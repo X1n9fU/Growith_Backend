@@ -53,7 +53,6 @@ public class ChallengeService {
     public ChallengeUpdateResponse updateChallenge(Long id, ChallengeUpdateRequest challengeUpdateRequest) {
         Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.updateInfo(challengeUpdateRequest);
-        challengeRepository.flush();
         return ChallengeUpdateResponse.fromEntity(challenge);
     }
 
