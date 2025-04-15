@@ -22,7 +22,7 @@ public class AccountBookController {
     private final AccountBookService accountBookService;
 
     @GetMapping("/spend")
-    public ResponseEntity<List<AccountBookSpendResponse>> spendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<AccountBookSpendResponse>> getSpendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUser().getId();
         List<AccountBookSpendResponse> responses = accountBookService.getSpendList(userId);
 
@@ -62,7 +62,7 @@ public class AccountBookController {
     }
 
     @GetMapping("/income")
-    public ResponseEntity<List<AccountBookIncomeResponse>> incomeList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<AccountBookIncomeResponse>> getIncomeList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUser().getId();
         List<AccountBookIncomeResponse> responses = accountBookService.getIncomeList(userId);
 
