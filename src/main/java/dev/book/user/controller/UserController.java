@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
@@ -40,7 +40,6 @@ public class UserController {
             HttpServletRequest request, HttpServletResponse response,
             @AuthenticationPrincipal CustomUserDetails userDetails){
         userService.deleteUser(request, response, userDetails);
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok().build();
     }
 }

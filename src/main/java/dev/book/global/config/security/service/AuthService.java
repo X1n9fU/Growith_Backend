@@ -7,8 +7,8 @@ import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
 import dev.book.user.dto.request.UserSignUpRequest;
 import dev.book.user.entity.UserEntity;
-import dev.book.user.exception.DuplicateNicknameException;
-import dev.book.user.exception.UserNotFoundException;
+import dev.book.user.exception.UserErrorCode;
+import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,7 +37,7 @@ public class AuthService {
     @Transactional
     public void signUp(UserSignUpRequest userSignupRequest, HttpServletResponse response) {
         UserEntity user = userRepository.findByEmail(userSignupRequest.email())
-                .orElseThrow(() -> new UserNotFoundException("이메일에 해당하는 유저를 찾을 수 없습니다. :" + userSignupRequest.email()));
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         Authentication authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
@@ -63,7 +63,7 @@ public class AuthService {
 
     public void validateNickname(String nickname) {
         boolean isExisted = userRepository.existsByNickname(nickname);
-        if (isExisted) throw new DuplicateNicknameException("이미 사용하고 있는 닉네임입니다. : " + nickname);
+        if (isExisted) throw new UserErrorException(UserErrorCode.DUPLICATE_NICKNAME);
     }
 
     /**
