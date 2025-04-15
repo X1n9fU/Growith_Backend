@@ -1,5 +1,6 @@
-package dev.book.accountbook.exception;
+package dev.book.accountbook.exception.accountbook;
 
+import dev.book.accountbook.exception.CustomErrorException;
 import lombok.Getter;
 
 @Getter

@@ -1,6 +1,8 @@
 package dev.book.accountbook.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
+import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -51,7 +53,7 @@ public enum Category {
         Category category = KOREAN_NAME_MAP.get(input);
 
         if (category == null) {
-            throw new IllegalArgumentException("유효하지 않은 소비 카테고리입니다: " + input);
+            throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_CATEGORY);
         }
 
         return category;
