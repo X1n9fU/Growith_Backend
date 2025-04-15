@@ -60,7 +60,7 @@ public class AuthService {
         return tokenDto;
     }
 
-    private void validateNickname(String nickname) {
+    public void validateNickname(String nickname) {
         boolean isExisted = userRepository.existsByNickname(nickname);
         if (isExisted) throw new DuplicateNicknameException("이미 사용하고 있는 닉네임입니다. : " + nickname);
     }

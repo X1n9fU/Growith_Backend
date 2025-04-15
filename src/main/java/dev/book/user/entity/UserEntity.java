@@ -1,6 +1,6 @@
 package dev.book.user.entity;
 
-import dev.book.global.config.security.dto.OAuth2Attributes;
+import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.entity.BaseTimeEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
