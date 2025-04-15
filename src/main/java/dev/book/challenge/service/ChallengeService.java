@@ -9,6 +9,8 @@ import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.dummy.DummyUser;
 import dev.book.challenge.dummy.DummyUserRepository;
 import dev.book.challenge.entity.Challenge;
+import dev.book.challenge.exception.ChallengeException;
+import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.user_challenge.entity.UserChallenge;
 import dev.book.user_challenge.repository.UserChallengeRepository;
@@ -43,13 +45,13 @@ public class ChallengeService {
     }
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
-        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new IllegalArgumentException());
+        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         return ChallengeReadDetailResponse.fromEntity(challenge);
     }
 
     @Transactional
     public ChallengeUpdateResponse updateChallenge(Long id, ChallengeUpdateRequest challengeUpdateRequest) {
-        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException());
+        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.updateInfo(challengeUpdateRequest);
         challengeRepository.flush();
         return ChallengeUpdateResponse.fromEntity(challenge);
@@ -57,7 +59,7 @@ public class ChallengeService {
 
 
     public void deleteChallenge(Long id) {
-        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException());
+        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challengeRepository.delete(challenge);
 
     }
