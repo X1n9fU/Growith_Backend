@@ -14,6 +14,6 @@ public record ChallengeReadDetailResponse(Long id, String creator, String title,
                                           LocalDateTime modifyDate) {
 
     public static ChallengeReadDetailResponse fromEntity(Challenge challenge) {
-        return new ChallengeReadDetailResponse(challenge.getId(), challenge.getCreator().getName(), challenge.getTitle(), challenge.getRelease(), challenge.getAmount(), challenge.getCapacity(), challenge.getCategory(), challenge.getStatus(), challenge.getStartDate(), challenge.getEndDate(), challenge.getCreateDate(), challenge.getModifyDate());
+        return new ChallengeReadDetailResponse(challenge.getId(), challenge.getCreator().getName(), challenge.getTitle(), challenge.getRelease(), challenge.getAmount(), challenge.getCapacity(), challenge.getCategory(), challenge.getStatus(), challenge.getStartDate(), challenge.getEndDate(), challenge.getCreatedAt(), challenge.getUpdatedAt());
     }
 }

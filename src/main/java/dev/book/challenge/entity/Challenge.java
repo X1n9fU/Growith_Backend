@@ -5,25 +5,23 @@ import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.type.Category;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
+import dev.book.global.entity.BaseTimeEntity;
 import dev.book.user.entity.UserEntity;
 import dev.book.user_challenge.entity.UserChallenge;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Challenge {
+public class Challenge extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,12 +55,6 @@ public class Challenge {
     @JoinColumn(name = "creator_id")
     private UserEntity creator;
 
-    @CreatedDate
-    private LocalDateTime createDate;
-
-    @LastModifiedDate
-    private LocalDateTime modifyDate;
-
     private Challenge(String title, String text, String release, int amount, String category, Integer capacity, LocalDate startDate, LocalDate endDate, UserEntity creator) {
         this.title = title;
         this.text = text;
@@ -93,6 +85,5 @@ public class Challenge {
         this.category = Category.valueOf(request.category());
         this.startDate = request.startDate();
         this.endDate = request.endDate();
-        this.modifyDate = LocalDateTime.now();
     }
 }

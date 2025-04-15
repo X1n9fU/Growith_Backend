@@ -50,6 +50,7 @@ public class ChallengeService {
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
         Challenge challenge = getMyChallenge(user.getId(), id);
         challenge.updateInfo(challengeUpdateRequest);
+        challengeRepository.flush();
         return ChallengeUpdateResponse.fromEntity(challenge);
     }
 

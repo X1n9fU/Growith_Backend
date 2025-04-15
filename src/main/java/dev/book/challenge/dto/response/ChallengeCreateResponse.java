@@ -19,7 +19,7 @@ public record ChallengeCreateResponse(Long id, String title, String text, Releas
         return new ChallengeCreateResponse(challenge.getId(), challenge.getTitle(),
                 challenge.getText(), challenge.getRelease(), challenge.getAmount(),
                 challenge.getCapacity(), challenge.getCategory(), challenge.getStatus(),
-                challenge.getStartDate(), challenge.getEndDate(), challenge.getCreateDate(),
-                challenge.getModifyDate());
+                challenge.getStartDate(), challenge.getEndDate(), challenge.getCreatedAt(),
+                challenge.getUpdatedAt());
     }
 }
