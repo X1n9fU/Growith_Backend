@@ -3,6 +3,7 @@ package dev.book.challenge.service;
 import dev.book.challenge.challenge_invite.entity.ChallengeInvite;
 import dev.book.challenge.challenge_invite.repository.ChallengeInviteRepository;
 import dev.book.challenge.dto.request.ChallengeInviteRequest;
+import dev.book.challenge.dto.response.ChallengeInviteResponse;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
@@ -13,6 +14,8 @@ import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static dev.book.challenge.exception.ErrorCode.*;
 import static dev.book.user.exception.UserErrorCode.USER_NOT_FOUND;
@@ -33,18 +36,33 @@ public class ChallengeInviteService {
 
         boolean isNotParticipant = isNotParticipant(challengeId, user);
         if (isNotParticipant) {
-            throw new ChallengeException(CHALLENGE_INVITE_INVALID);
+            throw new ChallengeException(CHALLENGE_INVITE_INVALID); // 현재 내가 챌린지에 참여하지 않는데 초대를 보낼때
         }
-        boolean isAlreadyInvited = challengeInviteRepository.existsByInviteUserIdAndChallengeId(inviteUser.getId(), challenge.getId());
+        boolean isAlreadyInvited = isAlreadyInvited(inviteUser, challenge);
+
         if (isAlreadyInvited) {
-            throw new ChallengeException(CHALLENGE_ALREADY_INVITED);
+            throw new ChallengeException(CHALLENGE_ALREADY_INVITED); // 이미 초대가 된 상황일때
+        }
+        long countParticipants = userChallengeRepository.countByChallengeId(challengeId);
+        if (challenge.isOver(countParticipants)) {
+            throw new ChallengeException(CHALLENGE_CAPACITY_FULL); // 최대인원을 초과 했을때
         }
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
+    }
+
+    private boolean isAlreadyInvited(UserEntity inviteUser, Challenge challenge) {
+        return challengeInviteRepository.existsByInviteUserIdAndChallengeId(inviteUser.getId(), challenge.getId());
     }
 
     private boolean isNotParticipant(Long challengeId, UserEntity user) {
         return !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
     }
 
+    @Transactional(readOnly = true)
+    public List<ChallengeInviteResponse> getMyInviteList(UserEntity user) {
+        List<ChallengeInvite> challengeInvites = challengeInviteRepository.findAllByInviteUserId(user.getId());
+        List<ChallengeInviteResponse> challengeInviteResponses = challengeInvites.stream().map(ChallengeInviteResponse::fromEntity).toList();
+        return challengeInviteResponses;
+    }
 }
