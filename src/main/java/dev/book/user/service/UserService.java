@@ -33,7 +33,7 @@ public class UserService {
         UserEntity user = userDetails.user();
         user.updateNickname(profileUpdateRequest.nickname());
         user.updateProfileImage(profileUpdateRequest.profileImageUrl());
-
+        userRepository.save(user);
         return UserProfileResponse.fromEntity(user);
     }
 
