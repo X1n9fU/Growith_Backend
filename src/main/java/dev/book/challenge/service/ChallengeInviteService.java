@@ -7,6 +7,7 @@ import dev.book.challenge.dto.response.ChallengeInviteResponse;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorException;
@@ -70,6 +71,8 @@ public class ChallengeInviteService {
     public void acceptInvite(Long inviteId, UserEntity user) {
         ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
         challengeInvite.accept();
+        UserChallenge userChallenge = UserChallenge.of(user, challengeInvite.getChallenge());
+        userChallengeRepository.save(userChallenge);
     }
 
     @Transactional
