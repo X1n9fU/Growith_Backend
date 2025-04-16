@@ -2,8 +2,7 @@ package dev.book.global.config.security.handler;
 
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.jwt.JwtUtil;
-import dev.book.global.config.security.service.OAuth2AuthService;
-import dev.book.global.config.security.util.CookieUtil;
+import dev.book.global.config.security.service.oauth2.OAuth2AuthService;
 import dev.book.user.enums.UserLoginState;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +34,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         switch(userLoginState){ //todo 반환되는 화면 경로 정하기
             case LOGIN_SUCCESS ->{
                 TokenDto tokenDto = jwtUtil.generateToken(authentication);
-                //todo 토큰 처리
+                jwtUtil.addTokenInCookie(response, tokenDto);
                 getRedirectStrategy().sendRedirect(request, response, "/main");
             }
             case PROFILE_INCOMPLETE ->
