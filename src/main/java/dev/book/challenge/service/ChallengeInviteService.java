@@ -65,4 +65,16 @@ public class ChallengeInviteService {
         List<ChallengeInviteResponse> challengeInviteResponses = challengeInvites.stream().map(ChallengeInviteResponse::fromEntity).toList();
         return challengeInviteResponses;
     }
+
+    @Transactional
+    public void acceptInvite(Long inviteId, UserEntity user) {
+        ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
+        challengeInvite.accept();
+    }
+
+    @Transactional
+    public void rejectInvite(Long inviteId, UserEntity user) {
+        ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
+        challengeInvite.reject();
+    }
 }
