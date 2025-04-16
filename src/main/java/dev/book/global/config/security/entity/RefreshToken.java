@@ -14,8 +14,8 @@ public class RefreshToken {
     private Long id;
     private String refreshToken;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
 
     public RefreshToken(UserEntity user, String refreshToken) {
