@@ -10,6 +10,7 @@ import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
+import dev.book.accountbook.type.PeriodRange;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -59,9 +60,9 @@ public class StatService {
                 .toList();
     }
 
-    private AccountBookConsumeResponse getConsume(Long userId, Category category, LocalDateTime[] period) {
-        Integer thisAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period[0], period[1]);
-        Integer lastAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period[2], period[3]);
+    private AccountBookConsumeResponse getConsume(Long userId, Category category, PeriodRange period) {
+        Integer thisAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period.currentStart(), period.currentEnd());
+        Integer lastAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period.previousStart(), period.previousEnd());
 
         return new AccountBookConsumeResponse(lastAmount - thisAmount);
     }
