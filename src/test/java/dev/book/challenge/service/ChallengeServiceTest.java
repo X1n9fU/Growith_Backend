@@ -10,6 +10,7 @@ import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.user.entity.UserEntity;
+import dev.book.user.repository.UserRepository;
 import dev.book.user_challenge.repository.UserChallengeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -45,6 +47,9 @@ class ChallengeServiceTest {
 
     @Mock
     private UserChallengeRepository userChallengeRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
@@ -155,22 +160,35 @@ class ChallengeServiceTest {
     @DisplayName("만든 사람만 챌린지를 수정 할수 있다.")
     void updateNotChallenge() {
 
-        // given
+        //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity creator = UserEntity.builder()
                 .name("작성자")
+                .email("이메일1")
                 .build();
+
+        ReflectionTestUtils.setField(creator, "id", 1L);
+
         UserEntity noCreator = UserEntity.builder()
                 .name("사용자")
+                .email("이메일2")
                 .build();
+
+        ReflectionTestUtils.setField(noCreator, "id", 2L);
+
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.empty());
+
+
+        given(challengeRepository.findByIdAndCreatorId(1L, creator.getId())).willReturn(Optional.of(challenge));
+        given(challengeRepository.findByIdAndCreatorId(1L, noCreator.getId())).willReturn(Optional.empty());
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
-        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "A", start, end);
+        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "NONE", start, end);
 
         //when
+        challengeService.deleteChallenge(creator, 1L);
         //then
         assertThatThrownBy(() -> challengeService.updateChallenge(noCreator, 1L, updateRequest)).isInstanceOf(ChallengeException.class)
                 .hasMessage("수정 및 삭제 권한이 없습니다.");
@@ -201,15 +219,26 @@ class ChallengeServiceTest {
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity creator = UserEntity.builder()
                 .name("작성자")
+                .email("이메일1")
                 .build();
+
+        ReflectionTestUtils.setField(creator, "id", 1L);
+
         UserEntity noCreator = UserEntity.builder()
                 .name("사용자")
+                .email("이메일2")
                 .build();
 
-        Challenge challenge = Challenge.of(challengeCreateRequest, noCreator);
-        given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.empty());
+        ReflectionTestUtils.setField(noCreator, "id", 2L);
+
+
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
+
+        given(challengeRepository.findByIdAndCreatorId(1L, creator.getId())).willReturn(Optional.of(challenge));
+        given(challengeRepository.findByIdAndCreatorId(1L, noCreator.getId())).willReturn(Optional.empty());
 
         //when
+        challengeService.deleteChallenge(creator, 1L);
         //then
         assertThatThrownBy(() -> challengeService.deleteChallenge(noCreator, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("수정 및 삭제 권한이 없습니다.");
