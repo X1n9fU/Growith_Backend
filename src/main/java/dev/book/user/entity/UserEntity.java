@@ -1,11 +1,9 @@
 package dev.book.user.entity;
 
-import dev.book.global.config.security.dto.OAuth2Attributes;
+import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
+import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,8 +28,7 @@ public class UserEntity extends BaseTimeEntity {
     @NotNull
     private String nickname;
 
-    @NotNull
-    private String profileImageUrl;
+    private String profileImageUrl; //null인 경우 프로필 없음
 
     private String userCategory; //추후 enum으로 변경
 
@@ -40,6 +37,9 @@ public class UserEntity extends BaseTimeEntity {
     private int completedChallenges = 0;
 
     private int participatingChallenges = 0;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private RefreshToken refreshToken;
 
     //todo 알림 설정 필요
 //    private NotificationPreference notificationPreference;
@@ -64,4 +64,21 @@ public class UserEntity extends BaseTimeEntity {
                 .profileImageUrl(oAuth2Attributes.profileImageUrl())
                 .build();
     }
+
+    public void updateNickname(String nickname){
+        this.nickname = nickname;
+    }
+
+    public void updateCategory(String userCategory){
+        this.userCategory = userCategory;
+    }
+
+    public void updateProfileImage(String profileImageUrl){
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateRefreshToken(RefreshToken refreshTokenEntity) {
+        this.refreshToken = refreshTokenEntity;
+    }
+    public void deleteRefreshToken() {this.refreshToken = null;}
 }

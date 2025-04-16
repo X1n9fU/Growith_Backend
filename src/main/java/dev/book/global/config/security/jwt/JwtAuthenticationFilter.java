@@ -1,12 +1,12 @@
 package dev.book.global.config.security.jwt;
 
+import dev.book.global.config.security.util.CookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,11 +25,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    private final String AUTHORIZATION_PREFIX = "Bearer ";
+    private final String ACCESS_TOKEN = "access_token";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = resolveToken(request);
+        String token = getToken(request);
 
         try {
             String email = jwtUtil.validateToken(token);
@@ -54,10 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request ,response);
     }
 
-    private String resolveToken(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith(AUTHORIZATION_PREFIX))
-            return null;
-        return header.substring(AUTHORIZATION_PREFIX.length());
+    private String getToken(HttpServletRequest request) {
+        return CookieUtil.getCookie(request, ACCESS_TOKEN);
     }
 }

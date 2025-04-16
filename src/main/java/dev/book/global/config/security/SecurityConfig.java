@@ -5,7 +5,7 @@ import dev.book.global.config.security.handler.OAuth2FailureHandler;
 import dev.book.global.config.security.handler.OAuth2SuccessHandler;
 import dev.book.global.config.security.jwt.JwtAuthenticationFilter;
 import dev.book.global.config.security.jwt.JwtUtil;
-import dev.book.global.config.security.service.CustomOAuth2UserService;
+import dev.book.global.config.security.service.oauth2.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

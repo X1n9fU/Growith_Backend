@@ -1,4 +1,4 @@
-package dev.book.global.config.security.dto;
+package dev.book.global.config.security.dto.oauth2;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
