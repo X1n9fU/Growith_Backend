@@ -1,4 +1,4 @@
-package dev.book.user_challenge.entity;
+package dev.book.challenge.user_challenge.entity;
 
 import dev.book.challenge.entity.Challenge;
 import dev.book.user.entity.UserEntity;

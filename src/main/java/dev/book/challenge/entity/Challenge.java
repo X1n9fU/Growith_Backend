@@ -5,9 +5,9 @@ import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.type.Category;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
+import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.global.entity.BaseTimeEntity;
 import dev.book.user.entity.UserEntity;
-import dev.book.user_challenge.entity.UserChallenge;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -85,5 +85,9 @@ public class Challenge extends BaseTimeEntity {
         this.category = Category.valueOf(request.category());
         this.startDate = request.startDate();
         this.endDate = request.endDate();
+    }
+
+    public boolean isOver(long countParticipants) {
+        return countParticipants >= this.capacity;
     }
 }

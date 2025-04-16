@@ -10,15 +10,18 @@ import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.challenge.user_challenge.entity.UserChallenge;
+import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
-import dev.book.user_challenge.entity.UserChallenge;
-import dev.book.user_challenge.repository.UserChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
+import static dev.book.challenge.exception.ErrorCode.CHALLENGE_CAPACITY_FULL;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class ChallengeService {
         UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
         userChallengeRepository.save(userChallenge);
         return ChallengeCreateResponse.fromEntity(savedChallenge);
+
     }
 
     public Page<ChallengeReadResponse> searchChallenge(String title, String text, int page, int size) {
@@ -64,5 +68,22 @@ public class ChallengeService {
     private Challenge getMyChallenge(Long userId, Long id) {
         Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
         return challenge;
+    }
+
+    @Transactional
+    public void participate(UserEntity user, Long id) {
+
+        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        boolean isExist = userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), id);
+        if (isExist) {
+            throw new ChallengeException(CHALLENGE_ALREADY_JOINED);
+        }
+
+        long countParticipants = userChallengeRepository.countByChallengeId(id);
+        if (challenge.isOver(countParticipants)) {
+            throw new ChallengeException(CHALLENGE_CAPACITY_FULL);
+        }
+        UserChallenge userChallenge = UserChallenge.of(user, challenge);
+        userChallengeRepository.save(userChallenge);
     }
 }
