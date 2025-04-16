@@ -31,10 +31,6 @@ public class AccountBookService {
     public List<AccountBookSpendResponse> getSpendList(Long userId) {
         List<AccountBook> accountBooks = accountBookRepository.findAllByUserIdAndType(userId, CategoryType.SPEND);
 
-        if (accountBooks.isEmpty()) {
-            throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_SPEND);
-        }
-
         return accountBooks.stream()
                 .map(AccountBookSpendResponse::from)
                 .toList();
@@ -71,10 +67,6 @@ public class AccountBookService {
 
     public List<AccountBookIncomeResponse> getIncomeList(Long userId) {
         List<AccountBook> accountBooks = accountBookRepository.findAllByUserIdAndType(userId, CategoryType.INCOME);
-
-        if (accountBooks.isEmpty()) {
-            throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_INCOME);
-        }
 
         return accountBooks.stream()
                 .map(AccountBookIncomeResponse::from)
