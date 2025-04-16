@@ -11,5 +11,5 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     @Query("SELECT COUNT(u) FROM UserChallenge u WHERE u.challenge.id=:id")
     long countByChallengeId(Long id);
 
-    boolean existsByUserIdAndChallengeId(Long id, Long id1);
+    boolean existsByUserIdAndChallengeId(Long id, Long challengeId);
 }
