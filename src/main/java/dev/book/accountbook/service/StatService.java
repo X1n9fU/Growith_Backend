@@ -63,10 +63,6 @@ public class StatService {
         Integer thisAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period[0], period[1]);
         Integer lastAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period[2], period[3]);
 
-        if (lastAmount == 0 || thisAmount == 0) {
-            throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_SPEND);
-        }
-
-        return new AccountBookConsumeResponse(thisAmount - lastAmount);
+        return new AccountBookConsumeResponse(lastAmount - thisAmount);
     }
 }
