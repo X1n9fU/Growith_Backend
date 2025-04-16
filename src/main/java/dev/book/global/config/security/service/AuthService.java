@@ -47,7 +47,6 @@ public class AuthService {
 
         user.updateNickname(userSignupRequest.nickname());
         user.updateCategory(userSignupRequest.category());
-        userRepository.save(user);
 
         TokenDto tokenDto = getTokenDto(response, authentication);
 
