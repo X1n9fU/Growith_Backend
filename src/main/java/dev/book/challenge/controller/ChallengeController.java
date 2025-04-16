@@ -63,5 +63,11 @@ public class ChallengeController {
 
     }
 
+    @DeleteMapping("/{id}/exit")
+    public ResponseEntity<String> leaveChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
+        challengeService.leaveChallenge(userDetails.user(), id);
+        return ResponseEntity.ok().body("챌린지에서 나갔습니다");
+    }
+
 
 }

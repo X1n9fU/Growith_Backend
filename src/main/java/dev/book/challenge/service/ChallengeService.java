@@ -20,8 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
-import static dev.book.challenge.exception.ErrorCode.CHALLENGE_CAPACITY_FULL;
+import static dev.book.challenge.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -85,5 +84,18 @@ public class ChallengeService {
         }
         UserChallenge userChallenge = UserChallenge.of(user, challenge);
         userChallengeRepository.save(userChallenge);
+    }
+
+    @Transactional
+    public void leaveChallenge(UserEntity user, Long challengeId) {
+        boolean isNotExist = !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
+
+        System.out.println(isNotExist);
+        if (isNotExist) {
+            throw new ChallengeException(CHALLENGE_NOT_FOUND_USER);
+        }
+
+        userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(), challengeId);
+
     }
 }
