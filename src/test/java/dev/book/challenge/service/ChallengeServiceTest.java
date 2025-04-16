@@ -11,7 +11,7 @@ import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
-import dev.book.user_challenge.repository.UserChallengeRepository;
+import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

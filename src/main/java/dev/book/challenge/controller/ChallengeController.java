@@ -56,5 +56,12 @@ public class ChallengeController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/{id}/participation")
+    public ResponseEntity<String> participate(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
+        challengeService.participate(userDetails.user(), id);
+        return ResponseEntity.ok().body("참여가 완료 되었습니다");
+
+    }
+
 
 }
