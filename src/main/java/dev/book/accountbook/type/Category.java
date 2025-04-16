@@ -50,7 +50,7 @@ public enum Category {
             return Category.NONE;
         }
 
-        Category category = KOREAN_NAME_MAP.get(input);
+        Category category = KOREAN_NAME_MAP.get(input.toUpperCase());
 
         if (category == null) {
             throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_CATEGORY);

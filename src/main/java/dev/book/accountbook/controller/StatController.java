@@ -5,6 +5,7 @@ import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.accountbook.dto.response.AccountBookStatResponse;
 import dev.book.accountbook.service.StatService;
 import dev.book.accountbook.type.Category;
+import dev.book.accountbook.type.Frequency;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class StatController {
     private final StatService statService;
 
     @GetMapping("/{frequency}")
-    public ResponseEntity<List<AccountBookStatResponse>> statList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String frequency) {
+    public ResponseEntity<List<AccountBookStatResponse>> statList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency) {
         Long userId = userDetails.getUser().getId();
         List<AccountBookStatResponse> list = statService.statList(userId, frequency);
 
@@ -31,7 +32,7 @@ public class StatController {
     }
 
     @GetMapping("/{frequency}/{category}")
-    public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String frequency, @PathVariable Category category) {
+    public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
         Long userId = userDetails.getUser().getId();
         List<AccountBookSpendResponse> list = statService.categoryList(userId, frequency, category);
 
@@ -39,7 +40,7 @@ public class StatController {
     }
 
     @GetMapping("/{frequency}/{category}/consume")
-    public ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String frequency, @PathVariable Category category) {
+    public ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
         Long userId = userDetails.getUser().getId();
         AccountBookConsumeResponse response = statService.consume(userId, frequency, category);
 
