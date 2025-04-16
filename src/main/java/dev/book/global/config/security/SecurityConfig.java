@@ -1,5 +1,6 @@
 package dev.book.global.config.security;
 
+import dev.book.global.config.security.filter.CheckFriendInviteFilter;
 import dev.book.global.config.security.filter.JwtAuthenticationFilter;
 import dev.book.global.config.security.handler.CustomAccessDeniedHandler;
 import dev.book.global.config.security.handler.CustomAuthenticationEntryPoint;
@@ -67,6 +68,7 @@ public class SecurityConfig {
                                         .userService(customOAuth2UserService))
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CheckFriendInviteFilter(), JwtAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint(exceptionHandlerExceptionResolver()))
                         .accessDeniedHandler(new CustomAccessDeniedHandler(exceptionHandlerExceptionResolver())));
