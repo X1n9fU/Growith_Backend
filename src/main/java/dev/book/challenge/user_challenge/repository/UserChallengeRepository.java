@@ -12,4 +12,6 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     long countByChallengeId(Long id);
 
     boolean existsByUserIdAndChallengeId(Long id, Long challengeId);
+
+    void deleteByUserIdAndChallengeId(Long userId, Long challengeId);
 }
