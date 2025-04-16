@@ -6,6 +6,7 @@ import dev.book.global.config.security.service.AuthService;
 import dev.book.user.dto.request.UserSignUpRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody UserSignUpRequest userSignupRequest, HttpServletResponse response){
-        authService.signUp(userSignupRequest, response);
+    public ResponseEntity<?> signUp(@RequestBody UserSignUpRequest userSignupRequest,
+                                    @RequestParam("email") @Email String email, HttpServletResponse response){
+        authService.signUp(userSignupRequest, email, response);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

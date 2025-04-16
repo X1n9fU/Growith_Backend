@@ -31,12 +31,14 @@ public class AuthService {
 
     /**
      * 유저의 회원가입을 진행합니다.
+     *
      * @param userSignupRequest
+     * @param email
      * @param response
      */
     @Transactional
-    public void signUp(UserSignUpRequest userSignupRequest, HttpServletResponse response) {
-        UserEntity user = userRepository.findByEmail(userSignupRequest.email())
+    public void signUp(UserSignUpRequest userSignupRequest, String email, HttpServletResponse response) {
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
         Authentication authentication = getAuthentication(user);
