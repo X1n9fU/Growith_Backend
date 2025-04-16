@@ -24,7 +24,7 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @PostMapping
-    public ResponseEntity<?> createChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChallengeCreateRequest challengeCreateRequest) {
+    public ResponseEntity<ChallengeCreateResponse> createChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChallengeCreateRequest challengeCreateRequest) {
         ChallengeCreateResponse challengeCreateResponse = challengeService.createChallenge(userDetails.getUser(), challengeCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(challengeCreateResponse);
     }
@@ -39,13 +39,13 @@ public class ChallengeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChallengeReadDetailResponse> searchById(@PathVariable Long id) {
+    public ResponseEntity<ChallengeReadDetailResponse> searchChallengeById(@PathVariable Long id) {
         ChallengeReadDetailResponse challengeReadResponse = challengeService.searchChallengeById(id);
         return ResponseEntity.ok().body(challengeReadResponse);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, @Valid @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
+    public ResponseEntity<ChallengeUpdateResponse> updateChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id, @Valid @RequestBody ChallengeUpdateRequest challengeUpdateRequest) {
         ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(userDetails.getUser(), id, challengeUpdateRequest);
         return ResponseEntity.ok().body(challengeUpdateResponse);
     }

@@ -49,7 +49,7 @@ class ChallengeServiceTest {
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 2, 1);
-        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, "A", start, end);
+        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, "NONE", start, end);
     }
 
     @Test
@@ -141,7 +141,7 @@ class ChallengeServiceTest {
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
-        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "A", start, end);
+        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "NONE", start, end);
 
         //when
         ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(creator, 1L, updateRequest);
