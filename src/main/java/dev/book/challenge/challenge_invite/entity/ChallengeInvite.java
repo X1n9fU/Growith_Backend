@@ -41,4 +41,12 @@ public class ChallengeInvite extends BaseTimeEntity {
     public static ChallengeInvite of(UserEntity requestUser, UserEntity inviteUser, Challenge challenge) {
         return new ChallengeInvite(requestUser, inviteUser, challenge);
     }
+
+    public void accept() {
+        this.isAccept = true;
+    }
+
+    public void reject() {
+        this.isAccept = false;
+    }
 }
