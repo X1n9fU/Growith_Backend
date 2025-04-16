@@ -1,5 +1,7 @@
-package dev.book.global.config.security.jwt;
+package dev.book.global.config.security.filter;
 
+import dev.book.global.config.security.jwt.JwtAuthenticationToken;
+import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.util.CookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -15,7 +17,6 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 /**
  * 헤더에서 토큰을 꺼내서 유효성 검증
@@ -46,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             logger.error("만료된 JWT 토큰입니다. : " + e.getMessage());
         } catch (MalformedJwtException | JwtException | IllegalArgumentException e){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             logger.error("잘못된 JWT 토큰입니다. : " + e.getMessage());
         } catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

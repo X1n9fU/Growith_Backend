@@ -1,4 +1,4 @@
-package dev.book.global.config.security.handler;
+package dev.book.global.config.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
