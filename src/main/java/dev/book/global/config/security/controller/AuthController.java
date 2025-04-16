@@ -1,6 +1,7 @@
 package dev.book.global.config.security.controller;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
+import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.service.AuthService;
 import dev.book.user.dto.request.UserSignUpRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +26,15 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request,
-                                    HttpServletResponse response,
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response,
                                     @AuthenticationPrincipal CustomUserDetails userDetails){
         authService.logout(request, response, userDetails);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissueToken(HttpServletResponse response, @RequestBody TokenDto tokenDto){
+        authService.reissueToken(response, tokenDto.refreshToken());
         return ResponseEntity.ok().build();
     }
 }

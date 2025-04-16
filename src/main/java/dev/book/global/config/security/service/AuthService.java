@@ -39,9 +39,7 @@ public class AuthService {
         UserEntity user = userRepository.findByEmail(userSignupRequest.email())
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        Authentication authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        Authentication authentication = getAuthentication(user);
 
         validateNickname(userSignupRequest.nickname());
 
@@ -53,10 +51,16 @@ public class AuthService {
         refreshTokenService.saveAndUpdateRefreshToken(user, tokenDto.refreshToken());
     }
 
+    private Authentication getAuthentication(UserEntity user) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        Authentication authentication = new JwtAuthenticationToken(userDetails, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return authentication;
+    }
+
 
     private TokenDto getTokenDto(HttpServletResponse response, Authentication authentication) {
-        TokenDto tokenDto = jwtUtil.generateToken(authentication);
-        jwtUtil.addTokenInCookie(response, tokenDto);
+        TokenDto tokenDto = jwtUtil.generateToken(response, authentication);
         return tokenDto;
     }
 
@@ -74,5 +78,20 @@ public class AuthService {
         userDetails.user().deleteRefreshToken();
         jwtUtil.deleteAccessTokenAndRefreshToken(request, response); //쿠키에서 refreshToken 지우기
         userRepository.save(userDetails.user());
+    }
+
+    /**
+     * refreshToken을 통한 토큰 재발급
+     * @param response
+     * @param refreshToken
+     */
+    public void reissueToken(HttpServletResponse response, String refreshToken) {
+        String email = jwtUtil.validateToken(refreshToken);
+
+        UserEntity user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+
+        Authentication authentication = getAuthentication(user);
+        jwtUtil.generateToken(response, authentication);
     }
 }

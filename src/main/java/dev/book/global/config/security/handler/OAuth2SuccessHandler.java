@@ -33,8 +33,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         switch(userLoginState){ //todo 반환되는 화면 경로 정하기
             case LOGIN_SUCCESS ->{
-                TokenDto tokenDto = jwtUtil.generateToken(authentication);
-                jwtUtil.addTokenInCookie(response, tokenDto);
+                jwtUtil.generateToken(response, authentication);
                 getRedirectStrategy().sendRedirect(request, response, "/main");
             }
             case PROFILE_INCOMPLETE ->
