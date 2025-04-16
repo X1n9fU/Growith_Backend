@@ -48,7 +48,7 @@ public class Challenge extends BaseTimeEntity {
 
     private LocalDate endDate;
 
-    @OneToMany(mappedBy = "challenge")
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserChallenge> userChallenges;
 
     @ManyToOne(fetch = FetchType.LAZY)
