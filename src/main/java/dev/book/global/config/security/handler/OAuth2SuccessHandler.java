@@ -29,7 +29,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
-        String invitationToken = extractInvitationToken(request);
+        String invitationToken = extractInvitationToken(request, response);
         UserLoginState userLoginState = oauth2AuthService.getAttributes(authentication);
 
         // 친구 요청 처리
@@ -45,8 +45,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
     }
 
-    private String extractInvitationToken(HttpServletRequest request) {
-        return CookieUtil.getCookie(request, REQUEST_USER_TOKEN);
+    private String extractInvitationToken(HttpServletRequest request, HttpServletResponse response) {
+        String token = CookieUtil.getCookie(request, REQUEST_USER_TOKEN);
+        CookieUtil.deleteCookie(request, response, REQUEST_USER_TOKEN);
+        return token;
     }
 
     private void handleFriendInvitation(Authentication authentication, String invitationToken) {

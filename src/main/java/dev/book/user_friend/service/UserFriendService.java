@@ -50,12 +50,12 @@ public class UserFriendService {
         userFriendRepository.save(UserFriend.of(invitingUser, userInfo.localDateTime()));
     }
 
+    @Transactional
     public void getTokenAndMakeInvitation(CustomUserDetails userDetails, HttpServletResponse response, String token) throws Exception {
         makeInvitation(userDetails.getUsername(), token);
         response.sendRedirect(MAIN_URL);
     }
 
-    @Transactional
     public void makeInvitation(String email, String safeToken) throws Exception {
         String token = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
         EncryptUserInfo userInfo = decryptToken(token);
