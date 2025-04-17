@@ -1,7 +1,10 @@
-package dev.book.global.config.security.jwt;
+package dev.book.global.config.security.filter;
 
+import dev.book.global.config.security.jwt.JwtAuthenticationToken;
+import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.util.CookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +17,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 헤더에서 토큰을 꺼내서 유효성 검증
@@ -26,9 +30,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private final String ACCESS_TOKEN = "access_token";
+    private static final List<String> SWAGGER_LIST = List.of(
+            "/swagger-ui", "/swagger-ui/", "/swagger-ui/index.html",
+            "/v3/api-docs", "/v3/api-docs/", "/swagger-resources", "/swagger-resources/"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return SWAGGER_LIST.stream().anyMatch(path::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        logger.info(request.getRequestURL());
         String token = getToken(request);
 
         try {
@@ -43,12 +58,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             logger.error("만료된 JWT 토큰입니다. : " + e.getMessage());
-        } catch (JwtException | IllegalArgumentException e){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            logger.error("잘못된 JWT 토큰입니다." + e.getMessage());
+        } catch (MalformedJwtException | JwtException | IllegalArgumentException e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            logger.error("잘못된 JWT 토큰입니다. : " + e.getMessage());
         } catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            logger.error("서버 오류" + e.getMessage());
+            logger.error("서버 오류 : " + e.getMessage());
         }
 
         filterChain.doFilter(request ,response);

@@ -9,5 +9,9 @@ spring:
         - local
         - oauth2
         - jwt
+        - swagger
       prod:
         - prod
+        - oauth2
+        - jwt
+        - swagger

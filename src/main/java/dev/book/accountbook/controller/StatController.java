@@ -25,7 +25,7 @@ public class StatController {
 
     @GetMapping("/{frequency}")
     public ResponseEntity<List<AccountBookStatResponse>> statList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         List<AccountBookStatResponse> list = statService.statList(userId, frequency);
 
         return ResponseEntity.ok(list);
@@ -33,7 +33,7 @@ public class StatController {
 
     @GetMapping("/{frequency}/{category}")
     public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         List<AccountBookSpendResponse> list = statService.categoryList(userId, frequency, category);
 
         return ResponseEntity.ok(list);
@@ -41,7 +41,7 @@ public class StatController {
 
     @GetMapping("/{frequency}/{category}/consume")
     public ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         AccountBookConsumeResponse response = statService.consume(userId, frequency, category);
 
         return ResponseEntity.ok(response);

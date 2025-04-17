@@ -23,7 +23,7 @@ public class AccountBookController {
 
     @GetMapping("/spend")
     public ResponseEntity<List<AccountBookSpendResponse>> getSpendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         List<AccountBookSpendResponse> responses = accountBookService.getSpendList(userId);
 
         return ResponseEntity.ok(responses);
@@ -31,7 +31,7 @@ public class AccountBookController {
 
     @GetMapping("/spend/{id}")
     public ResponseEntity<AccountBookSpendResponse> getSpendOne(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         AccountBookSpendResponse response = accountBookService.getSpendOne(id,userId);
 
         return ResponseEntity.ok(response);
@@ -39,7 +39,7 @@ public class AccountBookController {
 
     @PostMapping("/spend")
     public ResponseEntity<AccountBookSpendResponse> createSpend(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody AccountBookSpendRequest request) {
-        UserEntity userId = userDetails.getUser();
+        UserEntity userId = userDetails.user();
         AccountBookSpendResponse response = accountBookService.createSpend(request, userId);
 
         return ResponseEntity.ok(response);
@@ -47,7 +47,7 @@ public class AccountBookController {
 
     @PutMapping("/spend/{id}")
     public ResponseEntity<AccountBookSpendResponse> modifySpend(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody AccountBookSpendRequest request, @PathVariable Long id) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         AccountBookSpendResponse response = accountBookService.modifySpend(request, id, userId);
 
         return ResponseEntity.ok(response);
@@ -55,7 +55,7 @@ public class AccountBookController {
 
     @DeleteMapping("/spend/{id}")
     public ResponseEntity<Boolean> deleteSpend(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         boolean response = accountBookService.deleteSpend(id, userId);
 
         return ResponseEntity.ok(response);
@@ -63,7 +63,7 @@ public class AccountBookController {
 
     @GetMapping("/income")
     public ResponseEntity<List<AccountBookIncomeResponse>> getIncomeList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         List<AccountBookIncomeResponse> responses = accountBookService.getIncomeList(userId);
 
         return ResponseEntity.ok(responses);
@@ -71,7 +71,7 @@ public class AccountBookController {
 
     @GetMapping("/income/{id}")
     public ResponseEntity<AccountBookIncomeResponse> getIncomeOne(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         AccountBookIncomeResponse response = accountBookService.getIncomeOne(id, userId);
 
         return ResponseEntity.ok(response);
@@ -79,7 +79,7 @@ public class AccountBookController {
 
     @PostMapping("/income")
     public ResponseEntity<AccountBookIncomeResponse> createIncome(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody AccountBookIncomeRequest request) {
-        UserEntity user = userDetails.getUser();
+        UserEntity user = userDetails.user();
         AccountBookIncomeResponse response = accountBookService.createIncome(request, user);
 
         return ResponseEntity.ok(response);
@@ -87,7 +87,7 @@ public class AccountBookController {
 
     @PutMapping("/income/{id}")
     public ResponseEntity<AccountBookIncomeResponse> modifyIncome(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody AccountBookIncomeRequest request, @PathVariable Long id) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         AccountBookIncomeResponse response = accountBookService.modifyIncome(id, request, userId);
 
         return ResponseEntity.ok(response);
@@ -95,7 +95,7 @@ public class AccountBookController {
 
     @DeleteMapping("/income/{id}")
     public ResponseEntity<Boolean> deleteIncome(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id) {
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.user().getId();
         boolean response = accountBookService.deleteIncome(id, userId);
 
         return ResponseEntity.ok(response);

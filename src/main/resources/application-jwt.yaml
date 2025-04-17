@@ -4,3 +4,6 @@ spring:
       access: 1800 #30분
       refresh: 86400 #1일
     secret: "${JWT_SECRET}"
+
+  aes:
+    secret: "${AES_SECRET}"

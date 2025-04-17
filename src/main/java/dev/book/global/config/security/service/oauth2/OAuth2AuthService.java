@@ -1,8 +1,8 @@
 package dev.book.global.config.security.service.oauth2;
 
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
-import dev.book.global.config.security.exception.CustomOAuth2Error;
-import dev.book.global.config.security.exception.UnValidatedProviderException;
+import dev.book.global.config.security.exception.OAuth2ErrorCode;
+import dev.book.global.config.security.exception.OAuth2Exception;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.enums.UserLoginState;
 import dev.book.user.repository.UserRepository;
@@ -33,8 +33,7 @@ public class OAuth2AuthService {
             OAuth2Attributes kakaoAttributes = OAuth2Attributes.toKakao(attributes);
             return getUserLoginState(kakaoAttributes);
         }
-        CustomOAuth2Error oAuth2Error = new CustomOAuth2Error("Invalid_Provider", "지원되지 않는 공급자입니다.", null, 403);
-        throw new UnValidatedProviderException(oAuth2Error);
+        throw new OAuth2Exception(OAuth2ErrorCode.UNVALIDATED_PROVIDER);
     }
 
     /**

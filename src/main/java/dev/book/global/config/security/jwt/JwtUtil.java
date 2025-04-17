@@ -50,7 +50,7 @@ public class JwtUtil {
      * @param authentication
      * @return
      */
-    public TokenDto generateToken(Authentication authentication){
+    public TokenDto generateToken(HttpServletResponse response, Authentication authentication){
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .reduce((auth1, auth2) -> auth1 + "," + auth2)
@@ -62,8 +62,10 @@ public class JwtUtil {
         //refreshToken 저장
         refreshTokenService.saveAndUpdateRefreshToken(authentication.getName(), refreshToken);
 
-        return new TokenDto(accessToken, refreshToken);
+        TokenDto tokenDto = new TokenDto(accessToken, refreshToken);
+        addTokenInCookie(response, tokenDto);
 
+        return tokenDto;
     }
 
     private String generateAccessToken(String authorities, String authName){
