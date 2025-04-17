@@ -59,7 +59,8 @@ public class UserFriendService {
     public void makeInvitation(String email, String safeToken) throws Exception {
         String token = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
         EncryptUserInfo userInfo = decryptToken(token);
-        UserFriend userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(userInfo.id(), userInfo.localDateTime());
+        UserFriend userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(userInfo.id(), userInfo.localDateTime())
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.INVITING_NOT_FOUND));
         UserEntity friend = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         userFriend.inviteFriend(friend);

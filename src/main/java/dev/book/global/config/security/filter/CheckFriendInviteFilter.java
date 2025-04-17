@@ -19,7 +19,7 @@ public class CheckFriendInviteFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String redirect_uri = request.getRequestURI();
 
-        if (redirect_uri.equals(REQUEST_FRIEND_URI)){
+        if (REQUEST_FRIEND_URI.equals(redirect_uri)){
             String token = request.getParameter("token");
 
             if (token != null){

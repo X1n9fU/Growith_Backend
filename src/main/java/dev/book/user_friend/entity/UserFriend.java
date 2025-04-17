@@ -33,7 +33,7 @@ public class UserFriend {
     LocalDateTime acceptedAt;
 
     @Builder
-    public UserFriend(UserEntity user, UserEntity friend, LocalDateTime requestedAt) {
+    private UserFriend(UserEntity user, UserEntity friend, LocalDateTime requestedAt) {
         this.user = user;
         this.friend = friend;
         this.requestedAt = requestedAt;
