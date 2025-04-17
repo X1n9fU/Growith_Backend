@@ -90,7 +90,6 @@ public class ChallengeService {
     public void leaveChallenge(UserEntity user, Long challengeId) {
         boolean isNotExist = !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
 
-        System.out.println(isNotExist);
         if (isNotExist) {
             throw new ChallengeException(CHALLENGE_NOT_FOUND_USER);
         }
