@@ -35,29 +35,28 @@ public class ChallengeInviteService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         UserEntity inviteUser = userRepository.findByEmail(challengeInviteRequest.email()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
 
-        boolean isNotParticipant = isNotParticipant(challengeId, user);
-        if (isNotParticipant) {
-            throw new ChallengeException(CHALLENGE_INVITE_INVALID); // 현재 내가 챌린지에 참여하지 않는데 초대를 보낼때
-        }
-        boolean isAlreadyInvited = isAlreadyInvited(inviteUser, challenge);
 
-        if (isAlreadyInvited) {
-            throw new ChallengeException(CHALLENGE_ALREADY_INVITED); // 이미 초대가 된 상황일때
-        }
+        isNotParticipant(challengeId, user);// 자신이 참가하지않은 챌린지에 초대 하는 상황
+
+        isAlreadyInvited(inviteUser, challenge); // 이미 초대가 된 상황일때
+
+
         long countParticipants = userChallengeRepository.countByChallengeId(challengeId);
-        if (challenge.isOver(countParticipants)) {
-            throw new ChallengeException(CHALLENGE_CAPACITY_FULL); // 최대인원을 초과 했을때
-        }
+        challenge.isOver(countParticipants);
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
     }
 
-    private boolean isAlreadyInvited(UserEntity inviteUser, Challenge challenge) {
-        return challengeInviteRepository.existsByInviteUserIdAndChallengeId(inviteUser.getId(), challenge.getId());
+    private void isAlreadyInvited(UserEntity inviteUser, Challenge challenge) {
+        if (challengeInviteRepository.existsByInviteUserIdAndChallengeId(inviteUser.getId(), challenge.getId())) {
+            throw new ChallengeException(CHALLENGE_ALREADY_INVITED);
+        }
     }
 
-    private boolean isNotParticipant(Long challengeId, UserEntity user) {
-        return !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
+    private void isNotParticipant(Long challengeId, UserEntity user) {
+        if (!userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId)) {
+            throw new ChallengeException(CHALLENGE_INVITE_INVALID);
+        }
     }
 
     @Transactional(readOnly = true)

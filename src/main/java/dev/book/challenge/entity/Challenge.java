@@ -2,6 +2,7 @@ package dev.book.challenge.entity;
 
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
+import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.type.Category;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
@@ -16,6 +17,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static dev.book.challenge.exception.ErrorCode.*;
 
 @Entity
 @Getter
@@ -87,7 +90,27 @@ public class Challenge extends BaseTimeEntity {
         this.endDate = request.endDate();
     }
 
-    public boolean isOver(long countParticipants) {
-        return countParticipants >= this.capacity;
+    public void isOver(long countParticipants) {
+        if (countParticipants >= this.capacity) {
+            throw new ChallengeException(CHALLENGE_CAPACITY_FULL);
+        }
+    }
+
+    public void checkAlreadyStartOrEnd() {
+        checkAlreadyStart();
+        checkAlreadyEnd();
+
+    }
+
+    private void checkAlreadyStart() {
+        if (Status.IN_PROGRESS.equals(this.status)) {
+            throw new ChallengeException(CHALLENGE_ALREADY_START);
+        }
+    }
+
+    private void checkAlreadyEnd() {
+        if (Status.COMPLETED.equals(this.status)) {
+            throw new ChallengeException(CHALLENGE_ALREADY_END);
+        }
     }
 }
