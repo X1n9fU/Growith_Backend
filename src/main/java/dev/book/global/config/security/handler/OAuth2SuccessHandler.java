@@ -1,6 +1,6 @@
 package dev.book.global.config.security.handler;
 
-import dev.book.friend.service.FriendService;
+import dev.book.user_friend.service.UserFriendService;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.oauth2.OAuth2AuthService;
 import dev.book.global.config.security.util.CookieUtil;
@@ -23,7 +23,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final OAuth2AuthService oauth2AuthService;
     private final JwtUtil jwtUtil;
-    private final FriendService friendService;
+    private final UserFriendService userFriendService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -53,7 +53,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (invitationToken == null) return;
 
         try {
-            friendService.makeInvitation(authentication.getName(), invitationToken);
+            userFriendService.makeInvitation(authentication.getName(), invitationToken);
         } catch (Exception e) {
             throw new RuntimeException("친구 요청 처리 중 오류 발생", e);
         }

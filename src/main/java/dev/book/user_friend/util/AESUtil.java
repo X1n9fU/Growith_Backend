@@ -1,4 +1,4 @@
-package dev.book.friend.util;
+package dev.book.user_friend.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

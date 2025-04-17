@@ -1,26 +1,20 @@
-package dev.book.friend.service;
+package dev.book.user_friend.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.book.friend.dto.EncryptUserInfo;
-import dev.book.friend.dto.request.KakaoMessageRequestDto;
-import dev.book.friend.dto.response.KakaoFriendsResponseDto;
-import dev.book.friend.dto.response.KakaoResponseDto;
-import dev.book.friend.dto.response.InvitingUserTokenResponseDto;
-import dev.book.friend.util.AESUtil;
+import dev.book.user_friend.dto.EncryptUserInfo;
+import dev.book.user_friend.dto.response.KakaoResponseDto;
+import dev.book.user_friend.dto.response.InvitingUserTokenResponseDto;
+import dev.book.user_friend.util.AESUtil;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
-import dev.book.user_friend.UserFriend;
-import dev.book.user_friend.UserFriendRepository;
+import dev.book.user_friend.entity.UserFriend;
+import dev.book.user_friend.repository.UserFriendRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +25,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class FriendService {
+public class UserFriendService {
 
     private static final String MAIN_URL = "http://localhost:8080/main";
 
@@ -66,9 +60,9 @@ public class FriendService {
         String token = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
         EncryptUserInfo userInfo = decryptToken(token);
         UserFriend userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(userInfo.id(), userInfo.localDateTime());
-        UserEntity invitedUser = userRepository.findByEmail(email)
+        UserEntity friend = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-        userFriend.updateInvitedUser(invitedUser);
+        userFriend.inviteFriend(friend);
     }
 
     private EncryptUserInfo decryptToken(String safeToken) throws Exception {

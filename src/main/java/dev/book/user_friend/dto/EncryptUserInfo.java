@@ -1,4 +1,4 @@
-package dev.book.friend.dto;
+package dev.book.user_friend.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -38,7 +38,7 @@ public class UserEntity extends BaseTimeEntity {
 
     private int participatingChallenges = 0;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private RefreshToken refreshToken;
 
     //todo 알림 설정 필요
