@@ -1,5 +1,6 @@
 package dev.book.global.config.security;
 
+import dev.book.global.config.security.dto.PermitUrlProperties;
 import dev.book.global.config.security.filter.CheckFriendInviteFilter;
 import dev.book.global.config.security.filter.JwtAuthenticationFilter;
 import dev.book.global.config.security.handler.CustomAccessDeniedHandler;
@@ -20,7 +21,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -38,6 +38,7 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final PermitUrlProperties permitUrl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,7 +49,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers(WHITE_LIST).permitAll()
+                                .requestMatchers(permitUrl.getUrl().toArray(new String[0])).permitAll()
                                 .anyRequest().authenticated()
                         //todo 현재는 모든 경로를 열어놓음 추후 endpoint마다 권한 설정
                 )
@@ -61,24 +62,14 @@ public class SecurityConfig {
                                 .userInfoEndpoint(userInfo -> userInfo
                                         .userService(customOAuth2UserService))
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService, permitUrl), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CheckFriendInviteFilter(), JwtAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint(exceptionHandlerExceptionResolver()))
                         .accessDeniedHandler(new CustomAccessDeniedHandler(exceptionHandlerExceptionResolver())));
-        ;
         return http.build();
     }
 
-    public String[] WHITE_LIST = {
-            "/oauth2/**",
-            "/login/oauth2/**",
-            "/favicon.ico",
-            "/api/v1/auth/signup",
-            "/signup",
-            "/login",
-
-    };
 
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository OAuth2AuthorizationRequestBasedOnCookieRepository(){

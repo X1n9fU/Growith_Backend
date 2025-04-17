@@ -4,6 +4,20 @@ spring:
       access: 1800 #30분
       refresh: 86400 #1일
     secret: "${JWT_SECRET}"
+    permit:
+      url:
+        - "/swagger-ui"
+        - "/swagger-ui/**"
+        - "/v3/api-docs/**"
+        - "/v3/api-docs"
+        - "/oauth2/**"
+        - "/login/oauth2/**"
+        - "/favicon.ico"
+        - "/api/v1/auth/signup"
+        - "/signup"
+        - "/login"
+
 
   aes:
     secret: "${AES_SECRET}"
+
