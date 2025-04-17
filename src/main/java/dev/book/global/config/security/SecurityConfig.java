@@ -48,15 +48,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers(
-                                        new AntPathRequestMatcher("/oauth2/**"),
-                                        new AntPathRequestMatcher("/login/oauth2/**"),
-                                        new AntPathRequestMatcher("/favicon.ico"),
-                                        new AntPathRequestMatcher("/api/v1/auth/signup")
-                                ).permitAll()
+                                .requestMatchers(WHITE_LIST).permitAll()
                                 .anyRequest().authenticated()
                         //todo 현재는 모든 경로를 열어놓음 추후 endpoint마다 권한 설정
-
                 )
                 .oauth2Login(
                         oauth2 -> oauth2
@@ -75,6 +69,16 @@ public class SecurityConfig {
         ;
         return http.build();
     }
+
+    public String[] WHITE_LIST = {
+            "/oauth2/**",
+            "/login/oauth2/**",
+            "/favicon.ico",
+            "/api/v1/auth/signup",
+            "/signup",
+            "/login",
+
+    };
 
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository OAuth2AuthorizationRequestBasedOnCookieRepository(){

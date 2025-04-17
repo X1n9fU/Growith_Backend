@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 헤더에서 토큰을 꺼내서 유효성 검증
@@ -29,9 +30,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private final String ACCESS_TOKEN = "access_token";
+    private static final List<String> SWAGGER_LIST = List.of(
+            "/swagger-ui", "/swagger-ui/", "/swagger-ui/index.html",
+            "/v3/api-docs", "/v3/api-docs/", "/swagger-resources", "/swagger-resources/"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return SWAGGER_LIST.stream().anyMatch(path::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        logger.info(request.getRequestURL());
         String token = getToken(request);
 
         try {
