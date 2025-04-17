@@ -2,12 +2,13 @@ package dev.book.challenge.entity;
 
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
+import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.type.Category;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
+import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.global.entity.BaseTimeEntity;
 import dev.book.user.entity.UserEntity;
-import dev.book.user_challenge.entity.UserChallenge;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,6 +17,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static dev.book.challenge.exception.ErrorCode.*;
 
 @Entity
 @Getter
@@ -85,5 +88,29 @@ public class Challenge extends BaseTimeEntity {
         this.category = Category.valueOf(request.category());
         this.startDate = request.startDate();
         this.endDate = request.endDate();
+    }
+
+    public void isOver(long countParticipants) {
+        if (countParticipants >= this.capacity) {
+            throw new ChallengeException(CHALLENGE_CAPACITY_FULL);
+        }
+    }
+
+    public void checkAlreadyStartOrEnd() {
+        checkAlreadyStart();
+        checkAlreadyEnd();
+
+    }
+
+    private void checkAlreadyStart() {
+        if (Status.IN_PROGRESS.equals(this.status)) {
+            throw new ChallengeException(CHALLENGE_ALREADY_START);
+        }
+    }
+
+    private void checkAlreadyEnd() {
+        if (Status.COMPLETED.equals(this.status)) {
+            throw new ChallengeException(CHALLENGE_ALREADY_END);
+        }
     }
 }

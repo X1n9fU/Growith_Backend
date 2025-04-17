@@ -9,9 +9,9 @@ import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
-import dev.book.user_challenge.repository.UserChallengeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -242,5 +242,71 @@ class ChallengeServiceTest {
         //then
         assertThatThrownBy(() -> challengeService.deleteChallenge(noCreator, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("수정 및 삭제 권한이 없습니다.");
+    }
+
+
+    @Test
+    @DisplayName("사용자는 챌린지를 참여할수 있다.")
+    void participate() {
+        // given
+        ChallengeCreateRequest challengeCreateRequest = createRequest();
+        UserEntity creator = UserEntity.builder()
+                .name("작성자")
+                .build();
+        UserEntity noCreator = UserEntity.builder()
+                .name("사용자")
+                .build();
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
+        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(false);
+        given(userChallengeRepository.countByChallengeId(1L)).willReturn(4L);
+        // when
+        challengeService.participate(noCreator, 1L);
+        // then
+        verify(userChallengeRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("사용자는 참여한 챌린지를 참여할수 없다.")
+    void NotParticipate() {
+        //given
+        ChallengeCreateRequest challengeCreateRequest = createRequest();
+        UserEntity user = UserEntity.builder()
+                .name("사용자")
+                .email("이메일1")
+                .build();
+
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        Challenge challenge = Challenge.of(challengeCreateRequest, user);
+        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(true);
+        // when
+        // then
+        assertThatThrownBy(() -> challengeService.participate(user, 1L)).isInstanceOf(ChallengeException.class)
+                .hasMessage("이미 참여된 챌린지 입니다.");
+
+    }
+
+    @Test
+    @DisplayName("모집인원 초과한 챌린지는 참여할수 없다.")
+    void FullParticipate() {
+        // given
+        ChallengeCreateRequest challengeCreateRequest = createRequest();
+        UserEntity user = UserEntity.builder()
+                .name("사용자")
+                .email("이메일1")
+                .build();
+
+        ReflectionTestUtils.setField(user, "id", 1L);
+        Challenge challenge = Challenge.of(challengeCreateRequest, user);
+        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(false);
+        given(userChallengeRepository.countByChallengeId(any())).willReturn(5L);
+        // when
+        // then
+        assertThatThrownBy(() -> challengeService.participate(user, 1L)).isInstanceOf(ChallengeException.class)
+                .hasMessage("참여 인원이 초과 하였습니다.");
+
     }
 }
