@@ -20,7 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static dev.book.challenge.exception.ErrorCode.*;
+import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
+import static dev.book.challenge.exception.ErrorCode.CHALLENGE_NOT_FOUND_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -64,37 +65,44 @@ public class ChallengeService {
 
     }
 
-    private Challenge getMyChallenge(Long userId, Long id) {
-        Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
-        return challenge;
-    }
-
     @Transactional
     public void participate(UserEntity user, Long id) {
 
         Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
-        boolean isExist = userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), id);
-        if (isExist) {
-            throw new ChallengeException(CHALLENGE_ALREADY_JOINED);
-        }
+        challenge.checkAlreadyStartOrEnd();
+        checkExist(user, id);
 
         long countParticipants = userChallengeRepository.countByChallengeId(id);
-        if (challenge.isOver(countParticipants)) {
-            throw new ChallengeException(CHALLENGE_CAPACITY_FULL);
-        }
+        challenge.isOver(countParticipants);
         UserChallenge userChallenge = UserChallenge.of(user, challenge);
         userChallengeRepository.save(userChallenge);
     }
 
+
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
-        boolean isNotExist = !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
 
+        checkNotExist(user, challengeId);
+        userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(), challengeId);
+
+    }
+
+    private void checkExist(UserEntity user, Long id) {
+        boolean isExist = userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), id);
+        if (isExist) {
+            throw new ChallengeException(CHALLENGE_ALREADY_JOINED);
+        }
+    }
+
+    private void checkNotExist(UserEntity user, Long challengeId) {
+        boolean isNotExist = !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
         if (isNotExist) {
             throw new ChallengeException(CHALLENGE_NOT_FOUND_USER);
         }
+    }
 
-        userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(), challengeId);
-
+    private Challenge getMyChallenge(Long userId, Long id) {
+        Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
+        return challenge;
     }
 }
