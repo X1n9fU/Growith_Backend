@@ -23,5 +23,5 @@ springdoc:
         url: http://localhost:8080  # 기본 서버 URL 설정
         description: "Local 개발 환경"
     production:
-        url: https://api.example.com  # 운영 서버 URL 설정
+        url: "${SERVER_IP}"  # 운영 서버 URL 설정
         description: "Production 서버"
