@@ -68,6 +68,18 @@ public class JwtUtil {
         return tokenDto;
     }
 
+    public String generateAccessToken(HttpServletResponse response, Authentication authentication){
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .reduce((auth1, auth2) -> auth1 + "," + auth2)
+                .orElse("");
+
+        String accessToken = generateAccessToken(authorities, authentication.getName());
+
+        addAccessTokenInCookie(response, accessToken);
+        return accessToken;
+    }
+
     private String generateAccessToken(String authorities, String authName){
         Date now = new Date();
         return Jwts.builder()
@@ -105,9 +117,17 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public String getRefreshToken(HttpServletRequest request){
+        return CookieUtil.getCookie(request, REFRESH_TOKEN);
+    }
+
     public void addTokenInCookie(HttpServletResponse response, TokenDto tokenDto) {
         CookieUtil.addCookie(response, ACCESS_TOKEN, tokenDto.accessToken(), (int) ACCESS_TOKEN_EXPIRATION * 1000);
         CookieUtil.addCookie(response, REFRESH_TOKEN, tokenDto.refreshToken(), (int) REFRESH_TOKEN_EXPIRATION * 1000);
+    }
+
+    public void addAccessTokenInCookie(HttpServletResponse response, String accessToken){
+        CookieUtil.addCookie(response, ACCESS_TOKEN, accessToken, (int) ACCESS_TOKEN_EXPIRATION * 1000);
     }
 
     public void deleteAccessTokenAndRefreshToken(HttpServletRequest request, HttpServletResponse response) {
