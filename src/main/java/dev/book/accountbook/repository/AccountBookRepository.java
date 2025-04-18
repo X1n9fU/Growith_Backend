@@ -55,4 +55,6 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    List<AccountBook> findByUserIdAndCategory(Long userId, Category category);
 }

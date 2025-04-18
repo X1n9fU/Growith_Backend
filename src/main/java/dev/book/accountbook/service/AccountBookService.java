@@ -1,5 +1,6 @@
 package dev.book.accountbook.service;
 
+import dev.book.accountbook.dto.event.SpendCreatedEvent;
 import dev.book.accountbook.dto.request.AccountBookIncomeRequest;
 import dev.book.accountbook.dto.request.AccountBookRequest;
 import dev.book.accountbook.dto.request.AccountBookSpendRequest;
@@ -9,9 +10,11 @@ import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.AccountBookRepository;
+import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountBookService {
     private final AccountBookRepository accountBookRepository;
+    private final ApplicationEventPublisher publisher;
 
     public AccountBookSpendResponse getSpendOne(Long id, Long userId) {
         AccountBook accountBook = findAccountBookOrThrow(id, userId, AccountBookErrorCode.NOT_FOUND_SPEND);
@@ -38,6 +42,7 @@ public class AccountBookService {
 
     public AccountBookSpendResponse createSpend(AccountBookSpendRequest spendRequest, UserEntity user) {
         AccountBook accountBook = accountBookRepository.save(spendRequest.toEntity(user));
+        publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
 
         return AccountBookSpendResponse.from(accountBook);
     }
@@ -93,6 +98,14 @@ public class AccountBookService {
         accountBookRepository.deleteById(accountBook.getId());
 
         return true;
+    }
+
+    public List<AccountBookSpendResponse> getCategorySpendList(Category category, Long userId) {
+        List<AccountBook> categorySpendList = accountBookRepository.findByUserIdAndCategory(userId, category);
+
+        return categorySpendList.stream()
+                .map(AccountBookSpendResponse::from)
+                .toList();
     }
 
     private AccountBook findAccountBookOrThrow(Long id, Long userId, AccountBookErrorCode errorCode) {

@@ -1,5 +1,6 @@
 package dev.book.accountbook.controller;
 
+import dev.book.accountbook.controller.swagger.StatApi;
 import dev.book.accountbook.dto.response.AccountBookConsumeResponse;
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.accountbook.dto.response.AccountBookStatResponse;
@@ -10,20 +11,17 @@ import dev.book.global.config.security.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/stat")
 @RequiredArgsConstructor
-public class StatController {
+public class StatController implements StatApi {
     private final StatService statService;
 
-    @GetMapping("/{frequency}")
+    @Override
     public ResponseEntity<List<AccountBookStatResponse>> statList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency) {
         Long userId = userDetails.user().getId();
         List<AccountBookStatResponse> list = statService.statList(userId, frequency);
@@ -31,7 +29,7 @@ public class StatController {
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/{frequency}/{category}")
+    @Override
     public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
         Long userId = userDetails.user().getId();
         List<AccountBookSpendResponse> list = statService.categoryList(userId, frequency, category);
@@ -39,7 +37,7 @@ public class StatController {
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/{frequency}/{category}/consume")
+    @Override
     public ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
         Long userId = userDetails.user().getId();
         AccountBookConsumeResponse response = statService.consume(userId, frequency, category);
