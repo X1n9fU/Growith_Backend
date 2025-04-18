@@ -48,15 +48,21 @@ public class BudgetService {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendLimitWarning(SpendCreatedEvent event) {
-        BudgetResponse responses = budgetRepository.findBudgetWithTotal(event.userId());
-        FcmToken token = fcmTokenRepository.findByUserId(event.userId()).orElseThrow(() -> new FcmTokenErrorException(FcmTokenErrorCode.NOT_FOUND_FCM_TOKEN));
+        BudgetResponse response = budgetRepository.findBudgetWithTotal(event.userId());
 
-        fcmService.sendSpendNotification(token.getToken(), event.nickname(), responses.budget(), responses.total());
+        if (response.total() >= response.budget() * 0.5) {
+            long usageRate = calcUsageRate(response);
+
+            FcmToken token = fcmTokenRepository.findByUserId(event.userId())
+                    .orElseThrow(() -> new FcmTokenErrorException(FcmTokenErrorCode.NOT_FOUND_FCM_TOKEN));
+
+            fcmService.sendSpendNotification(token.getToken(), event.nickname(), response.budget(), response.total(), usageRate);
+        }
     }
 
     @Transactional
     public BudgetResponse modify(Long userId, Long id, BudgetRequest budgetRequest) {
-        Budget budget = budgetRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_BUDGET));
+        Budget budget = findBudgetIdAndUserId(id, userId);
         budget.modifyBudget(budgetRequest.budget());
         budgetRepository.flush();
 
@@ -64,7 +70,15 @@ public class BudgetService {
     }
 
     public void deleteBudget(Long userId, Long id) {
-        Budget budget = budgetRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_BUDGET));
+        Budget budget = findBudgetIdAndUserId(id, userId);
         budgetRepository.deleteById(budget.getId());
+    }
+
+    private long calcUsageRate(BudgetResponse response) {
+        return  (response.total() / response.budget()) * 100;
+    }
+
+    private Budget findBudgetIdAndUserId(Long budgetId, Long userId) {
+        return budgetRepository.findByIdAndUserId(budgetId, userId).orElseThrow(() -> new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_BUDGET));
     }
 }
