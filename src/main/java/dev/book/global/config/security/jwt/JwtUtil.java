@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * 토큰을 제작하고 validate 검증하는 로직
@@ -53,8 +54,7 @@ public class JwtUtil {
     public TokenDto generateToken(HttpServletResponse response, Authentication authentication){
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .reduce((auth1, auth2) -> auth1 + "," + auth2)
-                .orElse("");
+                .collect(Collectors.joining(","));
 
         String accessToken = generateAccessToken(authorities, authentication.getName());
         String refreshToken = generateRefreshToken(authorities, authentication.getName());
@@ -68,16 +68,14 @@ public class JwtUtil {
         return tokenDto;
     }
 
-    public String generateAccessToken(HttpServletResponse response, Authentication authentication){
+    public void generateAccessToken(HttpServletResponse response, Authentication authentication){
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .reduce((auth1, auth2) -> auth1 + "," + auth2)
-                .orElse("");
+                .collect(Collectors.joining(","));
 
         String accessToken = generateAccessToken(authorities, authentication.getName());
 
         addAccessTokenInCookie(response, accessToken);
-        return accessToken;
     }
 
     private String generateAccessToken(String authorities, String authName){
