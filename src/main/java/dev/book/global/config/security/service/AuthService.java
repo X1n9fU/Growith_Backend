@@ -2,6 +2,8 @@ package dev.book.global.config.security.service;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.dto.TokenDto;
+import dev.book.global.config.security.exception.AuthErrorCode;
+import dev.book.global.config.security.exception.AuthException;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
@@ -10,6 +12,8 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +51,7 @@ public class AuthService {
         validateNickname(userSignupRequest.nickname());
 
         user.updateNickname(userSignupRequest.nickname());
-        user.updateCategory(userSignupRequest.category());
+        user.updateCategory(userSignupRequest.categories());
 
         TokenDto tokenDto = getTokenDto(response, authentication);
 
@@ -62,8 +67,7 @@ public class AuthService {
 
 
     private TokenDto getTokenDto(HttpServletResponse response, Authentication authentication) {
-        TokenDto tokenDto = jwtUtil.generateToken(response, authentication);
-        return tokenDto;
+        return jwtUtil.generateToken(response, authentication);
     }
 
     public void validateNickname(String nickname) {
@@ -83,17 +87,25 @@ public class AuthService {
     }
 
     /**
-     * refreshToken을 통한 토큰 재발급
+     * refreshToken을 통한 accessToken 재발급
+     *
+     * @param request
      * @param response
-     * @param refreshToken
      */
-    public void reissueToken(HttpServletResponse response, String refreshToken) {
-        String email = jwtUtil.validateToken(refreshToken);
+    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String refreshToken = jwtUtil.getRefreshToken(request);
+            String email = jwtUtil.validateToken(refreshToken);
 
-        UserEntity user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+            UserEntity user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        Authentication authentication = getAuthentication(user);
-        jwtUtil.generateToken(response, authentication);
+            Authentication authentication = getAuthentication(user);
+            jwtUtil.generateAccessToken(response, authentication);
+        } catch (ExpiredJwtException e){
+            throw new AuthException(AuthErrorCode.EXPIRED_JWT_TOKEN);
+        } catch (MalformedJwtException | JwtException | IllegalArgumentException e) {
+            throw new AuthException(AuthErrorCode.INVALID_JWT_TOKEN);
+        }
     }
 }

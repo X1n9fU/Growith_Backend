@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * 토큰을 제작하고 validate 검증하는 로직
@@ -53,8 +54,7 @@ public class JwtUtil {
     public TokenDto generateToken(HttpServletResponse response, Authentication authentication){
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .reduce((auth1, auth2) -> auth1 + "," + auth2)
-                .orElse("");
+                .collect(Collectors.joining(","));
 
         String accessToken = generateAccessToken(authorities, authentication.getName());
         String refreshToken = generateRefreshToken(authorities, authentication.getName());
@@ -66,6 +66,16 @@ public class JwtUtil {
         addTokenInCookie(response, tokenDto);
 
         return tokenDto;
+    }
+
+    public void generateAccessToken(HttpServletResponse response, Authentication authentication){
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        String accessToken = generateAccessToken(authorities, authentication.getName());
+
+        addAccessTokenInCookie(response, accessToken);
     }
 
     private String generateAccessToken(String authorities, String authName){
@@ -105,9 +115,17 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public String getRefreshToken(HttpServletRequest request){
+        return CookieUtil.getCookie(request, REFRESH_TOKEN);
+    }
+
     public void addTokenInCookie(HttpServletResponse response, TokenDto tokenDto) {
         CookieUtil.addCookie(response, ACCESS_TOKEN, tokenDto.accessToken(), (int) ACCESS_TOKEN_EXPIRATION * 1000);
         CookieUtil.addCookie(response, REFRESH_TOKEN, tokenDto.refreshToken(), (int) REFRESH_TOKEN_EXPIRATION * 1000);
+    }
+
+    public void addAccessTokenInCookie(HttpServletResponse response, String accessToken){
+        CookieUtil.addCookie(response, ACCESS_TOKEN, accessToken, (int) ACCESS_TOKEN_EXPIRATION * 1000);
     }
 
     public void deleteAccessTokenAndRefreshToken(HttpServletRequest request, HttpServletResponse response) {

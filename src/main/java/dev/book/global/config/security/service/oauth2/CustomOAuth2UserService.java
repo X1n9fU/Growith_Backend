@@ -2,8 +2,8 @@ package dev.book.global.config.security.service.oauth2;
 
 import dev.book.global.config.security.dto.oauth2.CustomOAuth2User;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
-import dev.book.global.config.security.exception.OAuth2ErrorCode;
-import dev.book.global.config.security.exception.OAuth2Exception;
+import dev.book.global.config.security.exception.AuthErrorCode;
+import dev.book.global.config.security.exception.AuthException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -28,7 +28,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             OAuth2Attributes kakaoAttributes = OAuth2Attributes.toKakao(attributes);
             return new CustomOAuth2User(kakaoAttributes.email(), attributes);
         }
-        throw new OAuth2Exception(OAuth2ErrorCode.UNVALIDATED_PROVIDER);
+        throw new AuthException(AuthErrorCode.UNVALIDATED_PROVIDER);
     }
 
 }

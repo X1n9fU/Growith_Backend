@@ -1,8 +1,8 @@
 package dev.book.global.config.security.service.oauth2;
 
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
-import dev.book.global.config.security.exception.OAuth2ErrorCode;
-import dev.book.global.config.security.exception.OAuth2Exception;
+import dev.book.global.config.security.exception.AuthErrorCode;
+import dev.book.global.config.security.exception.AuthException;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.enums.UserLoginState;
 import dev.book.user.repository.UserRepository;
@@ -33,7 +33,7 @@ public class OAuth2AuthService {
             OAuth2Attributes kakaoAttributes = OAuth2Attributes.toKakao(attributes);
             return getUserLoginState(kakaoAttributes);
         }
-        throw new OAuth2Exception(OAuth2ErrorCode.UNVALIDATED_PROVIDER);
+        throw new AuthException(AuthErrorCode.UNVALIDATED_PROVIDER);
     }
 
     /**

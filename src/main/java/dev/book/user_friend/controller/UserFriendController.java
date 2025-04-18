@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/friends")
-public class UserFriendController {
+public class UserFriendController implements UserFriendSwaggerController{
 
     private final UserFriendService userFriendService;
 

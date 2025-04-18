@@ -1,5 +1,6 @@
 package dev.book.user.entity;
 
+import dev.book.accountbook.type.Category;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
@@ -9,6 +10,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,7 +34,9 @@ public class UserEntity extends BaseTimeEntity {
 
     private String profileImageUrl; //null인 경우 프로필 없음
 
-    private String userCategory; //추후 enum으로 변경
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경
 
     private long savings = 0;
 
@@ -48,7 +54,7 @@ public class UserEntity extends BaseTimeEntity {
 
 
     @Builder
-    public UserEntity(String email, String name, String nickname, String profileImageUrl, String userCategory) {
+    public UserEntity(String email, String name, String nickname, String profileImageUrl, List<Category> userCategory) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
@@ -69,7 +75,7 @@ public class UserEntity extends BaseTimeEntity {
         this.nickname = nickname;
     }
 
-    public void updateCategory(String userCategory){
+    public void updateCategory(List<Category> userCategory){
         this.userCategory = userCategory;
     }
 
