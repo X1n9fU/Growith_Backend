@@ -1,9 +1,12 @@
 package dev.book.user_friend.controller;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
+import dev.book.user_friend.dto.response.FriendListResponseDto;
+import dev.book.user_friend.dto.response.FriendRequestListResponseDto;
 import dev.book.user_friend.dto.response.InvitingUserTokenResponseDto;
 import dev.book.user_friend.dto.response.KakaoResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,8 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Tag(name = "친구 API", description = "친구 초대 토큰 발급, 친구 조회, 삭제 api")
 public interface UserFriendSwaggerController {
@@ -40,4 +46,50 @@ public interface UserFriendSwaggerController {
     ResponseEntity<?> getTokenAndMakeInvitation(HttpServletResponse response, @AuthenticationPrincipal CustomUserDetails userDetails,
                                                        @RequestParam(name="token") String token) throws Exception;
 
-}
+
+    @Operation(summary = "친구 목록 반환", description = "친구 목록을 반환한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "친구 목록 반환 완료",
+             content = @Content(
+                     array = @ArraySchema(schema = @Schema(implementation = FriendListResponseDto.class))))
+    })
+    ResponseEntity<List<FriendListResponseDto>> getFriendList(@AuthenticationPrincipal CustomUserDetails userDetails);
+
+
+    @Operation(summary = "친구 요청 목록 반환", description = "받은 친구 요청 목록을 반환한다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "친구 요청 목록 반환 완료",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = FriendRequestListResponseDto.class))))
+    })
+    ResponseEntity<List<FriendRequestListResponseDto>> getFriendRequestList(@AuthenticationPrincipal CustomUserDetails userDetails);
+
+    @Operation(summary = "친구 요청 승낙", description = "친구 요청을 승낙합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "친구 요청 승낙 완료",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = FriendRequestListResponseDto.class)))),
+            @ApiResponse(responseCode = "404", description = "친구 유저를 찾을 수 없습니다"),
+            @ApiResponse(responseCode = "404", description = "친구 요청을 찾을 수 없습니다.")
+    })
+    ResponseEntity<?> acceptFriend(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("friend_id") Long friendId);
+
+    @Operation(summary = "친구 요청 거절", description = "친구 요청을 거절합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "친구 요청 거절 완료"),
+            @ApiResponse(responseCode = "404", description = "친구 유저를 찾을 수 없습니다"),
+            @ApiResponse(responseCode = "404", description = "친구 요청을 찾을 수 없습니다.")
+    })
+    ResponseEntity<?> rejectFriend(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("friend_id") Long friendId);
+
+
+    @Operation(summary = "친구 삭제", description = "친구를 삭제합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "친구 삭제 완료",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = FriendRequestListResponseDto.class)))),
+            @ApiResponse(responseCode = "404", description = "친구 유저를 찾을 수 없습니다")
+    })
+    ResponseEntity<?> deleteFriend(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("friend_id") Long friendId);
+
+    }

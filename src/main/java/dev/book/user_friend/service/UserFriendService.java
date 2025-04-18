@@ -110,7 +110,7 @@ public class UserFriendService {
 
     private UserFriend getRequestByUserAndFriend(UserEntity user, Long friendId) {
         UserEntity requestFriendUser = userRepository.findById(friendId)
-                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+                        .orElseThrow(() -> new UserErrorException(UserErrorCode.FRIEND_NOT_FOUND));
         return userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(requestFriendUser, user)
                 .orElseThrow(() -> new UserFriendException(UserFriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
     }
@@ -119,7 +119,7 @@ public class UserFriendService {
     @Transactional
     public void deleteFriend(CustomUserDetails userDetails, Long friendId) {
         UserEntity friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.FRIEND_NOT_FOUND));
         userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(userDetails.user(), friend);
     }
 }
