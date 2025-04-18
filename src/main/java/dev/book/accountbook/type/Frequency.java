@@ -56,17 +56,23 @@ public enum Frequency {
 
             return new PeriodRange(thisMonthStart, now, lastMonthStart, lastMonthEnd);
         }
+    },
+    YEARLY {
+        @Override
+        public LocalDateTime calcStartDate() {
+            return getStartOfCurrentYear();
+        }
+
+        @Override
+        public PeriodRange calcPeriod() {
+            LocalDateTime thisYearStart = getStartOfCurrentYear();
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime lastYearStart = thisYearStart.minusYears(1);
+            LocalDateTime lastYearEnd = thisYearStart.minusSeconds(1);
+
+            return new PeriodRange(thisYearStart, now, lastYearStart, lastYearEnd);
+        }
     };
-
-    @JsonCreator
-    public static Frequency from(String value) {
-        return Frequency.valueOf(value.toUpperCase());
-    }
-
-    @JsonValue
-    public String toJson() {
-        return this.name().toLowerCase();
-    }
 
     public abstract LocalDateTime calcStartDate();
 
@@ -95,5 +101,11 @@ public enum Frequency {
         return LocalDate.now()
                 .minusDays(1)
                 .atTime(LocalTime.MAX);
+    }
+
+    private static LocalDateTime getStartOfCurrentYear() {
+        return LocalDate.now()
+                .withDayOfYear(1)
+                .atStartOfDay();
     }
 }
