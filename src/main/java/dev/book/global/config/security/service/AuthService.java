@@ -51,7 +51,7 @@ public class AuthService {
         validateNickname(userSignupRequest.nickname());
 
         user.updateNickname(userSignupRequest.nickname());
-        user.updateCategory(userSignupRequest.category());
+        user.updateCategory(userSignupRequest.categories());
 
         TokenDto tokenDto = getTokenDto(response, authentication);
 
