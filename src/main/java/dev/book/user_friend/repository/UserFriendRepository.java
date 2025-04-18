@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface UserFriendRepository extends JpaRepository<UserFriend, Long> {
 
-    @Query("SELECT uf.user FROM UserFriend uf JOIN uf.user n where n.id=:id and uf.requestedAt=:requestAt")
+    @Query("SELECT uf FROM UserFriend uf JOIN uf.user n where n.id=:id and uf.requestedAt=:requestAt")
     Optional<UserFriend> findByInvitingUserAndRequestedAt(@Param("id")Long userId, @Param("requestAt")LocalDateTime requestAt);
 
     @Query("SELECT uf.user FROM UserFriend uf JOIN uf.user n WHERE uf.friend.id=:id AND uf.isRequest=true")

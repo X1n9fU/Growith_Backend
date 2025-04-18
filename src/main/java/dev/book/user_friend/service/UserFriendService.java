@@ -19,6 +19,7 @@ import dev.book.user_friend.entity.UserFriend;
 import dev.book.user_friend.repository.UserFriendRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserFriendService {
 
-    private static final String MAIN_URL = "http://localhost:8080/main";
+    @Value("${springdoc.servers.production.url}")
+    private String DOMAIN;
+    private final String MAIN_URL = DOMAIN + "/main";
 
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
@@ -48,7 +51,7 @@ public class UserFriendService {
     }
 
     public void getWebHookFromKakao(KakaoResponseDto kakaoResponseDto) throws Exception {
-        String requestUserToken = kakaoResponseDto.requestUserToken();
+        String requestUserToken = kakaoResponseDto.invitingUserToken();
         EncryptUserInfo userInfo = decryptToken(requestUserToken);
         UserEntity invitingUser = userRepository.findById(userInfo.id())
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
@@ -120,6 +123,8 @@ public class UserFriendService {
     public void deleteFriend(CustomUserDetails userDetails, Long friendId) {
         UserEntity friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.FRIEND_NOT_FOUND));
+        //양방향 삭제
         userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(userDetails.user(), friend);
+        userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(friend, userDetails.user());
     }
 }
