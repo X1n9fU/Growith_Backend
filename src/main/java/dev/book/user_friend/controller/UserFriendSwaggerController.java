@@ -3,7 +3,6 @@ package dev.book.user_friend.controller;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user_friend.dto.response.InvitingUserTokenResponseDto;
 import dev.book.user_friend.dto.response.KakaoResponseDto;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
