@@ -1,5 +1,6 @@
 package dev.book.challenge.controller;
 
+import dev.book.challenge.api.ChallengeApi;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/challenges")
-public class ChallengeController {
+public class ChallengeController implements ChallengeApi {
 
     private final ChallengeService challengeService;
 
