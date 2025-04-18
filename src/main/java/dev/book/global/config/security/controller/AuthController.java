@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-public class AuthController {
+public class AuthController implements AuthSwaggerController{
 
     private final AuthService authService;
 
@@ -35,8 +35,8 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissueToken(HttpServletResponse response, @RequestBody TokenDto tokenDto){
-        authService.reissueToken(response, tokenDto.refreshToken());
+    public ResponseEntity<?> reissueToken(HttpServletRequest request, HttpServletResponse response){
+        authService.reissueToken(request, response);
         return ResponseEntity.ok().build();
     }
 }
