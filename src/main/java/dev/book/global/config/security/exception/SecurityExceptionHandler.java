@@ -25,8 +25,14 @@ public class SecurityExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(e.getMessage());
     }
 
-   @ExceptionHandler(JwtException.class)
-    public ResponseEntity<?> handleJwtException(JwtException e){
+   @ExceptionHandler(AuthException.class)
+    public ResponseEntity<?> handleAuthException(AuthException e){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<?> handleAuthException(JwtException e){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(e.getMessage());
     }
