@@ -56,8 +56,7 @@ public class UserFriendService {
         response.sendRedirect(MAIN_URL);
     }
 
-    public void makeInvitation(String email, String safeToken) throws Exception {
-        String token = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
+    public void makeInvitation(String email, String token) throws Exception {
         EncryptUserInfo userInfo = decryptToken(token);
         UserFriend userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(userInfo.id(), userInfo.localDateTime())
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.INVITING_NOT_FOUND));

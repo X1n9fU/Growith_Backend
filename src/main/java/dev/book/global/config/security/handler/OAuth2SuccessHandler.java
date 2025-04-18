@@ -12,8 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtUtil jwtUtil;
     private final UserFriendService userFriendService;
 
+    @Transactional
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
@@ -51,10 +55,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return token;
     }
 
-    private void handleFriendInvitation(Authentication authentication, String invitationToken) {
-        if (invitationToken == null) return;
+
+    private void handleFriendInvitation(Authentication authentication, String safeToken) {
+        if (safeToken == null) return;
 
         try {
+            String invitationToken = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
             userFriendService.makeInvitation(authentication.getName(), invitationToken);
         } catch (Exception e) {
             throw new RuntimeException("친구 요청 처리 중 오류 발생", e);

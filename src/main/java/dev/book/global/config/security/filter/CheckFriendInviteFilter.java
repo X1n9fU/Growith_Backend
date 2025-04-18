@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class CheckFriendInviteFilter extends OncePerRequestFilter {
 
-    private static final String REQUEST_FRIEND_URI = "/api/v1/friends/request";
+    private static final String REQUEST_FRIEND_URI = "/api/v1/friends/invite";
     private static final String REQUEST_USER_TOKEN = "request_user_token";
     private static final long EXPIRATION_TIME = 86400;
 
