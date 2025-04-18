@@ -3,8 +3,12 @@ package dev.book.user_friend.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.book.user_friend.dto.EncryptUserInfo;
+import dev.book.user_friend.dto.response.FriendListResponseDto;
+import dev.book.user_friend.dto.response.FriendRequestListResponseDto;
 import dev.book.user_friend.dto.response.KakaoResponseDto;
 import dev.book.user_friend.dto.response.InvitingUserTokenResponseDto;
+import dev.book.user_friend.exception.UserFriendErrorCode;
+import dev.book.user_friend.exception.UserFriendException;
 import dev.book.user_friend.util.AESUtil;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user.entity.UserEntity;
@@ -22,6 +26,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -72,4 +77,49 @@ public class UserFriendService {
         return objectMapper.readValue(decryptUserInfo, EncryptUserInfo.class);
     }
 
+    public List<FriendListResponseDto> getFriendList(CustomUserDetails userDetails) {
+        UserEntity invitedUser = userDetails.user();
+        //친구 요청이 승낙된 내역만
+        List<UserEntity> friendLists = userFriendRepository.findAllByInvitedUserAndIsAcceptIsTrue(invitedUser.getId());
+        return friendLists.stream()
+                .map(FriendListResponseDto::of)
+                .toList();
+    }
+
+    public List<FriendRequestListResponseDto> getFriendRequestList(CustomUserDetails userDetails) {
+        UserEntity invitedUser = userDetails.user();
+        //친구 요청이 요청 중인 내역만
+        List<UserEntity> friendLists = userFriendRepository.findAllByInvitedUserAndIsRequestIsTrue(invitedUser.getId());
+        return friendLists.stream()
+                .map(FriendRequestListResponseDto::of)
+                .toList();
+    }
+
+    @Transactional
+    public void acceptFriend(CustomUserDetails userDetails, Long friendId) {
+        UserFriend friendRequest = getRequestByUserAndFriend(userDetails.user(), friendId);
+        friendRequest.accept();
+        userFriendRepository.save(UserFriend.of(friendRequest.getUser(), friendRequest.getFriend()));
+    }
+
+    @Transactional
+    public void rejectFriend(CustomUserDetails userDetails, Long friendId) {
+        UserFriend friendRequest = getRequestByUserAndFriend(userDetails.user(), friendId);
+        userFriendRepository.delete(friendRequest);
+    }
+
+    private UserFriend getRequestByUserAndFriend(UserEntity user, Long friendId) {
+        UserEntity requestFriendUser = userRepository.findById(friendId)
+                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        return userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(requestFriendUser, user)
+                .orElseThrow(() -> new UserFriendException(UserFriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
+    }
+
+
+    @Transactional
+    public void deleteFriend(CustomUserDetails userDetails, Long friendId) {
+        UserEntity friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(userDetails.user(), friend);
+    }
 }

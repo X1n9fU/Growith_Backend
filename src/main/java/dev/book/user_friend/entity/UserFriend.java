@@ -4,11 +4,13 @@ import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserFriend {
 
@@ -55,8 +57,18 @@ public class UserFriend {
                 .build();
     }
 
+    public static UserFriend of(UserEntity user, UserEntity friend){
+        UserFriend userFriend =  UserFriend.builder()
+                .user(friend)
+                .friend(user)
+                .build();
+        userFriend.accept();
+        return userFriend;
+    }
+
     public void accept(){
         this.isAccept = true;
+        this.isRequest = false;
         this.acceptedAt = LocalDateTime.now();
     }
 
