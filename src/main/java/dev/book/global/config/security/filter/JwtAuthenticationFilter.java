@@ -1,5 +1,6 @@
 package dev.book.global.config.security.filter;
 
+import dev.book.global.config.security.dto.PermitUrlProperties;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.util.CookieUtil;
@@ -17,7 +18,6 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * 헤더에서 토큰을 꺼내서 유효성 검증
@@ -28,17 +28,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-
     private final String ACCESS_TOKEN = "access_token";
-    private static final List<String> SWAGGER_LIST = List.of(
-            "/swagger-ui", "/swagger-ui/", "/swagger-ui/index.html",
-            "/v3/api-docs", "/v3/api-docs/", "/swagger-resources", "/swagger-resources/"
-    );
+    private final PermitUrlProperties permitUrl;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return SWAGGER_LIST.stream().anyMatch(path::startsWith);
+        logger.info(path);
+        return permitUrl.getUrl().stream().anyMatch(path::startsWith);
     }
 
     @Override
