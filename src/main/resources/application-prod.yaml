@@ -22,4 +22,4 @@ spring:
       matching-strategy: PATH_PATTERN_PARSER
 
 firebase:
-  url: "${firebase.url}"
+  url: "${firebase_url}"
