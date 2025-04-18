@@ -1,7 +1,11 @@
-package dev.book.global.config.security.jwt;
+package dev.book.global.config.security.filter;
 
+import dev.book.global.config.security.dto.PermitUrlProperties;
+import dev.book.global.config.security.jwt.JwtAuthenticationToken;
+import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.util.CookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,11 +28,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-
     private final String ACCESS_TOKEN = "access_token";
+    private final PermitUrlProperties permitUrl;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        logger.info(path);
+        return permitUrl.getUrl().stream().anyMatch(path::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        logger.info(request.getRequestURL());
         String token = getToken(request);
 
         try {
@@ -43,12 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             logger.error("만료된 JWT 토큰입니다. : " + e.getMessage());
-        } catch (JwtException | IllegalArgumentException e){
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            logger.error("잘못된 JWT 토큰입니다." + e.getMessage());
+        } catch (MalformedJwtException | JwtException | IllegalArgumentException e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            logger.error("잘못된 JWT 토큰입니다. : " + e.getMessage());
         } catch (Exception e){
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            logger.error("서버 오류" + e.getMessage());
+            logger.error("서버 오류 : " + e.getMessage());
         }
 
         filterChain.doFilter(request ,response);

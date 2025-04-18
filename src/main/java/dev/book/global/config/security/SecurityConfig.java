@@ -1,9 +1,12 @@
 package dev.book.global.config.security;
 
-import dev.book.global.config.security.handler.ExceptionHandlerFilter;
+import dev.book.global.config.security.dto.PermitUrlProperties;
+import dev.book.global.config.security.filter.CheckFriendInviteFilter;
+import dev.book.global.config.security.filter.JwtAuthenticationFilter;
+import dev.book.global.config.security.handler.CustomAccessDeniedHandler;
+import dev.book.global.config.security.handler.CustomAuthenticationEntryPoint;
 import dev.book.global.config.security.handler.OAuth2FailureHandler;
 import dev.book.global.config.security.handler.OAuth2SuccessHandler;
-import dev.book.global.config.security.jwt.JwtAuthenticationFilter;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.oauth2.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +21,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+
+import java.util.List;
 
 @EnableWebSecurity
 @Configuration
@@ -30,25 +38,20 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final PermitUrlProperties permitUrl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(CsrfConfigurer::disable)
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(CsrfConfigurer::disable)
                 .httpBasic(HttpBasicConfigurer::disable)
                 .formLogin(FormLoginConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers(
-                                        new AntPathRequestMatcher("/oauth2/**"),
-                                        new AntPathRequestMatcher("/login/oauth2/**"),
-                                        new AntPathRequestMatcher("/favicon.ico"),
-                                        new AntPathRequestMatcher("/signup"),
-                                        new AntPathRequestMatcher("/login")
-                                ).permitAll()
-                                .anyRequest().permitAll()
+                                .requestMatchers(permitUrl.getUrl().toArray(new String[0])).permitAll()
+                                .anyRequest().authenticated()
                         //todo 현재는 모든 경로를 열어놓음 추후 endpoint마다 권한 설정
-
                 )
                 .oauth2Login(
                         oauth2 -> oauth2
@@ -59,13 +62,35 @@ public class SecurityConfig {
                                 .userInfoEndpoint(userInfo -> userInfo
                                         .userService(customOAuth2UserService))
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new ExceptionHandlerFilter(), JwtAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService, permitUrl), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CheckFriendInviteFilter(), JwtAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint(exceptionHandlerExceptionResolver()))
+                        .accessDeniedHandler(new CustomAccessDeniedHandler(exceptionHandlerExceptionResolver())));
         return http.build();
     }
+
 
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository OAuth2AuthorizationRequestBasedOnCookieRepository(){
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
+    }
+
+    @Bean
+    public ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver() {
+        return new ExceptionHandlerExceptionResolver();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(){
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Cache-Control"));
+        config.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
