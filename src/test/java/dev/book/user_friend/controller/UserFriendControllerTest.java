@@ -33,10 +33,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.core.StringContains.containsString;
-
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -118,7 +116,7 @@ class UserFriendControllerTest {
     private String makeInvitation() throws Exception {
         //test@test.com 으로부터 초대 요청 생성
         String token = getToken();
-        final ResultActions actions = mockMvc.perform(post("/api/v1/friends/kakao")
+        mockMvc.perform(post("/api/v1/friends/kakao")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new KakaoResponseDto("chat_type", 10000L, "hash_chat_id", token))));
         return token;
@@ -126,12 +124,14 @@ class UserFriendControllerTest {
 
     //test2 ) 초대 토큰을 포함한 링크로 접속, 초대 요청 내역 완성
     private String completeInvitation() throws Exception {
+        //given
         String token = makeInvitation();
 
         Optional<UserEntity> user = userRepository.findByEmail("test2@test.com");
         userDetails = new CustomUserDetails(user.get());
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
 
+        //when
         //초대 요청 생성
         mockMvc.perform(get("/api/v1/friends/invite?token="+token))
                 .andExpect(status().is(302))
@@ -145,10 +145,13 @@ class UserFriendControllerTest {
     @DisplayName("getInviteUserToken: 친구 초대 토큰을 발급합니다.")
     void getInviteUserToken() throws Exception {
 
+        //given
         final String url = "/api/v1/friends/invite/token";
 
+        //when
         final ResultActions actions = mockMvc.perform(get(url));
 
+        //then
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.invitingUserToken").isNotEmpty());
     }
@@ -159,17 +162,19 @@ class UserFriendControllerTest {
     @DisplayName("kakao에서 보낸 웹 훅을 받아 토큰으로 친구 요청을 구성한다.")
     void getWebHookFromKakao() throws Exception {
 
+        //given
         String invitingUserToken = getToken();
         final String url = "/api/v1/friends/kakao";
 
+        //when
         final ResultActions actions = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new KakaoResponseDto("chat_type", 10000L, "hash_chat_id", invitingUserToken))));
 
+        //then
         actions.andExpect(status().isOk());
 
         EncryptUserInfo info = getEncryptUserInfo(invitingUserToken);
-
         Optional<UserFriend> userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(info.id(), info.localDateTime());
 
         assertThat(userFriend).isNotEmpty();
@@ -180,8 +185,7 @@ class UserFriendControllerTest {
     private EncryptUserInfo getEncryptUserInfo(String invitingUserToken) throws Exception {
         String json = AESUtil.decrypt(URLDecoder.decode(invitingUserToken, StandardCharsets.UTF_8));
         objectMapper.registerModule(new JavaTimeModule());
-        EncryptUserInfo info = objectMapper.readValue(json, EncryptUserInfo.class);
-        return info;
+        return objectMapper.readValue(json, EncryptUserInfo.class);
     }
 
     @Test
@@ -189,14 +193,26 @@ class UserFriendControllerTest {
     @DisplayName("getTokenAndMakeInvitation : URL에 포함된 토큰을 갖고 친구 요청 완성")
     void getTokenAndMakeInvitation() throws Exception {
 
-        String token = completeInvitation();
+        //given
+        String token = makeInvitation();
+
+        Optional<UserEntity> user = userRepository.findByEmail("test2@test.com");
+        userDetails = new CustomUserDetails(user.get());
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
+
+        //when
+        //초대 요청 생성
+        mockMvc.perform(get("/api/v1/friends/invite?token="+token))
+                .andExpect(status().is(302))
+                .andExpect(header().string("Location", containsString("/main")));
 
         EncryptUserInfo userInfo = getEncryptUserInfo(token);
 
-        Optional<UserEntity> user = userRepository.findByEmail(userInfo.email());
+        Optional<UserEntity> requestUser = userRepository.findByEmail(userInfo.email());
         Optional<UserEntity> friend = userRepository.findByEmail(userDetails.getUsername());
-        Optional<UserFriend> userFriend = userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(user.get(), friend.get());
+        Optional<UserFriend> userFriend = userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(requestUser.get(), friend.get());
 
+        //then
         assertThat(userFriend).isNotEmpty();
         assertThat(userFriend.get().getFriend()).isNotNull();
     }
@@ -205,6 +221,7 @@ class UserFriendControllerTest {
     @WithMockUser(username = "test2@test.com")
     void getFriendList() throws Exception {
 
+        //given
         String token = completeInvitation();
 
         EncryptUserInfo info = getEncryptUserInfo(token);
@@ -213,6 +230,8 @@ class UserFriendControllerTest {
         mockMvc.perform(get("/api/v1/friends/request/"+info.id()+"/accept"))
                 .andExpect(status().isOk());
 
+
+        //when
         final String url = "/api/v1/friends/list";
 
         mockMvc.perform(get(url))
@@ -225,6 +244,7 @@ class UserFriendControllerTest {
         Optional<UserEntity> user;
         user = userRepository.findByEmail(info.email());
 
+        //then
         //서로에게 친구가 보여지는 것 확인
         List<UserEntity> list;
         list = userFriendRepository.findAllByInvitedUserAndIsAcceptIsTrue(user.get().getId());
@@ -242,8 +262,19 @@ class UserFriendControllerTest {
     @WithMockUser(username = "test@test.com")
     @DisplayName("getFriendRequestList : 친구 요청 목록 반환")
     void getFriendRequestList() throws Exception {
-        completeInvitation();
+        //given
+        String token = completeInvitation();
 
+        EncryptUserInfo info = getEncryptUserInfo(token);
+        //when
+        final String url = "/api/v1/friends/requests";
+
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].friendUserId").value(info.id()));
+
+        //then
         //test2에게 test -> test2의 요청은 보임
         List<UserEntity> userFriends;
         userFriends = userFriendRepository.findAllByInvitedUserAndIsRequestIsTrue(userDetails.user().getId());
@@ -263,6 +294,7 @@ class UserFriendControllerTest {
     @DisplayName("acceptFriend: 친구 요청 승낙")
     void acceptFriend() throws Exception {
 
+        //given
         String token = completeInvitation();
         EncryptUserInfo info = getEncryptUserInfo(token);
 
@@ -275,11 +307,14 @@ class UserFriendControllerTest {
         assertThat(userFriend).isNotEmpty();
         assertThat(userFriend.get().getIsAccept()).isFalse(); //아직 받지 않은 상태
 
+        //when
         final String url = "/api/v1/friends/request/"+info.id()+"/accept";
 
         mockMvc.perform(get(url))
                 .andExpect(status().isOk());
 
+
+        //then
         user = userRepository.findByEmail(info.email());
         userFriend = userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(user.get(), userDetails.user());
 
@@ -300,6 +335,7 @@ class UserFriendControllerTest {
     @WithMockUser(username = "test2@test.com")
     @DisplayName("rejectFriend: 친구 요청 거절")
     void rejectFriend() throws Exception {
+        //given
         String token = completeInvitation();
         EncryptUserInfo info = getEncryptUserInfo(token);
 
@@ -312,11 +348,13 @@ class UserFriendControllerTest {
         assertThat(userFriend).isNotEmpty();
         assertThat(userFriend.get().getIsAccept()).isFalse(); //아직 받지 않은 상태
 
+        //when
         final String url = "/api/v1/friends/request/"+info.id()+"/reject";
 
         mockMvc.perform(get(url))
                 .andExpect(status().isOk());
 
+        //then
         //요청 지워짐
         userFriend = userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(user.get(), userDetails.user());
         assertThat(userFriend).isEmpty();
@@ -335,15 +373,19 @@ class UserFriendControllerTest {
     @WithMockUser(username = "test2@test.com")
     @DisplayName("deleteFriend: 친구를 삭제합니다.")
     void deleteFriend() throws Exception {
+        //given
         Optional<UserEntity> user = userRepository.findByEmail("test@test.com");
         Optional<UserEntity> user2 = userRepository.findByEmail(userDetails.getUsername());
         UserFriend userFriend = UserFriend.builder().user(user.get()).friend(user2.get()).build();
         userFriendRepository.save(userFriend);
 
+        //when
         final String url = "/api/v1/friends/"+user.get().getId();
 
         mockMvc.perform(delete(url));
 
+
+        //then
         //양쪽에서 친구를 조회했을 때 아무것도 반환이 되지 않음
         List<UserEntity> users;
         users = userFriendRepository.findAllByInvitedUserAndIsAcceptIsTrue(user.get().getId());
