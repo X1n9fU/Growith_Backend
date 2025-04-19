@@ -35,7 +35,7 @@ public class UserFriendService {
 
     @Value("${springdoc.servers.production.url}")
     private String DOMAIN;
-    private final String MAIN_URL = DOMAIN + "/main";
+    private final String MAIN_URL = "/main";
 
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
@@ -61,7 +61,7 @@ public class UserFriendService {
     @Transactional
     public void getTokenAndMakeInvitation(CustomUserDetails userDetails, HttpServletResponse response, String token) throws Exception {
         makeInvitation(userDetails.getUsername(), token);
-        response.sendRedirect(MAIN_URL);
+        response.sendRedirect(DOMAIN+MAIN_URL);
     }
 
     public void makeInvitation(String email, String token) throws Exception {

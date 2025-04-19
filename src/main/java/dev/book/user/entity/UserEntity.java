@@ -4,6 +4,7 @@ import dev.book.accountbook.type.Category;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
+import dev.book.user_friend.entity.UserFriend;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -46,6 +47,12 @@ public class UserEntity extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private RefreshToken refreshToken;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFriend> sendFriendRequests; //유저가 친구 요청 보냄
+
+    @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFriend> receivedFriendRequests; //유저가 친구 요청 받음
 
     //todo 알림 설정 필요
 //    private NotificationPreference notificationPreference;
