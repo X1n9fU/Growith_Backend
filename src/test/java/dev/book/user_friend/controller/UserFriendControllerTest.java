@@ -30,7 +30,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -203,10 +202,38 @@ class UserFriendControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@test.com")
+    @WithMockUser(username = "test2@test.com")
     void getFriendList() throws Exception {
 
-        completeInvitation();
+        String token = completeInvitation();
+
+        EncryptUserInfo info = getEncryptUserInfo(token);
+
+        //친구 요청 받기
+        mockMvc.perform(get("/api/v1/friends/request/"+info.id()+"/accept"))
+                .andExpect(status().isOk());
+
+        final String url = "/api/v1/friends/list";
+
+        mockMvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].friendUserId").value(info.id()));
+
+
+        //test(유저) -> test2(친구) 의 요청을 test2가 확인
+        Optional<UserEntity> user;
+        user = userRepository.findByEmail(info.email());
+
+        //서로에게 친구가 보여지는 것 확인
+        List<UserEntity> list;
+        list = userFriendRepository.findAllByInvitedUserAndIsAcceptIsTrue(user.get().getId());
+        assertThat(list).isNotEmpty();
+        assertThat(list.get(0).getEmail()).isEqualTo(userDetails.getUsername());
+
+        list = userFriendRepository.findAllByInvitedUserAndIsAcceptIsTrue(userDetails.user().getId());
+        assertThat(list).isNotEmpty();
+        assertThat(list.get(0).getEmail()).isEqualTo(user.get().getEmail());
 
 
     }
@@ -327,6 +354,4 @@ class UserFriendControllerTest {
 
     }
 
-    void getFriendProfile() {
-    }
 }
