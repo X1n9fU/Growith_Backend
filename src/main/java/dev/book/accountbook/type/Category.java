@@ -40,22 +40,8 @@ public enum Category {
     private final String koreanName;
     private final CategoryType type;
 
-    private static final Map<String, Category> KOREAN_NAME_MAP =
-            Arrays.stream(values())
-                    .collect(Collectors.toMap(Category::getKoreanName, c -> c));
-
     @JsonCreator
-    public static Category from(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return Category.NONE;
-        }
-
-        Category category = KOREAN_NAME_MAP.get(input.toUpperCase());
-
-        if (category == null) {
-            throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_CATEGORY);
-        }
-
-        return category;
+    public static Category from(String value) {
+        return Category.valueOf(value.toUpperCase());
     }
 }
