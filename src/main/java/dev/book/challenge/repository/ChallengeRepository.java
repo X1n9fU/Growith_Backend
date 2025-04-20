@@ -1,5 +1,6 @@
 package dev.book.challenge.repository;
 
+import dev.book.accountbook.type.Category;
 import dev.book.challenge.entity.Challenge;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,4 +25,12 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
     @Modifying
     @Query("UPDATE Challenge c SET c.status='COMPLETED' WHERE c.endDate<:today")
     void updateChallengeStatusByDate(@Param("today") LocalDate today);
+
+
+    @Query("""
+    SELECT c
+    FROM Challenge c
+    WHERE :date BETWEEN c.startDate AND c.endDate
+""")
+    List<Challenge> findAllByCategoryAndDate(LocalDateTime date);
 }
