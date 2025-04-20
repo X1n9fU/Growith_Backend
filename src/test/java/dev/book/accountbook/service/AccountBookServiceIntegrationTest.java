@@ -1,6 +1,5 @@
 package dev.book.accountbook.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.book.accountbook.dto.request.AccountBookIncomeRequest;
 import dev.book.accountbook.dto.request.AccountBookSpendRequest;
 import dev.book.accountbook.dto.request.Repeat;
@@ -13,10 +12,9 @@ import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.Frequency;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
-import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
+import dev.book.util.UserBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -67,13 +64,7 @@ public class AccountBookServiceIntegrationTest {
 
     @BeforeEach
     public void createUser() {
-        UserEntity user = userRepository.save(UserEntity.builder()
-                .email("test@test.com")
-                .name("test")
-                .nickname("nickname")
-                .profileImageUrl("profile")
-                .userCategory(List.of(Category.HOBBY))
-                .build());
+        UserEntity user = UserBuilder.of();
         userDetails = new CustomUserDetails(user);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
     }

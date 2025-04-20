@@ -6,6 +6,7 @@ import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
+import dev.book.util.UserBuilder;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,11 +65,7 @@ class UserControllerTest {
 
     @BeforeEach
     public void createUser(){
-        UserEntity user = userRepository.save(UserEntity.builder()
-                .email("test@test.com")
-                .name("test")
-                .nickname("nickname")
-                .profileImageUrl("profile").build());
+        UserEntity user = UserBuilder.of();
         userDetails = new CustomUserDetails(user);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
     }

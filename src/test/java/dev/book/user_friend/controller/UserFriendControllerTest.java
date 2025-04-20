@@ -12,6 +12,7 @@ import dev.book.user.user_friend.dto.response.KakaoResponseDto;
 import dev.book.user.user_friend.entity.UserFriend;
 import dev.book.user.user_friend.repository.UserFriendRepository;
 import dev.book.user.user_friend.util.AESUtil;
+import dev.book.util.UserBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,19 +70,11 @@ class UserFriendControllerTest {
 
     @BeforeEach
     public void createUser(){
-        UserEntity user = userRepository.save(UserEntity.builder()
-                .email("test@test.com")
-                .name("test")
-                .nickname("nickname")
-                .profileImageUrl("profile").build());
+        UserEntity user = UserBuilder.of();
         userDetails = new CustomUserDetails(user);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
 
-        UserEntity user2 = userRepository.save(UserEntity.builder()
-                .email("test2@test.com")
-                .name("test")
-                .nickname("nickname")
-                .profileImageUrl("profile").build());
+        UserEntity user2 = UserBuilder.of("test2@test.com");
         userDetails = new CustomUserDetails(user2);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
 
