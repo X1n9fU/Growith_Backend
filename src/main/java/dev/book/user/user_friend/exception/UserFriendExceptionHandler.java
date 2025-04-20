@@ -1,4 +1,4 @@
-package dev.book.user_friend.exception;
+package dev.book.user.user_friend.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

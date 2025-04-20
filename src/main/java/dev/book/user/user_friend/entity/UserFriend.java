@@ -1,4 +1,4 @@
-package dev.book.user_friend.entity;
+package dev.book.user.user_friend.entity;
 
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;

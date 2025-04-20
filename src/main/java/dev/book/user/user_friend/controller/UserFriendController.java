@@ -1,10 +1,10 @@
-package dev.book.user_friend.controller;
+package dev.book.user.user_friend.controller;
 
-import dev.book.user_friend.dto.response.FriendListResponseDto;
-import dev.book.user_friend.dto.response.FriendRequestListResponseDto;
-import dev.book.user_friend.dto.response.InvitingUserTokenResponseDto;
-import dev.book.user_friend.dto.response.KakaoResponseDto;
-import dev.book.user_friend.service.UserFriendService;
+import dev.book.user.user_friend.dto.response.FriendListResponseDto;
+import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
+import dev.book.user.user_friend.dto.response.InvitingUserTokenResponseDto;
+import dev.book.user.user_friend.dto.response.KakaoResponseDto;
+import dev.book.user.user_friend.service.UserFriendService;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

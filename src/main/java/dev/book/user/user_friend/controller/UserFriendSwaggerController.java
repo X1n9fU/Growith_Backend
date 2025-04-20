@@ -1,10 +1,10 @@
-package dev.book.user_friend.controller;
+package dev.book.user.user_friend.controller;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
-import dev.book.user_friend.dto.response.FriendListResponseDto;
-import dev.book.user_friend.dto.response.FriendRequestListResponseDto;
-import dev.book.user_friend.dto.response.InvitingUserTokenResponseDto;
-import dev.book.user_friend.dto.response.KakaoResponseDto;
+import dev.book.user.user_friend.dto.response.FriendListResponseDto;
+import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
+import dev.book.user.user_friend.dto.response.InvitingUserTokenResponseDto;
+import dev.book.user.user_friend.dto.response.KakaoResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

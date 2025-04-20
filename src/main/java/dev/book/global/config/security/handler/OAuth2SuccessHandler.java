@@ -1,6 +1,6 @@
 package dev.book.global.config.security.handler;
 
-import dev.book.user_friend.service.UserFriendService;
+import dev.book.user.user_friend.service.UserFriendService;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.oauth2.OAuth2AuthService;
 import dev.book.global.config.security.util.CookieUtil;

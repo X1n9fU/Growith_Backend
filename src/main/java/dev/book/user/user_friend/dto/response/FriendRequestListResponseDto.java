@@ -1,4 +1,4 @@
-package dev.book.user_friend.dto.response;
+package dev.book.user.user_friend.dto.response;
 
 import dev.book.user.entity.UserEntity;
 import lombok.Builder;
