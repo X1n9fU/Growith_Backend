@@ -1,7 +1,9 @@
 package dev.book.accountbook.entity;
 
-import dev.book.accountbook.type.Category;
+import dev.book.accountbook.entity.middle.BudgetAccountBook;
+import dev.book.accountbook.entity.middle.BudgetCategory;
 import dev.book.global.entity.BaseTimeEntity;
+import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -20,8 +22,6 @@ public class Budget extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int budgetLimit;
-    @Enumerated(EnumType.STRING)
-    private Category category;
     private int month;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -30,9 +30,17 @@ public class Budget extends BaseTimeEntity {
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BudgetAccountBook> budgetReferences = new ArrayList<>();
 
-    public Budget(int budgetLimit, Category category, int month, UserEntity user) {
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BudgetCategory> budgetCategories = new ArrayList<>();
+
+    public void addCategory(Category category) {
+        BudgetCategory bc = new BudgetCategory(this, category);
+        this.budgetCategories.add(bc);
+        category.getBudgets().add(bc); // 양방향이면 필요
+    }
+
+    public Budget(int budgetLimit, int month, UserEntity user) {
         this.budgetLimit = budgetLimit;
-        this.category = category;
         this.month = month;
         this.user = user;
     }

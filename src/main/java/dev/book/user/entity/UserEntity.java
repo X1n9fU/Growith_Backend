@@ -35,9 +35,8 @@ public class UserEntity extends BaseTimeEntity {
 
     private String profileImageUrl; //null인 경우 프로필 없음
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Enumerated(EnumType.STRING)
-    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경 // 임시 변경 by phc
 
     private long savings = 0;
 

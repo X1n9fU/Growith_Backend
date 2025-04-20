@@ -1,11 +1,14 @@
 package dev.book.accountbook.dto.request;
 
-import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record AccountBookIncomeRequest(
 
@@ -14,8 +17,8 @@ public record AccountBookIncomeRequest(
         @Schema(description = "수입 제목", example = "월급")
         String title,
 
-        @Schema(description = "카테고리", example = "salary")
-        Category category,
+        @Schema(description = "카테고리 목록", example = "[\"salary\", \"bonus\"]")
+        List<String> categoryList,
 
         @NotNull
         @Min(10)
@@ -37,5 +40,10 @@ public record AccountBookIncomeRequest(
     @Override
     public CategoryType categoryType() {
         return CategoryType.INCOME;
+    }
+
+    @Override
+    public List<String> categoryList() {
+        return categoryList;
     }
 }

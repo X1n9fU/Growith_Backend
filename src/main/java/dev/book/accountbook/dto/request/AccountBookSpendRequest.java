@@ -1,11 +1,11 @@
 package dev.book.accountbook.dto.request;
 
-import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record AccountBookSpendRequest(
         @NotBlank
@@ -13,8 +13,8 @@ public record AccountBookSpendRequest(
         @Schema(description = "지출 이름", example = "핫도그")
         String title,
 
-        @Schema(description = "카테고리", example = "food")
-        Category category,
+        @Schema(description = "카테고리", example = "[\"food\", \"shopping\"")
+        List<String> categoryList,
 
         @NotNull
         @Min(10)
@@ -34,5 +34,10 @@ public record AccountBookSpendRequest(
     @Override
     public CategoryType categoryType() {
         return CategoryType.SPEND;
+    }
+
+    @Override
+    public List<String> categoryList() {
+        return categoryList;
     }
 }

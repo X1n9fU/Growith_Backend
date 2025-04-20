@@ -5,7 +5,6 @@ import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.accountbook.dto.response.AccountBookStatResponse;
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.repository.AccountBookRepository;
-import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.accountbook.type.PeriodRange;
@@ -34,14 +33,14 @@ public class StatService {
     }
 
     @Transactional
-    public List<AccountBookSpendResponse> categoryList(Long userId, Frequency frequency, Category category) {
+    public List<AccountBookSpendResponse> categoryList(Long userId, Frequency frequency, String category) {
         userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
         return getCategoryList(userId, category, frequency.calcStartDate());
     }
 
     @Transactional
-    public AccountBookConsumeResponse consume(Long userId, Frequency frequency, Category category) {
+    public AccountBookConsumeResponse consume(Long userId, Frequency frequency, String category) {
         userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
         return getConsume(userId, category, frequency.calcPeriod());
@@ -49,10 +48,10 @@ public class StatService {
 
     private List<AccountBookStatResponse> getStatList(Long userId, LocalDateTime startDate) {
 
-        return accountBookRepository.findTop3Categories(userId, startDate, LocalDateTime.now(), PageRequest.of(0, 3));
+        return accountBookRepository.findTopCategoriesByUserAndPeriod(userId, startDate, LocalDateTime.now(), PageRequest.of(0, 3));
     }
 
-    private List<AccountBookSpendResponse> getCategoryList(Long userId, Category category, LocalDateTime starDate) {
+    private List<AccountBookSpendResponse> getCategoryList(Long userId, String category, LocalDateTime starDate) {
         List<AccountBook> responses = accountBookRepository.findByCategory(userId, CategoryType.SPEND, category, starDate, LocalDateTime.now());
 
         return responses.stream()
@@ -60,7 +59,7 @@ public class StatService {
                 .toList();
     }
 
-    private AccountBookConsumeResponse getConsume(Long userId, Category category, PeriodRange period) {
+    private AccountBookConsumeResponse getConsume(Long userId, String category, PeriodRange period) {
         Integer thisAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period.currentStart(), period.currentEnd());
         Integer lastAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period.previousStart(), period.previousEnd());
 
