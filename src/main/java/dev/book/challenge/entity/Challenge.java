@@ -3,7 +3,7 @@ package dev.book.challenge.entity;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.exception.ChallengeException;
-import dev.book.challenge.type.Category;
+import dev.book.challenge.type.ChallengeCategory;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
@@ -40,7 +40,7 @@ public class Challenge extends BaseTimeEntity {
     private Integer amount;
 
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private ChallengeCategory challengeCategory;
 
     private Integer capacity;
 
@@ -65,7 +65,7 @@ public class Challenge extends BaseTimeEntity {
         this.amount = amount;
         this.capacity = capacity;
         this.status = Status.RECRUITING;
-        this.category = Category.valueOf(category);
+        this.challengeCategory = ChallengeCategory.valueOf(category);
         this.startDate = startDate;
         this.endDate = endDate;
         this.creator = creator;
@@ -85,7 +85,7 @@ public class Challenge extends BaseTimeEntity {
         this.amount = request.amount();
         this.capacity = request.capacity();
         this.status = Status.RECRUITING;
-        this.category = Category.valueOf(request.category());
+        this.challengeCategory = ChallengeCategory.valueOf(request.category());
         this.startDate = request.startDate();
         this.endDate = request.endDate();
     }

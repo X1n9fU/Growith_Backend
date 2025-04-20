@@ -4,9 +4,11 @@ import dev.book.challenge.entity.Challenge;
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserChallenge {
     @Id
