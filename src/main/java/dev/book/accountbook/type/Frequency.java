@@ -1,7 +1,6 @@
 package dev.book.accountbook.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -107,5 +106,10 @@ public enum Frequency {
         return LocalDate.now()
                 .withDayOfYear(1)
                 .atStartOfDay();
+    }
+
+    @JsonCreator
+    public static Frequency from(String value) {
+        return Frequency.valueOf(value.toUpperCase());
     }
 }
