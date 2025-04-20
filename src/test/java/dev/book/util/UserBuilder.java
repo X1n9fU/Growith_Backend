@@ -52,4 +52,13 @@ public class UserBuilder {
                 .userCategory(categories)
                 .build();
     }
+
+    public static UserEntity newUser(String email, String name){
+        return UserEntity.builder()
+                .email(email)
+                .nickname("")
+                .name(name)
+                .profileImageUrl(profileImageUrl)
+                .build();
+    }
 }
