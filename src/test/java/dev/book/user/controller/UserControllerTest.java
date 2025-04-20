@@ -2,12 +2,13 @@ package dev.book.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.book.global.config.security.dto.CustomUserDetails;
+import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
+import dev.book.util.CookieTestUtil;
 import dev.book.util.UserBuilder;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +25,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -128,20 +128,11 @@ class UserControllerTest {
         // 응답 쿠키 가져오기
         MockHttpServletResponse response = result.andReturn().getResponse();
 
-        String accessToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "access_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+        TokenDto tokenDto = CookieTestUtil.getTokenFromCookie(response);
 
-        String refreshToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "refresh_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
 
-        assertNull(accessToken, "액세스 토큰이 삭제되지 않음");
-        assertNull(refreshToken, "리프레시 토큰이 삭제되지 않음");
+        assertNull(tokenDto.accessToken(), "액세스 토큰이 삭제되지 않음");
+        assertNull(tokenDto.refreshToken(), "리프레시 토큰이 삭제되지 않음");
 
     }
 }
