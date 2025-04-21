@@ -32,10 +32,9 @@ public class AchievementService {
     private final FCMService fcmService;
     private final FcmTokenRepository fcmTokenRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
-    private AchievementUserRepository achievementUserRepository;
-    private AchievementRepository achievementRepository;
-    private UserRepository userRepository;
+    private final AchievementUserRepository achievementUserRepository;
+    private final AchievementRepository achievementRepository;
+    private final UserRepository userRepository;
 
     /**
      * 업적 저장 후 fcm 알림 발송 & 웹소켓을 통한 실시간 유저 알림

@@ -58,14 +58,14 @@ public class IndividualAchievementStatus {
         this.user = user;
     }
     public int plusCompleteChallenge(){
-        return this.completeChallenge++;
+        return ++this.completeChallenge;
     }
 
     public int plusFailChallenge(){
-        return this.failChallenge++;
+        return ++this.failChallenge;
     }
     public int plusCreateChallenge(){
-        return this.createChallenge++;
+        return ++this.createChallenge;
     }
 
     public void loginYesterday(boolean isLoginYesterday){
@@ -76,7 +76,7 @@ public class IndividualAchievementStatus {
     }
 
     public long plusConsecutiveLogins(){
-        return this.consecutiveLogins++;
+        return ++this.consecutiveLogins;
     }
 
     public void resetConsecutiveLogins(){
@@ -84,55 +84,55 @@ public class IndividualAchievementStatus {
     }
 
     public long pluCheckSpendAnalysis(){
-        return this.checkSpendAnalysis++;
+        return ++this.checkSpendAnalysis;
     }
 
     public void plusCreateFirstIncome(){
         this.createFirstIncome = true;
     }
 
-    public boolean setSaveFivePercentOnLastWeek(){
-        return this.saveFivePercentOnLastWeek=true;
+    public void setSaveFivePercentOnLastWeek(){
+        this.saveFivePercentOnLastWeek = true;
     }
 
-    public boolean setSaveTenPercentOnLastWeek(){
-        return this.saveTenPercentOnLastWeek=true;
+    public void setSaveTenPercentOnLastWeek(){
+        this.saveTenPercentOnLastWeek = true;
     }
 
     public int plusConsecutiveNoSpend(){
-        return this.consecutiveNoSpend++;
+        return ++this.consecutiveNoSpend;
     }
 
     public int plusCreateBudget(){
-        return this.createBudget++;
+        return ++this.createBudget;
     }
 
     public int plusSuccessBudgetPlan(){
-        return this.successBudgetPlan++;
+        return ++this.successBudgetPlan;
     }
 
     public int plusGetWarningBudget(){
-        return this.getWarningBudget++;
+        return ++this.getWarningBudget;
     }
 
-    public boolean setSaveFivePercentFromBudget(){
-        return this.saveFivePercentFromBudget=true;
+    public void setSaveFivePercentFromBudget(){
+        this.saveFivePercentFromBudget = true;
     }
 
-    public boolean setSaveTenPercentFromBudget(){
-        return this.saveTenPercentFromBudget=true;
+    public void setSaveTenPercentFromBudget(){
+        this.saveTenPercentFromBudget = true;
     }
 
     public int plusInviteFriendToService(){
-        return this.inviteFriendToService++;
+        return ++this.inviteFriendToService;
     }
 
     public int plusInviteFriendToChallenge(){
-        return this.inviteFriendToChallenge++;
+        return ++this.inviteFriendToChallenge;
     }
 
     public int plusShareTips(){
-        return this.shareTips++;
+        return ++this.shareTips;
     }
 
 
