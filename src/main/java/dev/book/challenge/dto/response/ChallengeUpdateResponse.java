@@ -1,7 +1,6 @@
 package dev.book.challenge.dto.response;
 
 import dev.book.challenge.entity.Challenge;
-import dev.book.challenge.type.ChallengeCategory;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
 
@@ -10,7 +9,7 @@ import java.time.LocalDateTime;
 
 public record ChallengeUpdateResponse(Long id, String title, String text, Release release,
                                       Integer amount,
-                                      Integer capacity, ChallengeCategory challengeCategory, Status status,
+                                      Integer capacity, Category challengeCategory, Status status,
                                       LocalDate startDate, LocalDate endDate,
                                       LocalDateTime createDate,
                                       LocalDateTime modifyDate) {

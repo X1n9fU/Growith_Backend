@@ -1,7 +1,5 @@
 package dev.book.challenge.type;
 
-import dev.book.accountbook.type.Category;
-
 import java.util.List;
 
 public enum ChallengeCategory {

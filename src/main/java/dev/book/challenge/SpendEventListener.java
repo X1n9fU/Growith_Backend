@@ -1,7 +1,7 @@
 package dev.book.challenge;
 
 import dev.book.accountbook.entity.AccountBook;
-import dev.book.accountbook.type.Category;
+import dev.book.accountbook.entity.middle.AccountBookCategory;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.rank.SpendCreatedRankingEvent;
 import dev.book.challenge.rank.dto.response.RankResponse;
@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -30,19 +29,18 @@ public class SpendEventListener {
 
         AccountBook accountBook = event.accountBook();
         Long userId = accountBook.getUser().getId();
-        Category category = accountBook.getCategory();
-        LocalDateTime endDate = accountBook.getEndDate();
+        AccountBookCategory category = event.accountBook().getCategoryList().get(0);
 
-        List<Challenge> challenges = challengeRepository.findAllByCategoryAndDate(endDate.toLocalDate());
+        Category spendCategory = Category.valueOf(category.getCategory().getCategory());
+
+        List<Challenge> challenges = challengeRepository.findAllByCategoryAndDate(accountBook.getEndDate().toLocalDate());
 
         List<Challenge> relatedChallenges = challenges.stream()
-                .filter(c -> c.getChallengeCategory()
-                        .getRelatedSpendingCategories()
-                        .contains(category))
                 .filter(c -> {
                     List<Long> participantIds = userChallengeRepository.findUserIdByChallengeId(c.getId());
                     return participantIds.contains(userId);
                 })
+                .filter(c -> c.getChallengeCategory() == spendCategory)
                 .toList();
 
         for (Challenge challenge : relatedChallenges) {

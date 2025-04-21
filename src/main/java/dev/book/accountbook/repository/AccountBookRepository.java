@@ -92,26 +92,23 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
             @Param("categoryName") String categoryName,
             Pageable pageable
     );
-    List<AccountBook> findByUserIdAndCategoryOrderByUpdatedAtDescIdDesc(Long userId, Category category);
+    /*List<AccountBook> findByUserIdAndCategoryOrderByUpdatedAtDescIdDesc(Long userId, Category category);*/
 
 
     @Query("""
-    SELECT new dev.book.challenge.rank.dto.response.RankResponse(
-        u.email,
-        SUM(
-            CASE
-                WHEN ab.type = 'SPEND'
-                 AND ab.category IN :categories
-                 AND FUNCTION('DATE', ab.createdAt) BETWEEN :startDate AND :endDate
-                THEN ab.amount
-                ELSE 0
-            END
-        )
-    )
-    FROM UserEntity u
-    LEFT JOIN AccountBook ab ON ab.user = u
-    WHERE u.id IN :participantIds
-    GROUP BY u.id, u.email
-""")
-    List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDateTime startDate, LocalDateTime endDate);
+                SELECT new dev.book.challenge.rank.dto.response.RankResponse(
+                    u.email,
+                    CAST(COALESCE(SUM(ab.amount), 0) AS long)
+                )
+                FROM UserEntity u
+                LEFT JOIN AccountBook ab ON ab.user = u
+                LEFT JOIN ab.categoryList abc
+                WHERE u.id IN :participantIds
+                  AND (ab.type = 'SPEND' OR ab IS NULL)
+                  AND (abc.category = :category OR abc IS NULL)
+                  AND (ab.createdAt BETWEEN :startDate AND :endDate OR ab IS NULL)
+                GROUP BY u.id, u.email
+            """)
+    List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, dev.book.global.entity.Category category, LocalDateTime startDate, LocalDateTime endDate);
 }
+
