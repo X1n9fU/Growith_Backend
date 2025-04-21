@@ -5,6 +5,8 @@ import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.AuthService;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
 import dev.book.global.entity.Category;
+import dev.book.global.exception.category.CategoryErrorCode;
+import dev.book.global.exception.category.CategoryException;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
@@ -62,11 +64,22 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    /**
+     * 유저의 카테고리 변경
+     * @param userCategoriesRequest
+     * @param userDetails
+     */
     @Transactional
     public void updateUserCategories(UserCategoriesRequest userCategoriesRequest, CustomUserDetails userDetails) {
         UserEntity user = userRepository.findByEmail(userDetails.getUsername())
                         .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-        List<Category> categories = categoryRepository.findByCategoryIn(userCategoriesRequest.categories());
-        user.updateCategory(categories);
+        checkCategoriesAndUpdate(userCategoriesRequest.categories(), user);
+    }
+
+    public void checkCategoriesAndUpdate(List<String> categories, UserEntity user) {
+        List<Category> categoryList = categoryRepository.findByCategoryIn(categories);
+        if (categoryList.size() != categories.size())
+            throw new CategoryException(CategoryErrorCode.CATEGORY_BAD_REQUEST);
+        user.updateCategory(categoryList);
     }
 }

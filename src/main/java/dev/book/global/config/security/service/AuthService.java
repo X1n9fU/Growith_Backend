@@ -7,13 +7,12 @@ import dev.book.global.config.security.exception.AuthException;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
-import dev.book.global.entity.Category;
-import dev.book.global.repository.CategoryRepository;
 import dev.book.user.dto.request.UserSignUpRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import dev.book.user.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,14 +26,12 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
+    private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
@@ -61,8 +58,7 @@ public class AuthService {
 
     private void updateNickNameAndCategory(UserEntity user, UserSignUpRequest userSignupRequest) {
         user.updateNickname(userSignupRequest.nickname());
-        List<Category> categories = categoryRepository.findByCategoryIn(userSignupRequest.categories());
-        user.updateCategory(categories);
+        userService.checkCategoriesAndUpdate(userSignupRequest.categories(), user);
     }
 
     private Authentication getAuthentication(UserEntity user) {
