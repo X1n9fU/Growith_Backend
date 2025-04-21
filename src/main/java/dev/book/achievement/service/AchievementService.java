@@ -49,9 +49,14 @@ public class AchievementService {
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         AchievementUser achievementUser = new AchievementUser(user, achievement);
         achievementUserRepository.save(achievementUser);
+        eventPublisher.publishEvent(new GetAchievementEvent(achievement, userId));
     }
 
 
+    /**
+     * 달성한 업적에 대하여 FCM 알림을 보냅니다.
+     * @param event
+     */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleFcmAchievementNotification(GetAchievementEvent event){
         FcmToken token = fcmTokenRepository.findByUserId(event.userId())
@@ -59,6 +64,10 @@ public class AchievementService {
         fcmService.sendAchievementNotification(token.getToken(), event.achievement());
     }
 
+    /**
+     * 달성한 업적에 대하여 유저에게 알려 팝업을 띄웁니다.
+     * @param event
+     */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleWebSocketAchievementNotification(GetAchievementEvent event){
         AchievementResponseDto achievementResponseDto = AchievementResponseDto.from(event.achievement());

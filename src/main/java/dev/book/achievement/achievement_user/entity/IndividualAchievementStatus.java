@@ -3,12 +3,14 @@ package dev.book.achievement.achievement_user.entity;
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
  * 업적 달성을 파악하기 위한 개인별 현황도
  */
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class IndividualAchievementStatus {
     @Id
@@ -28,6 +30,10 @@ public class IndividualAchievementStatus {
 
     private boolean createFirstIncome=false;//첫번째 고정 수입 등록
 
+    private boolean saveFivePercentOnLastWeek=false; //5% 절약
+
+    private boolean saveTenPercentOnLastWeek=false; //10% 절약
+
     private int consecutiveNoSpend=0; //연속적으로 무지출한 횟수
 
     private int createBudget=0; //예산 계획 작성 횟수
@@ -35,6 +41,10 @@ public class IndividualAchievementStatus {
     private int successBudgetPlan=0; //예산 계획 지킨 횟수
 
     private int getWarningBudget=0; //과소비 경고 받은 횟수
+
+    private boolean saveFivePercentFromBudget=false;
+
+    private boolean saveTenPercentFromBudget=false;
 
     private int inviteFriendToService=0; //서비스 내에 친구를 초대한 횟수
 
@@ -45,58 +55,74 @@ public class IndividualAchievementStatus {
     public IndividualAchievementStatus(UserEntity user) {
         this.user = user;
     }
-    public void plusCompleteChallenge(){
-        this.completeChallenge++;
+    public int plusCompleteChallenge(){
+        return this.completeChallenge++;
     }
 
-    public void plusFailChallenge(){
-        this.failChallenge++;
+    public int plusFailChallenge(){
+        return this.failChallenge++;
     }
-    public void plusCreateChallenge(){
-        this.createChallenge++;
+    public int plusCreateChallenge(){
+        return this.createChallenge++;
     }
     public void loginToday(boolean isLoginToday){
         this.isLoginToday=isLoginToday;
     }
 
-    public void plusConsecutiveLogins(){
-        this.consecutiveLogins++;
+    public long plusConsecutiveLogins(){
+        return this.consecutiveLogins++;
     }
 
-    public void pluCheckSpendAnalysis(){
-        this.checkSpendAnalysis++;
-    } //소비 분석 탭을 확인한 횟수
+    public long pluCheckSpendAnalysis(){
+        return this.checkSpendAnalysis++;
+    }
 
     public void plusCreateFirstIncome(){
         this.createFirstIncome = true;
     }
 
-    public void plusConsecutiveNoSpend(){
-        this.consecutiveNoSpend++;
+    public boolean setSaveFivePercentOnLastWeek(){
+        return this.saveFivePercentOnLastWeek=true;
     }
 
-    public void plusCreateBudget(){
-        this.createBudget++;
+    public boolean setSaveTenPercentOnLastWeek(){
+        return this.saveTenPercentOnLastWeek=true;
     }
 
-    public void plusSuccessBudgetPlan(){
-        this.successBudgetPlan++;
+    public int plusConsecutiveNoSpend(){
+        return this.consecutiveNoSpend++;
     }
 
-    public void plusGetWarningBudget(){
-        this.getWarningBudget++;
+    public int plusCreateBudget(){
+        return this.createBudget++;
     }
 
-    public void plusInviteFriendToService(){
-        this.inviteFriendToService++;
+    public int plusSuccessBudgetPlan(){
+        return this.successBudgetPlan++;
     }
 
-    public void plusInviteFriendToChallenge(){
-        this.inviteFriendToChallenge++;
+    public int plusGetWarningBudget(){
+        return this.getWarningBudget++;
     }
 
-    public void plusShareTips(){
-        this.shareTips++;
+    public boolean setSaveFivePercentFromBudget(){
+        return this.saveFivePercentFromBudget=true;
+    }
+
+    public boolean setSaveTenPercentFromBudget(){
+        return this.saveTenPercentFromBudget=true;
+    }
+
+    public int plusInviteFriendToService(){
+        return this.inviteFriendToService++;
+    }
+
+    public int plusInviteFriendToChallenge(){
+        return this.inviteFriendToChallenge++;
+    }
+
+    public int plusShareTips(){
+        return this.shareTips++;
     }
 
 
