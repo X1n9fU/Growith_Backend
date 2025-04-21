@@ -9,6 +9,7 @@ import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
+import dev.book.util.UserBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,15 +50,9 @@ class ChallengeInviteServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity requestUser = UserEntity.builder()
-                .name("초대하는 사람")
-                .email("이메일1")
-                .build();
+        UserEntity requestUser = UserBuilder.of("이메일1", "초대하는 사람");
         ChallengeInviteRequest challengeInviteRequest = new ChallengeInviteRequest("이메일2");
-        UserEntity InviteUser = UserEntity.builder()
-                .name("초대받는 사람")
-                .email("이메일2")
-                .build();
+        UserEntity InviteUser = UserBuilder.of("이메일2", "초대받는 사람");
 
         given(userRepository.findByEmail(any())).willReturn(Optional.of(InviteUser));
 
@@ -81,15 +76,10 @@ class ChallengeInviteServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity requestUser = UserEntity.builder()
-                .name("초대하는 사람")
-                .email("이메일1")
-                .build();
+        UserEntity requestUser = UserBuilder.of("이메일1", "초대하는 사람");
+
         ChallengeInviteRequest challengeInviteRequest = new ChallengeInviteRequest("이메일2");
-        UserEntity InviteUser = UserEntity.builder()
-                .name("초대받는 사람")
-                .email("이메일2")
-                .build();
+        UserEntity InviteUser = UserBuilder.of("이메일2", "초대받는 사람");
 
         given(userRepository.findByEmail(any())).willReturn(Optional.of(InviteUser));
 

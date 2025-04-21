@@ -12,6 +12,7 @@ import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
+import dev.book.util.UserBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,10 +64,7 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("사용자")
-                .email("이메일")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일", "사용자");
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.save(any())).willReturn(challenge);
 
@@ -84,9 +82,8 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("사용자")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일", "사용자");
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         ChallengeReadResponse challengeReadResponse = ChallengeReadResponse.fromEntity(challenge);
         Pageable pageRequest = PageRequest.of(0, 10);
@@ -107,9 +104,8 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("사용자")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일", "사용자");
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findWithCreatorById(any())).willReturn(Optional.of(challenge));
 
@@ -138,9 +134,8 @@ class ChallengeServiceTest {
 
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("사용자")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일", "사용자");
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.of(challenge));
 
@@ -162,17 +157,11 @@ class ChallengeServiceTest {
 
         //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("작성자")
-                .email("이메일1")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일1", "작성자");
 
         ReflectionTestUtils.setField(creator, "id", 1L);
 
-        UserEntity noCreator = UserEntity.builder()
-                .name("사용자")
-                .email("이메일2")
-                .build();
+        UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
 
         ReflectionTestUtils.setField(noCreator, "id", 2L);
 
@@ -199,9 +188,8 @@ class ChallengeServiceTest {
     void deleteNotChallenge() {
         //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("작성자")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일1", "작성자");
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.of(challenge));
 
@@ -217,17 +205,12 @@ class ChallengeServiceTest {
     void deleteChallenge() {
         //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("작성자")
-                .email("이메일1")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일1", "작성자");
 
         ReflectionTestUtils.setField(creator, "id", 1L);
 
-        UserEntity noCreator = UserEntity.builder()
-                .name("사용자")
-                .email("이메일2")
-                .build();
+        UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
+
 
         ReflectionTestUtils.setField(noCreator, "id", 2L);
 
@@ -250,12 +233,9 @@ class ChallengeServiceTest {
     void participate() {
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserEntity.builder()
-                .name("작성자")
-                .build();
-        UserEntity noCreator = UserEntity.builder()
-                .name("사용자")
-                .build();
+        UserEntity creator = UserBuilder.of("이메일1", "작성자");
+        UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
         given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(false);
@@ -271,10 +251,8 @@ class ChallengeServiceTest {
     void NotParticipate() {
         //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity user = UserEntity.builder()
-                .name("사용자")
-                .email("이메일1")
-                .build();
+        UserEntity user = UserBuilder.of("이메일1", "사용자");
+
 
         ReflectionTestUtils.setField(user, "id", 1L);
 
@@ -293,10 +271,8 @@ class ChallengeServiceTest {
     void FullParticipate() {
         // given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity user = UserEntity.builder()
-                .name("사용자")
-                .email("이메일1")
-                .build();
+        UserEntity user = UserBuilder.of("이메일1", "사용자");
+
 
         ReflectionTestUtils.setField(user, "id", 1L);
         Challenge challenge = Challenge.of(challengeCreateRequest, user);

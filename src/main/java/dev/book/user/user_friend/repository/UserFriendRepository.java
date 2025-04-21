@@ -1,7 +1,7 @@
-package dev.book.user_friend.repository;
+package dev.book.user.user_friend.repository;
 
 import dev.book.user.entity.UserEntity;
-import dev.book.user_friend.entity.UserFriend;
+import dev.book.user.user_friend.entity.UserFriend;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
