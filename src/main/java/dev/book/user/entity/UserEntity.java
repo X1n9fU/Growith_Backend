@@ -1,9 +1,9 @@
 package dev.book.user.entity;
 
-import dev.book.accountbook.type.Category;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
-import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
+import dev.book.global.entity.Category;
+import dev.book.user.user_category.UserCategory;
 import dev.book.user.user_friend.entity.UserFriend;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -12,8 +12,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -35,35 +36,31 @@ public class UserEntity extends BaseTimeEntity {
 
     private String profileImageUrl; //null인 경우 프로필 없음
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경 // 임시 변경 by phc
-
     private long savings = 0;
 
     private int completedChallenges = 0;
 
     private int participatingChallenges = 0;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private RefreshToken refreshToken;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserCategory> userCategory = new HashSet<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserFriend> sendFriendRequests; //유저가 친구 요청 보냄
+    private Set<UserFriend> sendFriendRequests = new HashSet<>(); //유저가 친구 요청 보냄
 
     @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserFriend> receivedFriendRequests; //유저가 친구 요청 받음
+    private Set<UserFriend> receivedFriendRequests = new HashSet<>(); //유저가 친구 요청 받음
 
     //todo 알림 설정 필요
     //todo 이후 entity과의 관계 설정 필요
 
 
     @Builder
-    public UserEntity(String email, String name, String nickname, String profileImageUrl, List<Category> userCategory) {
+    public UserEntity(String email, String name, String nickname, String profileImageUrl) {
         this.email = email;
         this.name = name;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.userCategory = userCategory;
     }
 
     public static UserEntity of(OAuth2Attributes oAuth2Attributes){
@@ -79,16 +76,28 @@ public class UserEntity extends BaseTimeEntity {
         this.nickname = nickname;
     }
 
-    public void updateCategory(List<Category> userCategory){
-        this.userCategory = userCategory;
+    public void updateCategory(List<Category> categories){
+        if (!this.userCategory.isEmpty())
+            this.userCategory.clear();
+
+        Set<UserCategory> userCategories = getUserCategories(categories);
+        for (UserCategory uc : userCategories){
+            uc.setUser(this);
+            this.userCategory.add(uc);
+        }
+    }
+
+    private Set<UserCategory> getUserCategories(List<Category> categories) {
+        Set<UserCategory> userCategories = new HashSet<>();
+        for (Category category: categories){
+            UserCategory userCategory = new UserCategory(this, category);
+            userCategories.add(userCategory);
+        }
+        return userCategories;
     }
 
     public void updateProfileImage(String profileImageUrl){
         this.profileImageUrl = profileImageUrl;
     }
 
-    public void updateRefreshToken(RefreshToken refreshTokenEntity) {
-        this.refreshToken = refreshTokenEntity;
-    }
-    public void deleteRefreshToken() {this.refreshToken = null;}
 }

@@ -3,9 +3,15 @@ package dev.book.user.service;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.AuthService;
+import dev.book.global.config.security.service.refresh.RefreshTokenService;
+import dev.book.global.entity.Category;
+import dev.book.global.repository.CategoryRepository;
+import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.entity.UserEntity;
+import dev.book.user.exception.UserErrorCode;
+import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,12 +19,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
 
     public UserProfileResponse getUserProfile(CustomUserDetails userDetails) {
@@ -47,6 +57,16 @@ public class UserService {
     @Transactional
     public void deleteUser(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
         jwtUtil.deleteAccessTokenAndRefreshToken(request, response);
-        userRepository.delete(userDetails.user());
+        UserEntity user = userDetails.user();
+        refreshTokenService.deleteRefreshToken(user);
+        userRepository.delete(user);
+    }
+
+    @Transactional
+    public void updateUserCategories(UserCategoriesRequest userCategoriesRequest, CustomUserDetails userDetails) {
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        List<Category> categories = categoryRepository.findByCategoryIn(userCategoriesRequest.categories());
+        user.updateCategory(categories);
     }
 }
