@@ -12,6 +12,7 @@ import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
+import dev.book.challenge.rank.SpendCreatedRankingEvent;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,6 +44,7 @@ public class AccountBookService {
     public AccountBookSpendResponse createSpend(AccountBookSpendRequest spendRequest, UserEntity user) {
         AccountBook accountBook = accountBookRepository.save(spendRequest.toEntity(user));
         publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
+        publisher.publishEvent(new SpendCreatedRankingEvent(accountBook));
 
         return AccountBookSpendResponse.from(accountBook);
     }

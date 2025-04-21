@@ -19,12 +19,7 @@ public class RankService {
     private final UserChallengeRepository userChallengeRepository;
     private final AccountBookRepository accountBookRepository;
 
-    /**
-     * @param challengeId
-     * @param username    챌린지에 속한 참가자들의 아이디와 챌린지에 카테고리, 챌린지 시작시간, 챌린지 종료 시간 사이에 맞는 총 사용 내용 가져 온다.
-     * @return
-     */
-    public List<RankResponse> checkRank(Long challengeId, String username) {
+    public List<RankResponse> checkRank(Long challengeId) {
 
 
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow();

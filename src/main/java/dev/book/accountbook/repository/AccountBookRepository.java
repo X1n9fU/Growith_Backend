@@ -4,6 +4,7 @@ import dev.book.accountbook.dto.response.AccountBookStatResponse;
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.CategoryType;
+import dev.book.challenge.rank.dto.response.RankResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -58,4 +59,25 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
     );
 
     List<AccountBook> findByUserIdAndCategoryOrderByUpdatedAtDescIdDesc(Long userId, Category category);
+
+
+    @Query("""
+    SELECT new dev.book.challenge.rank.dto.response.RankResponse(
+        u.email,
+        SUM(
+            CASE
+                WHEN ab.type = 'SPEND'
+                 AND ab.category IN :categories
+                 AND FUNCTION('DATE', ab.createdAt) BETWEEN :startDate AND :endDate
+                THEN ab.amount
+                ELSE 0
+            END
+        )
+    )
+    FROM UserEntity u
+    LEFT JOIN AccountBook ab ON ab.user = u
+    WHERE u.id IN :participantIds
+    GROUP BY u.id, u.email
+""")
+    List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDateTime startDate, LocalDateTime endDate);
 }

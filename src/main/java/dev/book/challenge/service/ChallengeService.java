@@ -1,9 +1,5 @@
 package dev.book.challenge.service;
 
-import dev.book.accountbook.entity.AccountBook;
-import dev.book.accountbook.type.Category;
-import dev.book.accountbook.type.Frequency;
-import dev.book.challenge.SpendEventListener;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -13,20 +9,16 @@ import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.exception.ErrorCode;
-import dev.book.challenge.rank.SpendCreatedRankingEvent;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
 import static dev.book.challenge.exception.ErrorCode.CHALLENGE_NOT_FOUND_USER;
