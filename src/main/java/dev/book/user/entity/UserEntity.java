@@ -35,9 +35,8 @@ public class UserEntity extends BaseTimeEntity {
 
     private String profileImageUrl; //null인 경우 프로필 없음
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Enumerated(EnumType.STRING)
-    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경 // 임시 변경 by phc
 
     private long savings = 0;
 
@@ -55,8 +54,6 @@ public class UserEntity extends BaseTimeEntity {
     private List<UserFriend> receivedFriendRequests; //유저가 친구 요청 받음
 
     //todo 알림 설정 필요
-//    private NotificationPreference notificationPreference;
-
     //todo 이후 entity과의 관계 설정 필요
 
 

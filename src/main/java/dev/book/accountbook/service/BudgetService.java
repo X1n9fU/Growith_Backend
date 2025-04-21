@@ -41,7 +41,7 @@ public class BudgetService {
 
     public BudgetResponse createBudget(UserEntity user, BudgetRequest budgetRequest) {
         int date = LocalDate.now().getMonthValue();
-        budgetRepository.save(new Budget(budgetRequest.budget(), null, date, user));
+        budgetRepository.save(new Budget(budgetRequest.budget(), date, user));
 
         return budgetRepository.findBudgetWithTotal(user.getId());
     }
@@ -76,7 +76,7 @@ public class BudgetService {
     }
 
     private long calcUsageRate(BudgetResponse response) {
-        return  (response.total() / response.budget()) * 100;
+        return (response.total() / response.budget()) * 100;
     }
 
     private Budget findBudgetIdAndUserId(Long budgetId, Long userId) {
