@@ -5,7 +5,6 @@ import dev.book.accountbook.dto.response.AccountBookConsumeResponse;
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.accountbook.dto.response.AccountBookStatResponse;
 import dev.book.accountbook.service.StatService;
-import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.Frequency;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class StatController implements StatApi {
 
     @Override
     @GetMapping("/{frequency}/{category}")
-    public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
+    public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable String category) {
         Long userId = userDetails.user().getId();
         List<AccountBookSpendResponse> list = statService.categoryList(userId, frequency, category);
 
@@ -44,7 +43,7 @@ public class StatController implements StatApi {
 
     @Override
     @GetMapping("/consume/{frequency}/{category}")
-    public ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category) {
+    public ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable String category) {
         Long userId = userDetails.user().getId();
         AccountBookConsumeResponse response = statService.consume(userId, frequency, category);
 
