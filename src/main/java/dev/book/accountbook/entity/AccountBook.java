@@ -1,9 +1,10 @@
 package dev.book.accountbook.entity;
 
-import dev.book.accountbook.type.Category;
+import dev.book.accountbook.entity.middle.AccountBookCategory;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.global.entity.BaseTimeEntity;
+import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,6 +13,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,8 +26,6 @@ public class AccountBook extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    @Enumerated(value = EnumType.STRING)
-    private Category category;
     @Enumerated(value = EnumType.STRING)
     private CategoryType type;
     private int amount;
@@ -39,9 +40,22 @@ public class AccountBook extends BaseTimeEntity {
     private Integer month;
     private Integer day;
 
-    public AccountBook(String title, Category category, CategoryType type, int amount, LocalDateTime endDate, String memo, UserEntity user, Frequency frequency, Integer month, Integer day) {
+    @OneToMany(mappedBy = "accountBook", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AccountBookCategory> categoryList = new ArrayList<>();
+
+    public void addCategory(Category category) {
+        AccountBookCategory accountBookCategory = new AccountBookCategory(this, category);
+        this.categoryList.add(accountBookCategory);
+        category.getAccountBooks().add(accountBookCategory);
+    }
+
+    public void modifyCategories(List<Category> newCategories) {
+        this.categoryList.clear();
+        newCategories.forEach(this::addCategory);
+    }
+
+    public AccountBook(String title, CategoryType type, int amount, LocalDateTime endDate, String memo, UserEntity user, Frequency frequency, Integer month, Integer day) {
         this.title = title;
-        this.category = category;
         this.type = type;
         this.amount = amount;
         this.endDate = endDate;
@@ -54,10 +68,6 @@ public class AccountBook extends BaseTimeEntity {
 
     public void modifyTitle(String title) {
         this.title = title;
-    }
-
-    public void modifyCategory(Category category) {
-        this.category = category;
     }
 
     public void modifyAmount(int amount) {

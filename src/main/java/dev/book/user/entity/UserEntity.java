@@ -1,9 +1,9 @@
 package dev.book.user.entity;
 
-import dev.book.accountbook.type.Category;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
+import dev.book.global.entity.Category;
 import dev.book.user_friend.entity.UserFriend;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -35,9 +35,8 @@ public class UserEntity extends BaseTimeEntity {
 
     private String profileImageUrl; //null인 경우 프로필 없음
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Enumerated(EnumType.STRING)
-    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Category> userCategory = new ArrayList<>(); //추후 enum으로 변경 // 임시 변경 by phc
 
     private long savings = 0;
 

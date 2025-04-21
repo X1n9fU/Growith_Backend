@@ -3,7 +3,6 @@ package dev.book.accountbook.controller.swagger;
 import dev.book.accountbook.dto.response.AccountBookConsumeResponse;
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.accountbook.dto.response.AccountBookStatResponse;
-import dev.book.accountbook.type.Category;
 import dev.book.accountbook.type.Frequency;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -116,7 +115,7 @@ public interface StatApi {
                     )
             )
     )
-    ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category);
+    ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable String category);
 
     @Operation(
             summary = "소비 증감량 조회",
@@ -157,5 +156,5 @@ public interface StatApi {
                     )
             )
     )
-    ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable Category category);
+    ResponseEntity<AccountBookConsumeResponse> consume(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable String category);
 }

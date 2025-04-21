@@ -2,16 +2,22 @@ package dev.book.accountbook.dto.response;
 
 import dev.book.accountbook.dto.request.Repeat;
 import dev.book.accountbook.entity.AccountBook;
-import dev.book.accountbook.type.Category;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-public record AccountBookSpendResponse(Long id, String title, Category category, int amount, LocalDateTime updatedAt, String memo, LocalDateTime endDate, Repeat repeat) {
+public record AccountBookSpendResponse(Long id, String title, List<String> category, int amount,
+                                       LocalDateTime updatedAt, String memo, LocalDateTime endDate, Repeat repeat) {
     public static AccountBookSpendResponse from(AccountBook entity) {
+        List<String> categoryNames = entity.getCategoryList().stream()
+                .map(abCat -> abCat.getCategory().getCategory())
+                .toList();
+
+
         return new AccountBookSpendResponse(
                 entity.getId(),
                 entity.getTitle(),
-                entity.getCategory(),
+                categoryNames,
                 entity.getAmount(),
                 entity.getUpdatedAt(),
                 entity.getMemo(),
