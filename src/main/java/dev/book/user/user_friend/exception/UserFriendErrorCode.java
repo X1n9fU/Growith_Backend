@@ -1,4 +1,4 @@
-package dev.book.user_friend.exception;
+package dev.book.user.user_friend.exception;
 
 import dev.book.global.exception.ErrorCode;
 import lombok.Getter;

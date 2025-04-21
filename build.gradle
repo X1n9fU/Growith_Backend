@@ -57,16 +57,21 @@ dependencies {
     //Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+    //websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     // test
     testImplementation 'org.assertj:assertj-core:3.24.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.springframework.security:spring-security-test'\
 
-    //websocket
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // Lombok을 테스트 환경에서도 사용하기 위한 추가 설정
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
+
 }
 
 tasks.named('test') {

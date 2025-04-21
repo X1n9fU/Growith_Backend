@@ -9,8 +9,9 @@ import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.user.dto.request.UserSignUpRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
+import dev.book.util.CookieTestUtil;
+import dev.book.util.UserBuilder;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,12 +77,7 @@ class AuthControllerTest {
 
     @BeforeEach
     void setSecurityContext() {
-        UserEntity user = userRepository.save(UserEntity.builder()
-                .email("test@test.com")
-                .nickname("")
-                .profileImageUrl("profile")
-                .name("kmg")
-                .build());
+        UserEntity user = UserBuilder.of();
         userDetails = new CustomUserDetails(user);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
     }
@@ -107,20 +102,9 @@ class AuthControllerTest {
         // 응답 쿠키 가져오기
         MockHttpServletResponse response = result.andReturn().getResponse();
 
-        String accessToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "access_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-
-        String refreshToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "refresh_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(accessToken, "액세스 토큰 없음");
-        assertNotNull(refreshToken, "리프레시 토큰 없음");
+        TokenDto tokenDto = CookieTestUtil.getTokenFromCookie(response);
+        assertNotNull(tokenDto.accessToken(), "액세스 토큰 없음");
+        assertNotNull(tokenDto.refreshToken(), "리프레시 토큰 없음");
     }
 
 
@@ -137,20 +121,9 @@ class AuthControllerTest {
         // 응답 쿠키 가져오기
         MockHttpServletResponse response = result.andReturn().getResponse();
 
-        String accessToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "access_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-
-        String refreshToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "refresh_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-
-        assertNull(accessToken, "액세스 토큰이 삭제되지 않음");
-        assertNull(refreshToken, "리프레시 토큰이 삭제되지 않음");
+        TokenDto tokenDto = CookieTestUtil.getTokenFromCookie(response);
+        assertNull(tokenDto.accessToken(), "액세스 토큰이 삭제되지 않음");
+        assertNull(tokenDto.refreshToken(), "리프레시 토큰이 삭제되지 않음");
 
     }
 
@@ -175,21 +148,11 @@ class AuthControllerTest {
         // 응답 쿠키 가져오기
         MockHttpServletResponse response = result.andReturn().getResponse();
 
-        String accessToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "access_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+        TokenDto newTokenDto = CookieTestUtil.getTokenFromCookie(response);
 
-        String refreshToken = Arrays.stream(response.getCookies())
-                .filter(cookie -> "refresh_token".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
-
-        assertNotNull(accessToken, "액세스 토큰 재발급");
-        assertNotNull(refreshToken, "리프레시 토큰 재발급");
-        assertThat(refreshToken).isNotEqualTo(tokenDto.refreshToken());
+        assertNotNull(newTokenDto.accessToken(), "액세스 토큰 재발급");
+        assertNotNull(newTokenDto.refreshToken(), "리프레시 토큰 재발급");
+        assertThat(newTokenDto.refreshToken()).isNotEqualTo(tokenDto.refreshToken());
     }
 
     @WithMockUser(username = "test@test.com")
