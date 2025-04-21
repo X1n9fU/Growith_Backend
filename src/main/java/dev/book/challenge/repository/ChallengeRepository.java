@@ -14,6 +14,7 @@ import java.util.Optional;
 @Repository
 public interface ChallengeRepository extends JpaRepository<Challenge, Long>, ChallengeJpaRepository {
 
+
     @Query("SELECT c FROM Challenge c JOIN FETCH c.creator u where c.id=:id")
     Optional<Challenge> findWithCreatorById(Long id);
 
@@ -27,4 +28,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
 
     @Query("SELECT c FROM Challenge c WHERE c.startDate <= :date AND c.endDate >= :date")
     List<Challenge> findAllByCategoryAndDate(@Param("date") LocalDate date);
+
+    @Query("SELECT c FROM Challenge c JOIN FETCH c.challengeCategories WHERE c.id=:challengeId")
+    Optional<Challenge> findByIdA(Long challengeId);
 }

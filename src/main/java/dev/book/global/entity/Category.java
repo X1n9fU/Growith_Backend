@@ -2,6 +2,7 @@ package dev.book.global.entity;
 
 import dev.book.accountbook.entity.middle.AccountBookCategory;
 import dev.book.accountbook.entity.middle.BudgetCategory;
+import dev.book.challenge.ChallengeCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,4 +26,7 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BudgetCategory> budgets = new ArrayList<>();
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeCategory> challengeCategories = new ArrayList<>();
 }

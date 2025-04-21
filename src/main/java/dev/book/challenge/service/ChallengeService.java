@@ -1,5 +1,7 @@
 package dev.book.challenge.service;
 
+import dev.book.challenge.ChallengeCategory;
+import dev.book.challenge.category.ChallengeCategoryRepository;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -12,6 +14,8 @@ import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
+import dev.book.global.entity.Category;
+import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +23,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
 import static dev.book.challenge.exception.ErrorCode.CHALLENGE_NOT_FOUND_USER;
@@ -29,14 +35,17 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
+    private final CategoryRepository categoryRepository;
+    private final ChallengeCategoryRepository challengeCategoryRepository;
 
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
-
-        Challenge challenge = Challenge.of(challengeCreateRequest, user);
-        Challenge savedChallenge = challengeRepository.save(challenge);
-        UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
+        List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
+        Challenge challenge = Challenge.of(challengeCreateRequest,user);
+        UserChallenge userChallenge = UserChallenge.of(user, challenge);
         userChallengeRepository.save(userChallenge);
-        return ChallengeCreateResponse.fromEntity(savedChallenge);
+        List<ChallengeCategory> challengeCategory = categories.stream().map(category -> new ChallengeCategory(challenge,category)).toList();
+        challenge.getChallengeCategories().addAll(challengeCategory);
+        return ChallengeCreateResponse.fromEntity(challenge,categories);
 
     }
 
@@ -53,9 +62,11 @@ public class ChallengeService {
     @Transactional
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
         Challenge challenge = getMyChallenge(user.getId(), id);
-        challenge.updateInfo(challengeUpdateRequest);
+        List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
+        List<ChallengeCategory> challengeCategories = categories.stream().map(category -> new ChallengeCategory(challenge,category)).toList();
+        challenge.updateInfo(challengeUpdateRequest,challengeCategories);
         challengeRepository.flush();
-        return ChallengeUpdateResponse.fromEntity(challenge);
+        return ChallengeUpdateResponse.fromEntity(challenge,categories);
     }
 
     @Transactional

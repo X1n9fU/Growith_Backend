@@ -29,9 +29,8 @@ public class SpendEventListener {
 
         AccountBook accountBook = event.accountBook();
         Long userId = accountBook.getUser().getId();
-        AccountBookCategory category = event.accountBook().getCategoryList().get(0);
+        List<AccountBookCategory> accountBookCategories = event.accountBook().getCategoryList();
 
-        Category spendCategory = Category.valueOf(category.getCategory().getCategory());
 
         List<Challenge> challenges = challengeRepository.findAllByCategoryAndDate(accountBook.getEndDate().toLocalDate());
 
@@ -40,7 +39,7 @@ public class SpendEventListener {
                     List<Long> participantIds = userChallengeRepository.findUserIdByChallengeId(c.getId());
                     return participantIds.contains(userId);
                 })
-                .filter(c -> c.getChallengeCategory() == spendCategory)
+                .filter(c ->c.getChallengeCategories().contains(accountBookCategories))
                 .toList();
 
         for (Challenge challenge : relatedChallenges) {

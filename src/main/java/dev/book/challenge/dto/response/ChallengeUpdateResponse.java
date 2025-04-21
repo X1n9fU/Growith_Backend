@@ -3,21 +3,23 @@ package dev.book.challenge.dto.response;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
+import dev.book.global.entity.Category;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ChallengeUpdateResponse(Long id, String title, String text, Release release,
                                       Integer amount,
-                                      Integer capacity, Category challengeCategory, Status status,
+                                      Integer capacity, List<Category> categories, Status status,
                                       LocalDate startDate, LocalDate endDate,
                                       LocalDateTime createDate,
                                       LocalDateTime modifyDate) {
 
-    public static ChallengeUpdateResponse fromEntity(Challenge challenge) {
+    public static ChallengeUpdateResponse fromEntity(Challenge challenge,List<Category> categories) {
         return new ChallengeUpdateResponse(challenge.getId(), challenge.getTitle(),
                 challenge.getText(), challenge.getRelease(), challenge.getAmount(),
-                challenge.getCapacity(), challenge.getChallengeCategory(), challenge.getStatus(),
+                challenge.getCapacity(), categories, challenge.getStatus(),
                 challenge.getStartDate(), challenge.getEndDate(), challenge.getCreatedAt(),
                 challenge.getUpdatedAt());
     }
