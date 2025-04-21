@@ -1,4 +1,4 @@
-package dev.book.user_friend.controller;
+package dev.book.user.user_friend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
