@@ -7,6 +7,8 @@ import dev.book.global.config.security.exception.AuthException;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
+import dev.book.global.entity.Category;
+import dev.book.global.repository.CategoryRepository;
 import dev.book.user.dto.request.UserSignUpRequest;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
@@ -25,11 +27,14 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final RefreshTokenService refreshTokenService;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
@@ -45,17 +50,19 @@ public class AuthService {
     public void signUp(UserSignUpRequest userSignupRequest, String email, HttpServletResponse response) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-
         Authentication authentication = getAuthentication(user);
 
         validateNickname(userSignupRequest.nickname());
-
-        user.updateNickname(userSignupRequest.nickname());
-        user.updateCategory(userSignupRequest.categories());
+        updateNickNameAndCategory(user, userSignupRequest);
 
         TokenDto tokenDto = getTokenDto(response, authentication);
-
         refreshTokenService.saveAndUpdateRefreshToken(user, tokenDto.refreshToken());
+    }
+
+    private void updateNickNameAndCategory(UserEntity user, UserSignUpRequest userSignupRequest) {
+        user.updateNickname(userSignupRequest.nickname());
+        List<Category> categories = categoryRepository.findByCategoryIn(userSignupRequest.categories());
+        user.updateCategory(categories);
     }
 
     private Authentication getAuthentication(UserEntity user) {
@@ -81,9 +88,8 @@ public class AuthService {
      */
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
-        userDetails.user().deleteRefreshToken();
         jwtUtil.deleteAccessTokenAndRefreshToken(request, response); //쿠키에서 refreshToken 지우기
-        userRepository.save(userDetails.user());
+        refreshTokenService.deleteRefreshToken(userDetails.user());
     }
 
     /**

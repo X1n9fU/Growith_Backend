@@ -2,6 +2,7 @@ package dev.book.global.entity;
 
 import dev.book.accountbook.entity.middle.AccountBookCategory;
 import dev.book.accountbook.entity.middle.BudgetCategory;
+import dev.book.user.user_category.UserCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,6 +20,9 @@ public class Category {
     private Long id;
     private String category;
     private String korean;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategory> userCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountBookCategory> accountBooks = new ArrayList<>();

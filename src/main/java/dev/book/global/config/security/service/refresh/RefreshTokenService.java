@@ -30,7 +30,10 @@ public class RefreshTokenService {
                 .orElseGet(() -> new RefreshToken(user ,refreshToken));
         refreshTokenEntity.updateToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
+    }
 
-        user.updateRefreshToken(refreshTokenEntity);
+    @Transactional
+    public void deleteRefreshToken(UserEntity user){
+        refreshTokenRepository.deleteByUser(user);
     }
 }
