@@ -2,12 +2,11 @@ package dev.book.achievement.achievement_user;
 
 import dev.book.achievement.achievement_user.entity.IndividualAchievementStatus;
 import dev.book.achievement.achievement_user.repository.IndividualAchievementStatusRepository;
-import dev.book.achievement.exception.AchievementErrorCode;
-import dev.book.achievement.exception.AchievementException;
 import dev.book.achievement.service.AchievementService;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +14,33 @@ public class IndividualAchievementStatusService {
 
     private final IndividualAchievementStatusRepository individualAchievementStatusRepository;
     private final AchievementService achievementService;
+
+    @Transactional
+    public void deterMineContinuous(UserEntity user){
+        IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
+        long continuous = plusConsecutiveLogins(achievementStatus);
+        if (continuous > 0)
+            saveConsecutiveLoginAchievement(continuous, user.getId());
+    }
+
+    public void saveConsecutiveLoginAchievement(long consecutiveLogins, long userId){
+        if (consecutiveLogins == 7L)
+            achievementService.saveAchievement(7L, userId);
+        if (consecutiveLogins == 30L)
+            achievementService.saveAchievement(8L, userId);
+    }
+
+    private static long plusConsecutiveLogins(IndividualAchievementStatus achievementStatus) {
+        boolean isLoginToday = achievementStatus.isLoginToday();
+        long continuous;
+        if (!isLoginToday){
+            continuous = achievementStatus.plusConsecutiveLogins();
+            achievementStatus.loginToday(true);
+        } else {
+            continuous = -1;
+        }
+        return continuous;
+    }
 
     public void plusCompleteChallenge(UserEntity user){
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
@@ -54,13 +80,9 @@ public class IndividualAchievementStatusService {
         achievementStatus.loginToday(isLoginToday);
     }
 
-    public void plusConsecutiveLogins(UserEntity user){
+    public void resetConsecutiveLogins(UserEntity user){
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        long consecutiveLogins = achievementStatus.plusConsecutiveLogins();
-        if (consecutiveLogins == 7L)
-            achievementService.saveAchievement(7L, user.getId());
-        if (consecutiveLogins == 30L)
-            achievementService.saveAchievement(8L, user.getId());
+        achievementStatus.resetConsecutiveLogins();
     }
 
     public void pluCheckSpendAnalysis(UserEntity user){
@@ -179,6 +201,6 @@ public class IndividualAchievementStatusService {
 
     private IndividualAchievementStatus getIndividualAchievementStatus(UserEntity user){
         return individualAchievementStatusRepository.findByUser(user)
-                .orElseThrow(() -> new AchievementException(AchievementErrorCode.INDIVIDUAL_ACHIEVEMENT_NOT_FOUND));
+                .orElse(individualAchievementStatusRepository.save(new IndividualAchievementStatus(user)));
     }
 }

@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -53,5 +54,13 @@ public interface UserSwaggerController {
     })
     ResponseEntity<?> updateUserCategories(@RequestBody UserCategoriesRequest userCategoriesRequest,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails);
+
+    @Operation(summary = "유저의 로그인 여부", description = "연속적인 로그인에 대한 업적을 확인하기 위해 유저가 로그인 했는지 확인합니다. 하루 최초 1번만 필수 호출합니다."
+                                                            +"\n\n 만약 호출 시 연속적인 로그인에 대한 업적에 달성했을 경우, 달성했다는 알림이 갑니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유저 로그인 여부 확인 완료"),
+            @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다.")
+    })
+    ResponseEntity<?> checkIsUserLogin(@AuthenticationPrincipal CustomUserDetails userDetails);
 }
 

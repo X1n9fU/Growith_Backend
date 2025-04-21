@@ -22,6 +22,8 @@ public class IndividualAchievementStatus {
     private int completeChallenge=0; //챌린지 달성
     private int failChallenge=0; //챌린지 실패
     private int createChallenge=0; //챌린지 생성
+
+    private boolean isLoginYesterday = false;
     private boolean isLoginToday=false; //오늘 로그인 했는지
 
     private long consecutiveLogins=0; //연속적으로 로그인한 횟수
@@ -65,12 +67,20 @@ public class IndividualAchievementStatus {
     public int plusCreateChallenge(){
         return this.createChallenge++;
     }
+
+    public void loginYesterday(boolean isLoginYesterday){
+        this.isLoginYesterday = isLoginYesterday;
+    }
     public void loginToday(boolean isLoginToday){
         this.isLoginToday=isLoginToday;
     }
 
     public long plusConsecutiveLogins(){
         return this.consecutiveLogins++;
+    }
+
+    public void resetConsecutiveLogins(){
+        this.consecutiveLogins = 0;
     }
 
     public long pluCheckSpendAnalysis(){

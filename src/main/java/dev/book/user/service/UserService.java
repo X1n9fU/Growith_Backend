@@ -1,8 +1,8 @@
 package dev.book.user.service;
 
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtUtil;
-import dev.book.global.config.security.service.AuthService;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
 import dev.book.global.entity.Category;
 import dev.book.global.exception.category.CategoryErrorCode;
@@ -29,8 +29,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final IndividualAchievementStatusService individualAchievementStatusService;
     private final JwtUtil jwtUtil;
 
     public UserProfileResponse getUserProfile(CustomUserDetails userDetails) {
@@ -40,13 +40,18 @@ public class UserService {
     @Transactional
     public UserProfileResponse updateUserProfile(UserProfileUpdateRequest profileUpdateRequest, CustomUserDetails userDetails) {
 
-        authService.validateNickname(profileUpdateRequest.nickname());
+        validateNickname(profileUpdateRequest.nickname());
 
         UserEntity user = userDetails.user();
         user.updateNickname(profileUpdateRequest.nickname());
         user.updateProfileImage(profileUpdateRequest.profileImageUrl());
         userRepository.save(user);
         return UserProfileResponse.fromEntity(user);
+    }
+
+    public void validateNickname(String nickname) {
+        boolean isExisted = userRepository.existsByNickname(nickname);
+        if (isExisted) throw new UserErrorException(UserErrorCode.DUPLICATE_NICKNAME);
     }
 
     /**
@@ -81,5 +86,9 @@ public class UserService {
         if (categoryList.size() != categories.size())
             throw new CategoryException(CategoryErrorCode.CATEGORY_BAD_REQUEST);
         user.updateCategory(categoryList);
+    }
+
+    public void checkIsUserLogin(CustomUserDetails userDetails) {
+        individualAchievementStatusService.deterMineContinuous(userDetails.user());
     }
 }

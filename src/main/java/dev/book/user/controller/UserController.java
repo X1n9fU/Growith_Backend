@@ -47,4 +47,10 @@ public class UserController implements UserSwaggerController{
         userService.deleteUser(request, response, userDetails);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/check/login") //로그인 확인
+    public ResponseEntity<?> checkIsUserLogin(@AuthenticationPrincipal CustomUserDetails userDetails){
+        userService.checkIsUserLogin(userDetails);
+        return ResponseEntity.ok().build();
+    }
 }

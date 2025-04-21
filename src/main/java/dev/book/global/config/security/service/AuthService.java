@@ -49,7 +49,7 @@ public class AuthService {
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         Authentication authentication = getAuthentication(user);
 
-        validateNickname(userSignupRequest.nickname());
+        userService.validateNickname(userSignupRequest.nickname());
         updateNickNameAndCategory(user, userSignupRequest);
 
         TokenDto tokenDto = getTokenDto(response, authentication);
@@ -71,11 +71,6 @@ public class AuthService {
 
     private TokenDto getTokenDto(HttpServletResponse response, Authentication authentication) {
         return jwtUtil.generateToken(response, authentication);
-    }
-
-    public void validateNickname(String nickname) {
-        boolean isExisted = userRepository.existsByNickname(nickname);
-        if (isExisted) throw new UserErrorException(UserErrorCode.DUPLICATE_NICKNAME);
     }
 
     /**
