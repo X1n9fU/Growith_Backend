@@ -3,45 +3,43 @@ package dev.book.challenge;
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.rank.SpendCreatedRankingEvent;
-import dev.book.challenge.rank.dto.response.RankResponse;
 import dev.book.challenge.rank.service.RankService;
-import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
+import dev.book.global.entity.Category;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
-@Configuration
+@Component
 public class SpendEventListener {
-    private final ChallengeRepository challengeRepository;
-    private final RankService rankingService;
+
+    private final UserChallengeRepository userChallengeRepository;
+    private final RankService rankService;
     private final SimpMessagingTemplate messagingTemplate;
 
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSpendCreatedEvent(SpendCreatedRankingEvent event) {
 
-        AccountBook ab = event.accountBook();
-        LocalDateTime date = ab.getEndDate();
-        String userEmail = ab.getUser().getEmail();
+        AccountBook accountBook = event.accountBook();
+        Long userId = accountBook.getUser().getId();
+        LocalDateTime spendDate = accountBook.getEndDate();
 
-        List<Challenge> challenges = challengeRepository.findAllByCategoryAndDate(date);
+        Category spendCategory = accountBook.getCategory();
 
-        List<Challenge> relatedChallenges = challenges.stream()
-                .filter(c -> c.getChallengeCategory()
-                        .getRelatedSpendingCategories()
-                        .contains(ab.getCategory()))
-                .toList();
 
-        for (Challenge challenge : relatedChallenges) {
-            List<RankResponse> ranks = rankingService.checkRank(challenge.getId(), userEmail);
-            messagingTemplate.convertAndSend("/sub/rank/challenge/" + challenge.getId(), ranks);
+        List<Challenge> joinedChallenges = userChallengeRepository.findChallengesByUserAndDate(userId, spendCategory.getId(), spendDate.toLocalDate());
+
+        // 참여자 전체 순위 재계산 후 전송
+        for (Challenge challenge : joinedChallenges) {
+            rankService.checkRank(challenge.getId());
         }
-
     }
+
 }

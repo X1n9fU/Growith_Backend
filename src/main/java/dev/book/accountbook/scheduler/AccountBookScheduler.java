@@ -21,7 +21,7 @@ public class AccountBookScheduler {
     private final StatService statService;
     private final IndividualAchievementStatusService individualAchievementStatusService;
 
-    @Scheduled(cron = "0 0 1 * *") //매월 1일마다 예산 계획 성공 여부
+    @Scheduled(cron = "0 0 0 1 * *") //매월 1일마다 예산 계획 성공 여부
     public void checkBudgetSuccessfulOrNot(){
         //저번 달 예산 계획을 세운 사람들
         List<Budget> budgets = budgetRepository.findAllByMonthWithUser(LocalDate.now().minusMonths(1).getMonth().getValue());

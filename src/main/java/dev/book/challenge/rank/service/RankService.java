@@ -1,12 +1,16 @@
 package dev.book.challenge.rank.service;
 
 import dev.book.accountbook.repository.AccountBookRepository;
-import dev.book.accountbook.type.Category;
+import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.entity.Challenge;
+import dev.book.challenge.exception.ChallengeException;
+import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.rank.dto.response.RankResponse;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
+import dev.book.global.entity.Category;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,20 +22,17 @@ public class RankService {
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
     private final AccountBookRepository accountBookRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
-    /**
-     * @param challengeId
-     * @param username    챌린지에 속한 참가자들의 아이디와 챌린지에 카테고리, 챌린지 시작시간, 챌린지 종료 시간 사이에 맞는 총 사용 내용 가져 온다.
-     * @return
-     */
-    public List<RankResponse> checkRank(Long challengeId, String username) {
+    public void checkRank(Long challengeId) {
 
-
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow();
+        Challenge challenge = challengeRepository.findByIdJoinCategory(challengeId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         List<Long> participantIds = userChallengeRepository.findUserIdByChallengeId(challengeId);
-        List<Category> categories = challenge.getChallengeCategory().getRelatedSpendingCategories();
+        List<ChallengeCategory> challengeCategories = challenge.getChallengeCategories();
+        List<Category> categories = challengeCategories.stream().map(ChallengeCategory::getCategory).toList();
 
-        return accountBookRepository.findByUserSpendingRanks(participantIds, categories, challenge.getStartDate().atStartOfDay(), challenge.getEndDate().atStartOfDay().minusNanos(1));
+        List<RankResponse> rankResponses = accountBookRepository.findByUserSpendingRanks(participantIds, categories, challenge.getStartDate().atStartOfDay(), challenge.getEndDate().atTime(23, 59, 59, 999_999_999));
+        simpMessagingTemplate.convertAndSend("/sub/challenge/" + challengeId + "/rank", rankResponses);
 
 
     }

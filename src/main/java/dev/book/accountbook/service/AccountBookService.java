@@ -13,6 +13,7 @@ import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.type.CategoryType;
+import dev.book.challenge.rank.SpendCreatedRankingEvent;
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
@@ -67,6 +68,7 @@ public class AccountBookService {
         if (budgetRepository.existsById(user.getId())) {
             publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
         }
+        publisher.publishEvent(new SpendCreatedRankingEvent(accountBook));
 
         return AccountBookSpendResponse.from(saved);
     }
