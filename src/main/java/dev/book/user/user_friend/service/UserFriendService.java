@@ -2,6 +2,7 @@ package dev.book.user.user_friend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.user.user_friend.dto.response.FriendListResponseDto;
 import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
 import dev.book.user.user_friend.entity.UserFriend;
@@ -40,6 +41,7 @@ public class UserFriendService {
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
     private final ObjectMapper objectMapper;
+    private final IndividualAchievementStatusService individualAchievementStatusService;
 
     public InvitingUserTokenResponseDto getInviteUserToken(CustomUserDetails userDetails) throws Exception {
         Long id = userDetails.user().getId();
@@ -60,17 +62,18 @@ public class UserFriendService {
 
     @Transactional
     public void getTokenAndMakeInvitation(CustomUserDetails userDetails, HttpServletResponse response, String token) throws Exception {
-        makeInvitation(userDetails.getUsername(), token);
+        invitedUserMakeInvitation(userDetails.getUsername(), token);
         response.sendRedirect(DOMAIN+MAIN_URL);
     }
 
-    public void makeInvitation(String email, String token) throws Exception {
+    public void invitedUserMakeInvitation(String email, String token) throws Exception {
         EncryptUserInfo userInfo = decryptToken(token);
         UserFriend userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(userInfo.id(), userInfo.localDateTime())
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.INVITING_NOT_FOUND));
         UserEntity friend = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         userFriend.inviteFriend(friend);
+        individualAchievementStatusService.plusInviteFriendToService(userFriend.getUser());
     }
 
     private EncryptUserInfo decryptToken(String safeToken) throws Exception {

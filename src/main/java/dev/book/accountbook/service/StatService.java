@@ -8,6 +8,8 @@ import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.accountbook.type.PeriodRange;
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
@@ -25,10 +27,12 @@ public class StatService {
     private final UserRepository userRepository;
     private final AccountBookRepository accountBookRepository;
 
+    private final IndividualAchievementStatusService individualAchievementStatusService;
+
     @Transactional
     public List<AccountBookStatResponse> statList(Long userId, Frequency frequency) {
-        userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        individualAchievementStatusService.pluCheckSpendAnalysis(user);
         return getStatList(userId, frequency.calcStartDate());
     }
 
@@ -41,9 +45,9 @@ public class StatService {
 
     @Transactional
     public AccountBookConsumeResponse consume(Long userId, Frequency frequency, String category) {
-        userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        return getConsume(userId, category, frequency.calcPeriod());
+        return getConsume(user, category, frequency);
     }
 
     private List<AccountBookStatResponse> getStatList(Long userId, LocalDateTime startDate) {
@@ -59,10 +63,23 @@ public class StatService {
                 .toList();
     }
 
-    private AccountBookConsumeResponse getConsume(Long userId, String category, PeriodRange period) {
-        Integer thisAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period.currentStart(), period.currentEnd());
-        Integer lastAmount = accountBookRepository.sumSpending(userId, CategoryType.SPEND, category, period.previousStart(), period.previousEnd());
+    private AccountBookConsumeResponse getConsume(UserEntity user, String category, Frequency frequency) {
+        PeriodRange period = frequency.calcPeriod();
+        Integer thisAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, category, period.currentStart(), period.currentEnd());
+        Integer lastAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, category, period.previousStart(), period.previousEnd());
 
+        if (Frequency.WEEKLY.equals(frequency))
+            calcSavedRateAndAchieve(user, thisAmount, lastAmount);
         return new AccountBookConsumeResponse(lastAmount - thisAmount);
+    }
+
+    private void calcSavedRateAndAchieve(UserEntity user, Integer thisAmount, Integer lastAmount) {
+        if (lastAmount != null && lastAmount > 0) {
+            double savedRate = ((double) (lastAmount - thisAmount) / lastAmount) * 100;
+            if (savedRate >= 10.0)
+                individualAchievementStatusService.saveTenPercentOnLastWeek(user);
+            else if (savedRate >= 5.0)
+                individualAchievementStatusService.saveFivePercentOnLastWeek(user);
+        }
     }
 }

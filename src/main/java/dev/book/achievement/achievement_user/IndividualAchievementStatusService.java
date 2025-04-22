@@ -76,16 +76,6 @@ public class IndividualAchievementStatusService {
         }
     }
 
-    public void loginToday(UserEntity user, boolean isLoginToday) {
-        IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        achievementStatus.loginToday(isLoginToday);
-    }
-
-    public void resetConsecutiveLogins(UserEntity user) {
-        IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        achievementStatus.resetConsecutiveLogins();
-    }
-
     public void pluCheckSpendAnalysis(UserEntity user) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         long checkSpendAnalysis = achievementStatus.pluCheckSpendAnalysis();
@@ -93,9 +83,9 @@ public class IndividualAchievementStatusService {
             achievementService.saveAchievement(9L, user.getId());
     }
 
-    public void plusCreateFirstIncome(UserEntity user) {
+    public void setCreateFirstIncomeTrue(UserEntity user) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        achievementStatus.plusCreateFirstIncome();
+        achievementStatus.setCreateFirstIncomeTrue();
         achievementService.saveAchievement(10L, user.getId());
     }
 

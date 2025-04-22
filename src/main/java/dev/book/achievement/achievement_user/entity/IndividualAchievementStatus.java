@@ -87,7 +87,7 @@ public class IndividualAchievementStatus {
         return ++this.checkSpendAnalysis;
     }
 
-    public void plusCreateFirstIncome(){
+    public void setCreateFirstIncomeTrue(){
         this.createFirstIncome = true;
     }
 
