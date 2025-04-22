@@ -46,11 +46,11 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int completeChallenge = achievementStatus.plusCompleteChallenge();
         switch (completeChallenge) {
-            case 1:
+            case 1 ->
                 achievementService.saveAchievement(1L, user.getId());
-            case 5:
+            case 5 ->
                 achievementService.saveAchievement(2L, user.getId());
-            case 10:
+            case 10 ->
                 achievementService.saveAchievement(3L, user.getId());
         }
 
@@ -60,7 +60,7 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int failChallenge = achievementStatus.plusFailChallenge();
         switch (failChallenge) {
-            case 1:
+            case 1 ->
                 achievementService.saveAchievement(4L, user.getId());
         }
     }
@@ -69,9 +69,9 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int createChallenge = achievementStatus.plusCreateChallenge();
         switch (createChallenge) {
-            case 1:
+            case 1->
                 achievementService.saveAchievement(5L, user.getId());
-            case 5:
+            case 5->
                 achievementService.saveAchievement(6L, user.getId());
         }
     }
@@ -112,7 +112,7 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int consecutiveNoSpend = achievementStatus.plusConsecutiveNoSpend();
         switch (consecutiveNoSpend) {
-            case 3:
+            case 3 ->
                 achievementService.saveAchievement(13L, user.getId());
         }
     }
@@ -121,22 +121,27 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int createBudget = achievementStatus.plusCreateBudget();
         switch (createBudget) {
-            case 1:
+            case 1->
                 achievementService.saveAchievement(14L, user.getId());
-            case 3:
+            case 3->
                 achievementService.saveAchievement(15L, user.getId());
         }
     }
 
     public void plusSuccessBudgetPlan(UserEntity user) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
+        if (!achievementStatus.isSuccessBudgetPlanLastMonth()){
+            achievementStatus.resetSuccessBudgetPlan(); //저번달에 성공하지 못했으면 0으로 초기화
+        }
         int successBudgetPlan = achievementStatus.plusSuccessBudgetPlan();
+        achievementStatus.setSuccessBudgetPlanLastMonth(true);
         switch (successBudgetPlan) {
-            case 1:
+            case 1->
                 achievementService.saveAchievement(16L, user.getId());
-            case 3:
+            case 3->
                 achievementService.saveAchievement(17L, user.getId());
         }
+
     }
 
     public void plusGetWarningBudget(UserEntity user) {
@@ -170,9 +175,9 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int inviteFriendToService = achievementStatus.plusInviteFriendToService();
         switch (inviteFriendToService) {
-            case 1:
+            case 1->
                 achievementService.saveAchievement(21L, user.getId());
-            case 3:
+            case 3->
                 achievementService.saveAchievement(22L, user.getId());
         }
     }
@@ -181,7 +186,7 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int inviteFriendToChallenge = achievementStatus.plusInviteFriendToChallenge();
         switch (inviteFriendToChallenge) {
-            case 1:
+            case 1->
                 achievementService.saveAchievement(23L, user.getId());
         }
     }
@@ -190,9 +195,9 @@ public class IndividualAchievementStatusService {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
         int shareTips = achievementStatus.plusShareTips();
         switch (shareTips) {
-            case 1:
+            case 1->
                 achievementService.saveAchievement(24L, user.getId());
-            case 5:
+            case 5->
                 achievementService.saveAchievement(25L, user.getId());
         }
     }

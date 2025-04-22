@@ -24,13 +24,14 @@ public class AccountBookScheduler {
     @Scheduled(cron = "0 0 1 * *") //매월 1일마다 예산 계획 성공 여부
     public void checkBudgetSuccessfulOrNot(){
         //저번 달 예산 계획을 세운 사람들
-        List<Budget> budgets = budgetRepository.findAllByMonthWithUser(LocalDate.now().getMonth().getValue()-1);
+        List<Budget> budgets = budgetRepository.findAllByMonthWithUser(LocalDate.now().minusMonths(1).getMonth().getValue());
         for (Budget budget : budgets){
             int lastMonth = statService.getTotalConsumeOfLastMonth(budget.getUser().getId());
             if (lastMonth < budget.getBudgetLimit()){
                 // 저번 달 예산 계획과 비교하여 % 이상 절약한 사람들에게 업적 달성
                 calcSavedRateAndAchieve(budget.getUser(), budget.getBudgetLimit(), lastMonth);
-                // todo 예산 계획에 성공한 사람들
+                // 예산 계획에 성공한 사람들 횟수 +1
+                individualAchievementStatusService.plusSuccessBudgetPlan(budget.getUser());
             }
         }
     }

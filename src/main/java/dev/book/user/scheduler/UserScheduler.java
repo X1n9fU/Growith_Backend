@@ -25,18 +25,16 @@ public class UserScheduler {
                 = individualAchievementStatusRepository.findAll();
         individualAchievementStatuses.forEach(
                 ias -> {
-                    if (ias.isLoginYesterday()) { //어제 로그인 했는데 오늘 로그인 x -> reset
-                        if (!ias.isLoginToday()) {
-                            ias.resetConsecutiveLogins();
-                            ias.loginYesterday(false);
-                        }  //어제 로그인, 오늘도 로그인 -> 연속
+                    if (ias.isLoginYesterday() && !ias.isLoginToday()) {
+                        //어제 로그인 했는데 오늘 로그인 x -> reset
+                        ias.resetConsecutiveLogins();
+                        ias.loginYesterday(false);
                     }
-                    else { //어제 로그인 x, 오늘 로그인 -> 연속의 시작
-                        if (ias.isLoginToday()) {
-                            ias.loginYesterday(true);
-                        } else { //어제 로그인 x, 오늘도 로그인 x -> reset
-                            ias.resetConsecutiveLogins();
-                        }
+                    else {
+                            //어제 로그인 x, 오늘 로그인 -> 연속의 시작
+                        if (ias.isLoginToday()) ias.loginYesterday(true);
+                            //어제 로그인 x, 오늘도 로그인 x -> reset
+                        else ias.resetConsecutiveLogins();
                     }
                     ias.loginToday(false);
                 });
