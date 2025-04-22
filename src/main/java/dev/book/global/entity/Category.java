@@ -1,15 +1,12 @@
 package dev.book.global.entity;
 
-import dev.book.accountbook.entity.middle.AccountBookCategory;
-import dev.book.accountbook.entity.middle.BudgetCategory;
-import dev.book.user.user_category.UserCategory;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -21,12 +18,8 @@ public class Category {
     private String category;
     private String korean;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCategory> userCategories = new ArrayList<>();
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AccountBookCategory> accountBooks = new ArrayList<>();
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BudgetCategory> budgets = new ArrayList<>();
+    public Category(String category, String korean) {
+        this.category = category;
+        this.korean = korean;
+    }
 }

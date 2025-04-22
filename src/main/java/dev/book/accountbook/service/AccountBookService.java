@@ -3,6 +3,7 @@ package dev.book.accountbook.service;
 import dev.book.accountbook.dto.event.SpendCreatedEvent;
 import dev.book.accountbook.dto.request.AccountBookIncomeRequest;
 import dev.book.accountbook.dto.request.AccountBookRequest;
+import dev.book.accountbook.dto.request.AccountBookSpendListRequest;
 import dev.book.accountbook.dto.request.AccountBookSpendRequest;
 import dev.book.accountbook.dto.response.AccountBookIncomeResponse;
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
@@ -10,6 +11,7 @@ import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.AccountBookRepository;
+import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.global.entity.Category;
@@ -26,11 +28,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class AccountBookService {
     private final UserRepository userRepository;
+    private final BudgetRepository budgetRepository;
     private final ApplicationEventPublisher publisher;
     private final CategoryRepository categoryRepository;
     private final AccountBookRepository accountBookRepository;
@@ -47,7 +51,7 @@ public class AccountBookService {
 
     @Transactional
     public List<AccountBookSpendResponse> getSpendList(Long userId) {
-        List<AccountBook> accountBooks = accountBookRepository.findAllByUserIdAndTypeOrderByUpdatedAtDesc(userId, CategoryType.SPEND);
+        List<AccountBook> accountBooks = accountBookRepository.findAllByUserIdAndTypeAndCategoryIsNotNullOrderByUpdatedAtDesc(userId, CategoryType.SPEND);
 
         return accountBooks.stream()
                 .map(AccountBookSpendResponse::from)
@@ -56,12 +60,13 @@ public class AccountBookService {
 
     @Transactional
     public AccountBookSpendResponse createSpend(AccountBookSpendRequest request, UserEntity user) {
-        List<Category> categoryList = findCategorySpendList(request);
-        AccountBook accountBook = request.toEntity(user);
-        categoryList.forEach(accountBook::addCategory);
+        Category category = getCategory(request.category());
+        AccountBook accountBook = request.toEntity(user, category);
         AccountBook saved = accountBookRepository.save(accountBook);
 
-        publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
+        if (budgetRepository.existsById(user.getId())) {
+            publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
+        }
 
         return AccountBookSpendResponse.from(saved);
     }
@@ -70,10 +75,6 @@ public class AccountBookService {
     public AccountBookSpendResponse modifySpend(AccountBookSpendRequest request, Long id, Long userId) {
         AccountBook accountBook = findAccountBookOrThrow(id, userId, AccountBookErrorCode.NOT_FOUND_SPEND);
         updateAccountBook(accountBook, request);
-
-        List<Category> categoryList = findCategorySpendList(request);
-        accountBook.modifyCategories(categoryList);
-
         accountBookRepository.flush();
 
         return AccountBookSpendResponse.from(accountBook);
@@ -96,7 +97,7 @@ public class AccountBookService {
 
     @Transactional
     public List<AccountBookIncomeResponse> getIncomeList(Long userId) {
-        List<AccountBook> accountBooks = accountBookRepository.findAllByUserIdAndTypeOrderByUpdatedAtDesc(userId, CategoryType.INCOME);
+        List<AccountBook> accountBooks = accountBookRepository.findAllByUserIdAndTypeAndCategoryIsNotNullOrderByUpdatedAtDesc(userId, CategoryType.INCOME);
 
         return accountBooks.stream()
                 .map(AccountBookIncomeResponse::from)
@@ -105,9 +106,8 @@ public class AccountBookService {
 
     @Transactional
     public AccountBookIncomeResponse createIncome(AccountBookIncomeRequest request, UserEntity user) {
-        List<Category> categoryList = findCategorySpendList(request);
-        AccountBook accountBook = request.toEntity(user);
-        categoryList.forEach(accountBook::addCategory);
+        Category category = getCategory(request.category());
+        AccountBook accountBook = request.toEntity(user, category);
         AccountBook saved = accountBookRepository.save(accountBook);
         if (request.repeat() != null)
             individualAchievementStatusService.setCreateFirstIncomeTrue(user);
@@ -118,9 +118,7 @@ public class AccountBookService {
     public AccountBookIncomeResponse modifyIncome(Long id, AccountBookIncomeRequest request, Long userId) {
         AccountBook accountBook = findAccountBookOrThrow(id, userId, AccountBookErrorCode.NOT_FOUND_INCOME);
         updateAccountBook(accountBook, request);
-
-        List<Category> categoryList = findCategorySpendList(request);
-        accountBook.modifyCategories(categoryList);
+        accountBookRepository.flush();
 
         return AccountBookIncomeResponse.from(accountBook);
     }
@@ -141,12 +139,23 @@ public class AccountBookService {
                 .toList();
     }
 
+    public List<AccountBookSpendResponse> createSpendList(UserEntity user, AccountBookSpendListRequest requestList) {
+        List<AccountBook> accountBookList = accountBookList(user, requestList);
+        List<AccountBook> savedAccountBookList = accountBookRepository.saveAll(accountBookList);
+
+        return savedAccountBookList.stream()
+                .map(AccountBookSpendResponse::from)
+                .toList();
+    }
+
     private AccountBook findAccountBookOrThrow(Long id, Long userId, AccountBookErrorCode errorCode) {
         return accountBookRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new AccountBookErrorException(errorCode));
     }
 
     private void updateAccountBook(AccountBook accountBook, AccountBookRequest request) {
+        Category category = getCategory(request.category());
+
         accountBook.modifyTitle(request.title());
         accountBook.modifyAmount(request.amount());
         accountBook.modifyMemo(request.memo());
@@ -154,19 +163,22 @@ public class AccountBookService {
         accountBook.modifyMonth(request.repeat().month());
         accountBook.modifyDay(request.repeat().day());
         accountBook.modifyEndDate(request.endDate());
-
-        List<Category> categoryList = findCategorySpendList(request);
-        accountBook.modifyCategories(categoryList);
+        accountBook.modifyCategory(category);
     }
 
-    private List<Category> findCategorySpendList(AccountBookRequest request) {
-        List<Category> categoryList = categoryRepository.findByCategoryIn(request.categoryList());
+    private Category getCategory(String category) {
+        String getCategory = Objects.requireNonNullElse(category, "none");
 
-        if (categoryList.size() != request.categoryList().size()) {
+        return categoryRepository.findByCategory(getCategory)
+                .orElseThrow(() -> new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_CATEGORY));
+    }
 
-            throw new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_CATEGORY);
-        }
+    private List<AccountBook> accountBookList(UserEntity user, AccountBookSpendListRequest requestList) {
+        return requestList.accountBookSpendRequestList().stream()
+                .map(request -> {
+                    Category category = getCategory(request.category());
 
-        return categoryList;
+                    return request.toEntity(user, category);
+                }).toList();
     }
 }

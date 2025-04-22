@@ -44,10 +44,10 @@ public class StatService {
     }
 
     @Transactional
-    public AccountBookConsumeResponse consume(Long userId, Frequency frequency, String category) {
+    public AccountBookConsumeResponse consume(Long userId, Frequency frequency) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        return getConsume(user, category, frequency);
+        return getConsume(user, frequency);
     }
 
     private List<AccountBookStatResponse> getStatList(Long userId, LocalDateTime startDate) {
@@ -63,10 +63,10 @@ public class StatService {
                 .toList();
     }
 
-    private AccountBookConsumeResponse getConsume(UserEntity user, String category, Frequency frequency) {
+    private AccountBookConsumeResponse getConsume(UserEntity user, Frequency frequency) {
         PeriodRange period = frequency.calcPeriod();
-        Integer thisAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, category, period.currentStart(), period.currentEnd());
-        Integer lastAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, category, period.previousStart(), period.previousEnd());
+        Integer thisAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, period.currentStart(), period.currentEnd());
+        Integer lastAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, period.previousStart(), period.previousEnd());
 
         if (Frequency.WEEKLY.equals(frequency))
             calcSavedRateAndAchieve(user, thisAmount, lastAmount);
