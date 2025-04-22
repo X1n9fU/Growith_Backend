@@ -8,9 +8,10 @@ import dev.book.challenge.rank.service.RankService;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ public class SpendEventListener {
     private final SimpMessagingTemplate messagingTemplate;
 
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSpendCreatedEvent(SpendCreatedRankingEvent event) {
 
         AccountBook accountBook = event.accountBook();
