@@ -14,6 +14,7 @@ import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.achievement.achievement_user.dto.event.CreateFirstIncomeEvent;
+import dev.book.challenge.rank.SpendCreatedRankingEvent;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
@@ -38,8 +39,6 @@ public class AccountBookService {
     private final ApplicationEventPublisher publisher;
     private final CategoryRepository categoryRepository;
     private final AccountBookRepository accountBookRepository;
-
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public AccountBookSpendResponse getSpendOne(Long id, Long userId) {
@@ -67,6 +66,7 @@ public class AccountBookService {
         if (budgetRepository.existsById(user.getId())) {
             publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
         }
+        publisher.publishEvent(new SpendCreatedRankingEvent(accountBook));
 
         return AccountBookSpendResponse.from(saved);
     }
@@ -110,7 +110,7 @@ public class AccountBookService {
         AccountBook accountBook = request.toEntity(user, category);
         AccountBook saved = accountBookRepository.save(accountBook);
         if (request.repeat() != null)
-            eventPublisher.publishEvent(new CreateFirstIncomeEvent(user));
+            publisher.publishEvent(new CreateFirstIncomeEvent(user));
         return AccountBookIncomeResponse.from(saved);
     }
 

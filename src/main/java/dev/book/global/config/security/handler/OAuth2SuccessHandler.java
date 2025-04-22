@@ -42,10 +42,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         switch (userLoginState){
             case LOGIN_SUCCESS -> {
                 jwtUtil.generateToken(response, authentication);
-                getRedirectStrategy().sendRedirect(request, response, "/main");
+                getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/main");
             }
             case PROFILE_INCOMPLETE ->
-                getRedirectStrategy().sendRedirect(request, response, "/signup?email"+authentication.getName());
+                    getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/auth/signup?email="+authentication.getName());
         }
     }
 
@@ -61,7 +61,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         try {
             String invitationToken = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
-            userFriendService.makeInvitation(authentication.getName(), invitationToken);
+            userFriendService.invitedUserMakeInvitation(authentication.getName(), invitationToken);
         } catch (Exception e) {
             logger.error("친구 요청 처리 중 오류 발생", e);
         }

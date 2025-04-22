@@ -90,7 +90,7 @@ public class StatService {
         //todo 카테고리 리스트의 총 소비양
     }
 
-    public int getTotalConsumeOfLastMonth(Long userId){
+    public int getTotalConsumeOfLastMonth(Long userId) {
         PeriodRange periodRange = Frequency.MONTHLY.calcPeriod();
         return accountBookRepository.sumSpending(userId, CategoryType.SPEND, periodRange.previousStart(), periodRange.previousEnd());
     }
