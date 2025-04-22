@@ -1,6 +1,6 @@
 package dev.book.challenge.service;
 
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.InviteFriendToChallengeEvent;
 import dev.book.challenge.challenge_invite.entity.ChallengeInvite;
 import dev.book.challenge.challenge_invite.repository.ChallengeInviteRepository;
 import dev.book.challenge.dto.request.ChallengeInviteRequest;
@@ -14,6 +14,7 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class ChallengeInviteService {
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
     private final UserRepository userRepository;
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void invite(Long challengeId, UserEntity user, ChallengeInviteRequest challengeInviteRequest) {
@@ -47,7 +48,7 @@ public class ChallengeInviteService {
         challenge.isOver(countParticipants);
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
-        individualAchievementStatusService.plusInviteFriendToChallenge(user);
+        eventPublisher.publishEvent(new InviteFriendToChallengeEvent(user));
 
     }
 

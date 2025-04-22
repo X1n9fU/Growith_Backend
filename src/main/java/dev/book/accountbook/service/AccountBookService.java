@@ -13,7 +13,7 @@ import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.type.CategoryType;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.CreateFirstIncomeEvent;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
@@ -39,7 +39,7 @@ public class AccountBookService {
     private final CategoryRepository categoryRepository;
     private final AccountBookRepository accountBookRepository;
 
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public AccountBookSpendResponse getSpendOne(Long id, Long userId) {
@@ -110,7 +110,7 @@ public class AccountBookService {
         AccountBook accountBook = request.toEntity(user, category);
         AccountBook saved = accountBookRepository.save(accountBook);
         if (request.repeat() != null)
-            individualAchievementStatusService.setCreateFirstIncomeTrue(user);
+            eventPublisher.publishEvent(new CreateFirstIncomeEvent(user));
         return AccountBookIncomeResponse.from(saved);
     }
 

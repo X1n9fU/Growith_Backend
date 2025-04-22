@@ -89,6 +89,6 @@ public class UserService {
     }
 
     public void checkIsUserLogin(CustomUserDetails userDetails) {
-        individualAchievementStatusService.deterMineContinuous(userDetails.user());
+        individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
     }
 }

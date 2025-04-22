@@ -1,6 +1,6 @@
 package dev.book.challenge.service;
 
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.CreateChallengeEvent;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -15,6 +15,7 @@ import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
 
@@ -38,7 +39,7 @@ public class ChallengeService {
         Challenge savedChallenge = challengeRepository.save(challenge);
         UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
         userChallengeRepository.save(userChallenge);
-        individualAchievementStatusService.plusCreateChallenge(user);
+        eventPublisher.publishEvent(new CreateChallengeEvent(user));
         return ChallengeCreateResponse.fromEntity(savedChallenge);
 
     }

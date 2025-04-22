@@ -8,13 +8,15 @@ import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.accountbook.type.PeriodRange;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.CheckSpendAnalysisEvent;
+import dev.book.achievement.achievement_user.dto.event.SaveConsumeOfWeekEvent;
 import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +30,12 @@ public class StatService {
     private final UserRepository userRepository;
     private final AccountBookRepository accountBookRepository;
 
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public List<AccountBookStatResponse> statList(Long userId, Frequency frequency) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-        individualAchievementStatusService.pluCheckSpendAnalysis(user);
+        eventPublisher.publishEvent(new CheckSpendAnalysisEvent(user));
         return getStatList(userId, frequency.calcStartDate());
     }
 
@@ -78,7 +80,7 @@ public class StatService {
     private void calcSavedRateAndAchieve(UserEntity user, Integer thisAmount, Integer lastAmount) {
         if (lastAmount != null && lastAmount > 0) {
             double savedRate = ((double) (lastAmount - thisAmount) / lastAmount) * 100;
-            individualAchievementStatusService.achieveSaveAccomplishmentOfWeek(user, savedRate);
+            eventPublisher.publishEvent(new SaveConsumeOfWeekEvent(user, savedRate));
         }
     }
 
@@ -90,6 +92,6 @@ public class StatService {
 
     public int getTotalConsumeOfLastMonth(Long userId){
         PeriodRange periodRange = Frequency.MONTHLY.calcPeriod();
-        return accountBookRepository.sumSpendingPerLastMonth(userId, CategoryType.SPEND, periodRange.previousStart(), periodRange.previousEnd());
+        return accountBookRepository.sumSpending(userId, CategoryType.SPEND, periodRange.previousStart(), periodRange.previousEnd());
     }
 }

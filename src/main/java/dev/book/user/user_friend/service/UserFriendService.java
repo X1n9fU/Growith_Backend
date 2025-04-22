@@ -2,7 +2,7 @@ package dev.book.user.user_friend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.InviteFriendToServiceEvent;
 import dev.book.user.user_friend.dto.response.FriendListResponseDto;
 import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
 import dev.book.user.user_friend.entity.UserFriend;
@@ -21,6 +21,7 @@ import dev.book.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +42,7 @@ public class UserFriendService {
     private final UserRepository userRepository;
     private final UserFriendRepository userFriendRepository;
     private final ObjectMapper objectMapper;
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public InvitingUserTokenResponseDto getInviteUserToken(CustomUserDetails userDetails) throws Exception {
         Long id = userDetails.user().getId();
@@ -73,7 +74,7 @@ public class UserFriendService {
         UserEntity friend = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         userFriend.inviteFriend(friend);
-        individualAchievementStatusService.plusInviteFriendToService(userFriend.getUser());
+        eventPublisher.publishEvent(new InviteFriendToServiceEvent(userFriend.getUser()));
     }
 
     private EncryptUserInfo decryptToken(String safeToken) throws Exception {

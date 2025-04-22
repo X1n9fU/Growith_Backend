@@ -3,9 +3,11 @@ package dev.book.accountbook.scheduler;
 import dev.book.accountbook.entity.Budget;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.service.StatService;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.SaveConsumeFromBudgetEvent;
+import dev.book.achievement.achievement_user.dto.event.SuccessBudgetPlanEvent;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +21,7 @@ public class AccountBookScheduler {
     private final BudgetRepository budgetRepository;
 
     private final StatService statService;
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Scheduled(cron = "0 0 1 * *") //매월 1일마다 예산 계획 성공 여부
     public void checkBudgetSuccessfulOrNot(){
@@ -31,7 +33,7 @@ public class AccountBookScheduler {
                 // 저번 달 예산 계획과 비교하여 % 이상 절약한 사람들에게 업적 달성
                 calcSavedRateAndAchieve(budget.getUser(), budget.getBudgetLimit(), lastMonth);
                 // 예산 계획에 성공한 사람들 횟수 +1
-                individualAchievementStatusService.plusSuccessBudgetPlan(budget.getUser());
+                eventPublisher.publishEvent(new SuccessBudgetPlanEvent(budget.getUser()));
             }
         }
     }
@@ -40,7 +42,7 @@ public class AccountBookScheduler {
         if (lastAmount != null && lastAmount > 0) {
             double savedRate = ((double) (lastAmount - thisAmount) / lastAmount) * 100;
             if (savedRate >= 5.0)
-                individualAchievementStatusService.achieveSaveAccomplishmentFromBudget(user, savedRate);
+                eventPublisher.publishEvent(new SaveConsumeFromBudgetEvent(user, savedRate));
         }
     }
 
