@@ -12,9 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -43,13 +42,13 @@ public class UserEntity extends BaseTimeEntity {
     private int participatingChallenges = 0;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserCategory> userCategory = new HashSet<>();
+    private List<UserCategory> userCategory = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserFriend> sendFriendRequests = new HashSet<>(); //유저가 친구 요청 보냄
+    private List<UserFriend> sendFriendRequests = new ArrayList<>(); //유저가 친구 요청 보냄
 
     @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserFriend> receivedFriendRequests = new HashSet<>(); //유저가 친구 요청 받음
+    private List<UserFriend> receivedFriendRequests = new ArrayList<>(); //유저가 친구 요청 받음
 
     //todo 알림 설정 필요
     //todo 이후 entity과의 관계 설정 필요
@@ -80,15 +79,15 @@ public class UserEntity extends BaseTimeEntity {
         if (!this.userCategory.isEmpty())
             this.userCategory.clear();
 
-        Set<UserCategory> userCategories = getUserCategories(categories);
+        List<UserCategory> userCategories = getUserCategories(categories);
         for (UserCategory uc : userCategories){
             uc.setUser(this);
             this.userCategory.add(uc);
         }
     }
 
-    private Set<UserCategory> getUserCategories(List<Category> categories) {
-        Set<UserCategory> userCategories = new HashSet<>();
+    private List<UserCategory> getUserCategories(List<Category> categories) {
+        List<UserCategory> userCategories = new ArrayList<>();
         for (Category category: categories){
             UserCategory userCategory = new UserCategory(this, category);
             userCategories.add(userCategory);
