@@ -1,7 +1,7 @@
-package dev.book.accountbook.entity.middle;
+package dev.book.user.user_category;
 
-import dev.book.accountbook.entity.AccountBook;
 import dev.book.global.entity.Category;
+import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,21 +10,26 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AccountBookCategory {
+public class UserCategory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_book_id")
-    private AccountBook accountBook;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public AccountBookCategory(AccountBook accountBook, Category category) {
-        this.accountBook = accountBook;
+    public UserCategory(UserEntity user, Category category) {
+        this.user = user;
         this.category = category;
+    }
+
+    public void setUser(UserEntity user){
+        this.user = user;
     }
 }

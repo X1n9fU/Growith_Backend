@@ -12,6 +12,7 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import dev.book.user.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
@@ -45,17 +47,18 @@ public class AuthService {
     public void signUp(UserSignUpRequest userSignupRequest, String email, HttpServletResponse response) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-
         Authentication authentication = getAuthentication(user);
 
-        validateNickname(userSignupRequest.nickname());
-
-        user.updateNickname(userSignupRequest.nickname());
-        user.updateCategory(userSignupRequest.categories());
+        userService.validateNickname(userSignupRequest.nickname());
+        updateNickNameAndCategory(user, userSignupRequest);
 
         TokenDto tokenDto = getTokenDto(response, authentication);
-
         refreshTokenService.saveAndUpdateRefreshToken(user, tokenDto.refreshToken());
+    }
+
+    private void updateNickNameAndCategory(UserEntity user, UserSignUpRequest userSignupRequest) {
+        user.updateNickname(userSignupRequest.nickname());
+        userService.checkCategoriesAndUpdate(userSignupRequest.categories(), user);
     }
 
     private Authentication getAuthentication(UserEntity user) {
@@ -70,20 +73,14 @@ public class AuthService {
         return jwtUtil.generateToken(response, authentication);
     }
 
-    public void validateNickname(String nickname) {
-        boolean isExisted = userRepository.existsByNickname(nickname);
-        if (isExisted) throw new UserErrorException(UserErrorCode.DUPLICATE_NICKNAME);
-    }
-
     /**
      * RefreshToken 삭제
      * @param userDetails
      */
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
-        userDetails.user().deleteRefreshToken();
         jwtUtil.deleteAccessTokenAndRefreshToken(request, response); //쿠키에서 refreshToken 지우기
-        userRepository.save(userDetails.user());
+        refreshTokenService.deleteRefreshToken(userDetails.user());
     }
 
     /**

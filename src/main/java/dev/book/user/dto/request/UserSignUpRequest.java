@@ -1,6 +1,5 @@
 package dev.book.user.dto.request;
 
-import dev.book.global.entity.Category;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,8 +13,8 @@ public record UserSignUpRequest(
         String nickname,
 
         @Schema(description = "유저 초기 카테고리", defaultValue = "[\n" +
-                "         \"식비\", \"카페 / 간식\", \"편의점 / 마트 / 잡화\", \"쇼핑\", \"취미 / 여가\", \"생활\", \"미용\", \"의료 / 건강 / 피트니스\"\n" +
+                "         \"food\", \"cafe_snack\", \"convenience_store\", \"shopping\", \"hobby\", \"living\", \"beauty\", \"health\"\n" +
                 "   ]")
-        List<Category> categories
+        List<String> categories
 ) {
 }

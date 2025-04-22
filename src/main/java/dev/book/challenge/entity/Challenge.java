@@ -117,4 +117,9 @@ public class Challenge extends BaseTimeEntity {
             throw new ChallengeException(CHALLENGE_ALREADY_END);
         }
     }
+
+    public void completeChallenge(){
+        if (Status.IN_PROGRESS.equals(this.status))
+            this.status = Status.COMPLETED;
+    }
 }

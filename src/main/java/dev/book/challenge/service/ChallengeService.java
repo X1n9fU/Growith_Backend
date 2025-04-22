@@ -2,6 +2,7 @@ package dev.book.challenge.service;
 
 import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.category.ChallengeCategoryRepository;
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -35,6 +36,7 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
+    private final IndividualAchievementStatusService individualAchievementStatusService;
     private final CategoryRepository categoryRepository;
     private final ChallengeCategoryRepository challengeCategoryRepository;
 
@@ -43,6 +45,8 @@ public class ChallengeService {
         Challenge challenge = Challenge.of(challengeCreateRequest,user);
         UserChallenge userChallenge = UserChallenge.of(user, challenge);
         userChallengeRepository.save(userChallenge);
+        individualAchievementStatusService.plusCreateChallenge(user);
+        return ChallengeCreateResponse.fromEntity(savedChallenge);
         List<ChallengeCategory> challengeCategory = categories.stream().map(category -> new ChallengeCategory(challenge,category)).toList();
         challenge.getChallengeCategories().addAll(challengeCategory);
         return ChallengeCreateResponse.fromEntity(challenge,categories);
