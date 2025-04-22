@@ -1,4 +1,4 @@
-package dev.book.user.service;
+package dev.book.user.scheduler;
 
 import dev.book.achievement.achievement_user.entity.IndividualAchievementStatus;
 import dev.book.achievement.achievement_user.repository.IndividualAchievementStatusRepository;

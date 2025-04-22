@@ -71,6 +71,20 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
             @Param("endDate") LocalDateTime endDate
     );
 
+    @Query("""
+                SELECT COALESCE(SUM(a.amount), 0)
+                FROM AccountBook a
+                WHERE a.user.id = :userId
+                  AND a.type = :categoryType
+                  AND a.updatedAt BETWEEN :startDate AND :endDate
+            """)
+    Integer sumSpendingPerLastMonth(
+            @Param("userId") Long userId,
+            @Param("categoryType") CategoryType categoryType,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
     @EntityGraph(attributePaths = {"category"})
     @Query("""
                 SELECT DISTINCT ab

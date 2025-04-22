@@ -9,6 +9,7 @@ import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.accountbook.type.PeriodRange;
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
@@ -70,16 +71,25 @@ public class StatService {
 
         if (Frequency.WEEKLY.equals(frequency))
             calcSavedRateAndAchieve(user, thisAmount, lastAmount);
+
         return new AccountBookConsumeResponse(lastAmount - thisAmount);
     }
 
     private void calcSavedRateAndAchieve(UserEntity user, Integer thisAmount, Integer lastAmount) {
         if (lastAmount != null && lastAmount > 0) {
             double savedRate = ((double) (lastAmount - thisAmount) / lastAmount) * 100;
-            if (savedRate >= 10.0)
-                individualAchievementStatusService.saveTenPercentOnLastWeek(user);
-            else if (savedRate >= 5.0)
-                individualAchievementStatusService.saveFivePercentOnLastWeek(user);
+            individualAchievementStatusService.achieveSaveAccomplishmentOfWeek(user, savedRate);
         }
+    }
+
+    public AccountBookConsumeResponse getCategoryTotalConsume(Long userId, List<Category> category, LocalDateTime starDate, LocalDateTime endDate) {
+//        List<AccountBook> responses = accountBookRepository.findByCategory(userId, CategoryType.SPEND, category, starDate, LocalDateTime.now());
+        return null;
+        //todo 카테고리 리스트의 총 소비양
+    }
+
+    public int getTotalConsumeOfLastMonth(Long userId){
+        PeriodRange periodRange = Frequency.MONTHLY.calcPeriod();
+        return accountBookRepository.sumSpendingPerLastMonth(userId, CategoryType.SPEND, periodRange.previousStart(), periodRange.previousEnd());
     }
 }

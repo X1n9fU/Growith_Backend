@@ -89,20 +89,23 @@ public class IndividualAchievementStatusService {
         achievementService.saveAchievement(10L, user.getId());
     }
 
-    public void saveFivePercentOnLastWeek(UserEntity user) {
+    public void achieveSaveAccomplishmentOfWeek(UserEntity user, double savedRate){
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        if (!achievementStatus.isSaveFivePercentOnLastWeek()) {
-            achievementStatus.setSaveFivePercentOnLastWeek();
-            achievementService.saveAchievement(11L, user.getId());
-        }
+        //절약 %가 상한선 이상이면서, 사전에 업적 달성한 적이 없는 경우를 판단
+        if (savedRate >= 10.0 && !achievementStatus.isSaveTenPercentOnLastWeek())
+            saveTenPercentOnLastWeek(user.getId(), achievementStatus);
+        else if (savedRate >= 5.0 && !achievementStatus.isSaveFivePercentOnLastWeek())
+            saveFivePercentOnLastWeek(user.getId(), achievementStatus);
     }
 
-    public void saveTenPercentOnLastWeek(UserEntity user) {
-        IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        if (!achievementStatus.isSaveTenPercentOnLastWeek()) {
-            achievementStatus.setSaveTenPercentOnLastWeek();
-            achievementService.saveAchievement(12L, user.getId());
-        }
+    public void saveFivePercentOnLastWeek(Long userId, IndividualAchievementStatus achievementStatus) {
+        achievementStatus.setSaveFivePercentOnLastWeek();
+        achievementService.saveAchievement(11L, userId);
+    }
+
+    public void saveTenPercentOnLastWeek(Long userId, IndividualAchievementStatus achievementStatus) {
+        achievementStatus.setSaveTenPercentOnLastWeek();
+        achievementService.saveAchievement(12L, userId);
     }
 
     public void plusConsecutiveNoSpend(UserEntity user) {
@@ -142,20 +145,24 @@ public class IndividualAchievementStatusService {
         if (getWarningBudget == 1) achievementService.saveAchievement(18L, user.getId());
     }
 
-    public void saveFivePercentFromBudget(UserEntity user) {
+
+    public void achieveSaveAccomplishmentFromBudget(UserEntity user, double savedRate){
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        if (!achievementStatus.isSaveFivePercentFromBudget()) {
-            achievementStatus.setSaveFivePercentFromBudget();
-            achievementService.saveAchievement(19L, user.getId());
-        }
+        //절약 %가 상한선 이상이면서, 사전에 업적 달성한 적이 없는 경우를 판단
+        if (savedRate >= 10.0 && !achievementStatus.isSaveTenPercentFromBudget())
+            saveTenPercentFromBudget(user.getId(), achievementStatus);
+        else if (savedRate >= 5.0 && !achievementStatus.isSaveFivePercentFromBudget())
+            saveFivePercentFromBudget(user.getId(), achievementStatus);
     }
 
-    public void saveTenPercentFromBudget(UserEntity user) {
-        IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        if (!achievementStatus.isSaveTenPercentFromBudget()) {
-            achievementStatus.setSaveTenPercentFromBudget();
-            achievementService.saveAchievement(20L, user.getId());
-        }
+    public void saveFivePercentFromBudget(Long userId, IndividualAchievementStatus achievementStatus) {
+        achievementStatus.setSaveFivePercentFromBudget();
+        achievementService.saveAchievement(19L, userId);
+    }
+
+    public void saveTenPercentFromBudget(Long userId, IndividualAchievementStatus achievementStatus) {
+        achievementStatus.setSaveTenPercentFromBudget();
+        achievementService.saveAchievement(20L, userId);
     }
 
 
