@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -88,6 +89,22 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
             Pageable pageable
     );
 
+    @Query("""
+                SELECT COALESCE(SUM(a.amount), 0)
+                FROM AccountBook a
+                JOIN a.category c
+                WHERE a.user.id = :userId
+                  AND a.type = :categoryType
+                  AND a.category IN :categories
+                  AND a.updatedAt BETWEEN :startDate AND :endDate
+            """)
+    Integer sumSpendingInCategories(@Param("userId") Long userId,
+                                    @Param("categoryType") CategoryType categoryType,
+                                    @Param("categories") List<Category> category,
+                                    @Param("startDate") LocalDate startDate,
+                                    @Param("endDate") LocalDate endDate
+    );
+
 
     @Query("""
     SELECT new dev.book.challenge.rank.dto.response.RankResponse(
@@ -109,4 +126,3 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
 """)
     List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDateTime startDate, LocalDateTime endDate);
 }
-

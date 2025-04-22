@@ -153,7 +153,12 @@ public class IndividualAchievementStatusService {
             case 3->
                 achievementService.saveAchievement(17L, event.user().getId());
         }
+    }
 
+    public void didntHaveBudgetPlan(UserEntity user){
+        IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
+        achievementStatus.resetSuccessBudgetPlan();
+        achievementStatus.setSuccessBudgetPlanLastMonth(false);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
