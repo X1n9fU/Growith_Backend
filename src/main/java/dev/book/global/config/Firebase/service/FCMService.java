@@ -4,6 +4,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
+import dev.book.achievement.entity.Achievement;
 import dev.book.global.config.Firebase.entity.FcmToken;
 import dev.book.global.config.Firebase.repository.FcmTokenRepository;
 import dev.book.user.entity.UserEntity;
@@ -14,6 +15,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FCMService {
     private final FcmTokenRepository fcmTokenRepository;
+
+    public void sendAchievementNotification(String fcmToken, Achievement achievement){
+        Message message = messageBuild(fcmToken, achievement.getTitle(), achievement.getContent());
+
+        try {
+            String response = FirebaseMessaging.getInstance().send(message);
+
+        } catch (FirebaseMessagingException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void sendSpendNotification(String fcmToken, String userName, int budget, long amount, long percent) {
         String title = "지출 알림";

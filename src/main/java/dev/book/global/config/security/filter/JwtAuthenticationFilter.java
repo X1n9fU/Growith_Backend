@@ -34,13 +34,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        logger.info(path);
         return permitUrl.getUrl().stream().anyMatch(path::startsWith);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        logger.info(request.getRequestURL());
         String token = getToken(request);
 
         try {

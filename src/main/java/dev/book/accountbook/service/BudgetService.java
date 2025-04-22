@@ -7,6 +7,7 @@ import dev.book.accountbook.entity.Budget;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.BudgetRepository;
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.global.config.Firebase.entity.FcmToken;
 import dev.book.global.config.Firebase.exception.FcmTokenErrorCode;
 import dev.book.global.config.Firebase.exception.FcmTokenErrorException;
@@ -32,6 +33,7 @@ public class BudgetService {
     private final FcmTokenRepository fcmTokenRepository;
 
     private final FCMService fcmService;
+    private final IndividualAchievementStatusService individualAchievementStatusService;
 
     public BudgetResponse getBudget(Long userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
@@ -42,6 +44,7 @@ public class BudgetService {
     public BudgetResponse createBudget(UserEntity user, BudgetRequest budgetRequest) {
         int date = LocalDate.now().getMonthValue();
         budgetRepository.save(new Budget(budgetRequest.budget(), date, user));
+        individualAchievementStatusService.plusCreateBudget(user);
 
         return budgetRepository.findBudgetWithTotal(user.getId());
     }
@@ -57,6 +60,10 @@ public class BudgetService {
                     .orElseThrow(() -> new FcmTokenErrorException(FcmTokenErrorCode.NOT_FOUND_FCM_TOKEN));
 
             fcmService.sendSpendNotification(token.getToken(), event.nickname(), response.budget(), response.total(), usageRate);
+            //과소비 경고 업적
+            UserEntity user = userRepository.findById(event.userId())
+                            .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+            individualAchievementStatusService.plusGetWarningBudget(user);
         }
     }
 

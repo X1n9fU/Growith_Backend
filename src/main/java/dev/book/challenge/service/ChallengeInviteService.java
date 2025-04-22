@@ -1,5 +1,6 @@
 package dev.book.challenge.service;
 
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.challenge.challenge_invite.entity.ChallengeInvite;
 import dev.book.challenge.challenge_invite.repository.ChallengeInviteRepository;
 import dev.book.challenge.dto.request.ChallengeInviteRequest;
@@ -29,6 +30,7 @@ public class ChallengeInviteService {
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
     private final UserRepository userRepository;
+    private final IndividualAchievementStatusService individualAchievementStatusService;
 
     @Transactional
     public void invite(Long challengeId, UserEntity user, ChallengeInviteRequest challengeInviteRequest) {
@@ -45,6 +47,8 @@ public class ChallengeInviteService {
         challenge.isOver(countParticipants);
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
+        individualAchievementStatusService.plusInviteFriendToChallenge(user);
+
     }
 
     private void isAlreadyInvited(UserEntity inviteUser, Challenge challenge) {
