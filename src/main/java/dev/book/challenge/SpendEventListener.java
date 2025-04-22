@@ -3,7 +3,6 @@ package dev.book.challenge;
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.rank.SpendCreatedRankingEvent;
-import dev.book.challenge.rank.dto.response.RankResponse;
 import dev.book.challenge.rank.service.RankService;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
@@ -39,8 +38,7 @@ public class SpendEventListener {
 
         // 참여자 전체 순위 재계산 후 전송
         for (Challenge challenge : joinedChallenges) {
-            List<RankResponse> ranks = rankService.checkRank(challenge.getId());
-            messagingTemplate.convertAndSend("/sub/challenge/" + challenge.getId() + "/rank", ranks);
+            rankService.checkRank(challenge.getId());
         }
     }
 
