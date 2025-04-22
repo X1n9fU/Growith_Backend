@@ -49,7 +49,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers("/**","/ws/**").permitAll()
+                                .requestMatchers(permitUrl.getUrl().toArray(new String[0])).permitAll()
+                                .anyRequest().authenticated()
                         //todo 현재는 모든 경로를 열어놓음 추후 endpoint마다 권한 설정
                 )
                 .oauth2Login(
@@ -84,7 +85,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080","http://localhost:63342/"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080","http://localhost:63342"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Cache-Control"));
         config.setMaxAge(3600L);

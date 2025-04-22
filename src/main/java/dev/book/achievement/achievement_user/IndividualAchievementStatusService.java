@@ -130,7 +130,7 @@ public class IndividualAchievementStatusService {
 
     public void plusSuccessBudgetPlan(UserEntity user) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(user);
-        if (!achievementStatus.isSuccessBudgetPlanLastMonth()){
+        /*if (!achievementStatus.isSuccessBudgetPlanLastMonth()){
             achievementStatus.resetSuccessBudgetPlan(); //저번달에 성공하지 못했으면 0으로 초기화
         }
         int successBudgetPlan = achievementStatus.plusSuccessBudgetPlan();
@@ -140,7 +140,7 @@ public class IndividualAchievementStatusService {
                 achievementService.saveAchievement(16L, user.getId());
             case 3->
                 achievementService.saveAchievement(17L, user.getId());
-        }
+        }*/
 
     }
 

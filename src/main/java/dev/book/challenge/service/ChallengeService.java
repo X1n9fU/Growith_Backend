@@ -1,8 +1,8 @@
 package dev.book.challenge.service;
 
+import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.category.ChallengeCategoryRepository;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -42,14 +42,13 @@ public class ChallengeService {
 
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
-        Challenge challenge = Challenge.of(challengeCreateRequest,user);
+        Challenge challenge = Challenge.of(challengeCreateRequest, user);
         UserChallenge userChallenge = UserChallenge.of(user, challenge);
         userChallengeRepository.save(userChallenge);
         individualAchievementStatusService.plusCreateChallenge(user);
-        return ChallengeCreateResponse.fromEntity(savedChallenge);
-        List<ChallengeCategory> challengeCategory = categories.stream().map(category -> new ChallengeCategory(challenge,category)).toList();
+        List<ChallengeCategory> challengeCategory = categories.stream().map(category -> new ChallengeCategory(challenge, category)).toList();
         challenge.getChallengeCategories().addAll(challengeCategory);
-        return ChallengeCreateResponse.fromEntity(challenge,categories);
+        return ChallengeCreateResponse.fromEntity(challenge, categories);
 
     }
 
@@ -67,10 +66,10 @@ public class ChallengeService {
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
         Challenge challenge = getMyChallenge(user.getId(), id);
         List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
-        List<ChallengeCategory> challengeCategories = categories.stream().map(category -> new ChallengeCategory(challenge,category)).toList();
-        challenge.updateInfo(challengeUpdateRequest,challengeCategories);
+        List<ChallengeCategory> challengeCategories = categories.stream().map(category -> new ChallengeCategory(challenge, category)).toList();
+        challenge.updateInfo(challengeUpdateRequest, challengeCategories);
         challengeRepository.flush();
-        return ChallengeUpdateResponse.fromEntity(challenge,categories);
+        return ChallengeUpdateResponse.fromEntity(challenge, categories);
     }
 
     @Transactional

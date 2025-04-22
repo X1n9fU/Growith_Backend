@@ -22,17 +22,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
     @Query("SELECT c FROM Challenge c WHERE c.endDate < :today AND c.status <> 'COMPLETED'")
     List<Challenge> findChallengesToUpdate(@Param("today") LocalDate today);
 
-    @Query("""
-        SELECT c
-        FROM Challenge c
-        WHERE :date BETWEEN c.startDate AND c.endDate
-    """)
-    List<Challenge> findAllByCategoryAndDate(LocalDateTime date);
-
-
-    @Query("SELECT c FROM Challenge c WHERE c.startDate <= :date AND c.endDate >= :date")
-    List<Challenge> findAllByCategoryAndDate(@Param("date") LocalDate date);
-
     @Query("SELECT c FROM Challenge c JOIN FETCH c.challengeCategories WHERE c.id=:challengeId")
-    Optional<Challenge> findByIdA(Long challengeId);
+    Optional<Challenge> findByIdJoinCategory(Long challengeId);
+
 }

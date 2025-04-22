@@ -61,7 +61,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         try {
             String invitationToken = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
-            userFriendService.makeInvitation(authentication.getName(), invitationToken);
+            userFriendService.invitedUserMakeInvitation(authentication.getName(), invitationToken);
         } catch (Exception e) {
             logger.error("친구 요청 처리 중 오류 발생", e);
         }

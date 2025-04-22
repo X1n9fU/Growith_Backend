@@ -11,7 +11,7 @@ import java.io.FileInputStream;
 
 @Configuration
 public class FirebaseConfig {
-   /* @Value("${firebase.url}")
+    @Value("${firebase.url}")
     private String FIREBASE;
 
     @PostConstruct
@@ -30,5 +30,5 @@ public class FirebaseConfig {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
+    }
 }
