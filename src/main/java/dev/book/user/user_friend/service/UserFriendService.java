@@ -3,24 +3,23 @@ package dev.book.user.user_friend.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.book.achievement.achievement_user.dto.event.InviteFriendToServiceEvent;
-import dev.book.user.user_friend.dto.response.FriendListResponseDto;
-import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
-import dev.book.user.user_friend.entity.UserFriend;
-import dev.book.user.user_friend.repository.UserFriendRepository;
-import dev.book.user.user_friend.util.AESUtil;
-import dev.book.user.user_friend.dto.EncryptUserInfo;
-import dev.book.user.user_friend.dto.response.KakaoResponseDto;
-import dev.book.user.user_friend.dto.response.InvitingUserTokenResponseDto;
-import dev.book.user.user_friend.exception.UserFriendErrorCode;
-import dev.book.user.user_friend.exception.UserFriendException;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import dev.book.user.user_friend.dto.EncryptUserInfo;
+import dev.book.user.user_friend.dto.response.FriendListResponseDto;
+import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
+import dev.book.user.user_friend.dto.response.InvitingUserTokenResponseDto;
+import dev.book.user.user_friend.dto.response.KakaoResponseDto;
+import dev.book.user.user_friend.entity.UserFriend;
+import dev.book.user.user_friend.exception.UserFriendErrorCode;
+import dev.book.user.user_friend.exception.UserFriendException;
+import dev.book.user.user_friend.repository.UserFriendRepository;
+import dev.book.user.user_friend.util.AESUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +34,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserFriendService {
 
-    @Value("${springdoc.servers.production.url}")
-    private String DOMAIN;
+//    @Value("${springdoc.servers.production.url}")
+    private String DOMAIN = "http://localhost:3000";
     private final String MAIN_URL = "/main";
 
     private final UserRepository userRepository;
