@@ -5,16 +5,29 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import dev.book.achievement.entity.Achievement;
+import dev.book.global.config.Firebase.dto.LimitWarningFcmEvent;
 import dev.book.global.config.Firebase.entity.FcmToken;
+import dev.book.global.config.Firebase.exception.FcmTokenErrorCode;
+import dev.book.global.config.Firebase.exception.FcmTokenErrorException;
 import dev.book.global.config.Firebase.repository.FcmTokenRepository;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
 public class FCMService {
     private final FcmTokenRepository fcmTokenRepository;
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleLimitWarningFcmEvent(LimitWarningFcmEvent event){
+        FcmToken token = fcmTokenRepository.findByUserId(event.userId())
+                .orElseThrow(() -> new FcmTokenErrorException(FcmTokenErrorCode.NOT_FOUND_FCM_TOKEN));
+
+        sendSpendNotification(token.getToken(), event.nickname(), event.budget(), event.total(), event.usageRate());
+    }
 
     public void sendAchievementNotification(String fcmToken, Achievement achievement){
         Message message = messageBuild(fcmToken, achievement.getTitle(), achievement.getContent());
