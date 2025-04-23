@@ -22,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
@@ -134,5 +136,13 @@ public class ChallengeService {
     private Challenge getMyChallenge(Long userId, Long id) {
         Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
         return challenge;
+    }
+
+    public List<ChallengeReadResponse> findNewChallenge() {
+        Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startToday = now.toLocalDate().atStartOfDay();
+        LocalDateTime endToday = now.toLocalDate().atTime(LocalTime.MAX);
+        return challengeRepository.findNewChallenge(pageable, startToday, endToday);
     }
 }

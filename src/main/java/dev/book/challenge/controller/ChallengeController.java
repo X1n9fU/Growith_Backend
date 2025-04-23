@@ -69,9 +69,15 @@ public class ChallengeController implements ChallengeApi {
         return ResponseEntity.ok().body("챌린지에서 나갔습니다");
     }
 
-    @GetMapping("top")
-    public ResponseEntity<List<ChallengeTopResponse>> topChallenge() {
+    @GetMapping("/top")
+    public ResponseEntity<List<ChallengeTopResponse>> searchTopChallenge() {
         List<ChallengeTopResponse> topChallenge = challengeService.findTopChallenge();
         return ResponseEntity.ok().body(topChallenge);
+    }
+
+    @GetMapping("/new")
+    public ResponseEntity<List<ChallengeReadResponse>> searchNewChallenge() {
+        List<ChallengeReadResponse> challengeReadResponses = challengeService.findNewChallenge();
+        return ResponseEntity.ok().body(challengeReadResponses);
     }
 }

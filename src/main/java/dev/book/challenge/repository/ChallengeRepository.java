@@ -1,5 +1,6 @@
 package dev.book.challenge.repository;
 
+import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeTopResponse;
 import dev.book.challenge.entity.Challenge;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,14 +31,29 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
 
 
     @Query("""
-    SELECT new dev.book.challenge.dto.response.ChallengeTopResponse(
-        c.id, c.title, c.capacity,COUNT(uc),c.status
-    )
-    FROM UserChallenge uc
-    LEFT JOIN uc.challenge c
-    WHERE c.status = 'RECRUITING'
-    GROUP BY c.id, c.title, c.capacity, c.status
-    ORDER BY COUNT(uc) DESC
-""")
+                SELECT new dev.book.challenge.dto.response.ChallengeTopResponse(
+                    c.id, c.title, c.capacity,COUNT(uc),c.status
+                )
+                FROM UserChallenge uc
+                LEFT JOIN uc.challenge c
+                WHERE c.status = 'RECRUITING'
+                GROUP BY c.id, c.title, c.capacity, c.status
+                ORDER BY COUNT(uc) DESC
+            """)
     List<ChallengeTopResponse> findTopChallenge(Pageable pageable);
+
+
+    @Query("""
+                SELECT new dev.book.challenge.dto.response.ChallengeTopResponse(
+                    c.id, c.title, c.capacity,COUNT(uc),c.status
+                )
+                FROM UserChallenge uc
+                LEFT JOIN uc.challenge c
+                WHERE c.status = 'RECRUITING'
+                AND  c.release = 'PUBLIC'
+                AND c.createdAt BETWEEN :startToday AND :endToday 
+                GROUP BY c.id, c.title, c.capacity, c.status
+                ORDER BY COUNT(uc) DESC
+            """)
+    List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startToday, LocalDateTime endToday);
 }

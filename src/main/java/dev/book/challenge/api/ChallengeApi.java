@@ -82,5 +82,9 @@ public interface ChallengeApi {
     ResponseEntity<String> leaveChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id);
 
     @Operation(summary = "인기 챌린지 조회 API ", description = "모집중인 챌린지 중 상위 3개를 조회 합니다.")
-    ResponseEntity<List<ChallengeTopResponse>> topChallenge();
+    ResponseEntity<List<ChallengeTopResponse>> searchTopChallenge();
+
+    @Operation(summary = "신규 챌린지 조회 API ", description = "오늘 생성된 챌린지를 조회 합니다.")
+    ResponseEntity<List<ChallengeReadResponse>> searchNewChallenge();
+
 }
