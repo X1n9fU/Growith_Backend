@@ -1,12 +1,15 @@
 package dev.book.challenge.challenge_invite.entity;
 
 import dev.book.challenge.entity.Challenge;
+import dev.book.challenge.exception.ChallengeException;
 import dev.book.global.entity.BaseTimeEntity;
 import dev.book.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_ACCEPT;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,9 +47,13 @@ public class ChallengeInvite extends BaseTimeEntity {
 
     public void accept() {
         this.isAccept = true;
+        this.inviteUser.plusChallengeCount();
     }
 
     public void reject() {
+        if(this.isAccept){
+            throw new ChallengeException(CHALLENGE_ALREADY_ACCEPT);
+        }
         this.isAccept = false;
     }
 }

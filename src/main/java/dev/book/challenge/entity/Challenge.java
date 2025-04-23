@@ -54,7 +54,7 @@ public class Challenge extends BaseTimeEntity {
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserChallenge> userChallenges;
+    private List<UserChallenge> userChallenges=new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")

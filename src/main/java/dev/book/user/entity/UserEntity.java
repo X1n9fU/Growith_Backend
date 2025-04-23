@@ -1,5 +1,6 @@
 package dev.book.user.entity;
 
+import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.entity.BaseTimeEntity;
 import dev.book.global.entity.Category;
@@ -50,6 +51,10 @@ public class UserEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserFriend> receivedFriendRequests = new ArrayList<>(); //유저가 친구 요청 받음
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserChallenge> userChallenges = new ArrayList<>();
+
+
     //todo 알림 설정 필요
     //todo 이후 entity과의 관계 설정 필요
 
@@ -62,7 +67,7 @@ public class UserEntity extends BaseTimeEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public static UserEntity of(OAuth2Attributes oAuth2Attributes){
+    public static UserEntity of(OAuth2Attributes oAuth2Attributes) {
         return UserEntity.builder()
                 .email(oAuth2Attributes.email())
                 .name(oAuth2Attributes.nickname())
@@ -71,16 +76,16 @@ public class UserEntity extends BaseTimeEntity {
                 .build();
     }
 
-    public void updateNickname(String nickname){
+    public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    public void updateCategory(List<Category> categories){
+    public void updateCategory(List<Category> categories) {
         if (!this.userCategory.isEmpty())
             this.userCategory.clear();
 
         List<UserCategory> userCategories = getUserCategories(categories);
-        for (UserCategory uc : userCategories){
+        for (UserCategory uc : userCategories) {
             uc.setUser(this);
             this.userCategory.add(uc);
         }
@@ -88,15 +93,22 @@ public class UserEntity extends BaseTimeEntity {
 
     private List<UserCategory> getUserCategories(List<Category> categories) {
         List<UserCategory> userCategories = new ArrayList<>();
-        for (Category category: categories){
+        for (Category category : categories) {
             UserCategory userCategory = new UserCategory(this, category);
             userCategories.add(userCategory);
         }
         return userCategories;
     }
 
-    public void updateProfileImage(String profileImageUrl){
+    public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public void plusChallengeCount() {
+        this.participatingChallenges++;
+    }
+
+    public void minusChallengeCount() {
+        this.participatingChallenges--;
+    }
 }

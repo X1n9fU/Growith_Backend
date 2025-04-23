@@ -74,6 +74,7 @@ public class ChallengeInviteService {
     public void acceptInvite(Long inviteId, UserEntity user) {
         ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
         challengeInvite.accept();
+        user.plusChallengeCount();
         UserChallenge userChallenge = UserChallenge.of(user, challengeInvite.getChallenge());
         userChallengeRepository.save(userChallenge);
     }

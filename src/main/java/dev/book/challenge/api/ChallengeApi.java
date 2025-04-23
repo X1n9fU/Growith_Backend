@@ -79,4 +79,5 @@ public interface ChallengeApi {
     })
     public ResponseEntity<String> leaveChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id);
 
+
 }

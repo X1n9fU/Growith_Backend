@@ -18,6 +18,7 @@ import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
+import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,16 +39,19 @@ public class ChallengeService {
     private final UserChallengeRepository userChallengeRepository;
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-
+    @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
+        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow();
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
-        Challenge challenge = Challenge.of(challengeCreateRequest, user);
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         categories.forEach(category -> new ChallengeCategory(challenge, category));
         Challenge savedChallenge = challengeRepository.save(challenge);
-        UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
+        UserChallenge userChallenge = UserChallenge.of(creator, savedChallenge);
         userChallengeRepository.save(userChallenge);
         individualAchievementStatusService.plusCreateChallenge(user);
+        creator.plusChallengeCount();
         return ChallengeCreateResponse.fromEntity(challenge);
 
     }
@@ -74,30 +78,39 @@ public class ChallengeService {
 
     @Transactional
     public void deleteChallenge(UserEntity user, Long id) {
-        Challenge challenge = getMyChallenge(user.getId(), id);
+        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        Challenge challenge = getMyChallenge(creator.getId(), id);
+        List<Long> userIds = userChallengeRepository.findUserIdByChallengeId(challenge.getId());
+        List<UserEntity> users = userRepository.findAllById(userIds);
+        for (UserEntity participant : users) {
+            participant.minusChallengeCount();
+        }
         challengeRepository.delete(challenge);
+
 
     }
 
     @Transactional
     public void participate(UserEntity user, Long id) {
-
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
 
         long countParticipants = userChallengeRepository.countByChallengeId(id);
         challenge.isOver(countParticipants);
-        UserChallenge userChallenge = UserChallenge.of(user, challenge);
+        userEntity.plusChallengeCount();
+        UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);
         userChallengeRepository.save(userChallenge);
     }
 
 
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
-
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         checkNotExist(user, challengeId);
-        userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(), challengeId);
+        userEntity.minusChallengeCount();
+        userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challengeId);
 
     }
 

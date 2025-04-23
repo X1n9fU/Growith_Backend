@@ -16,7 +16,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
     @Query("SELECT DISTINCT c FROM Challenge c JOIN FETCH c.creator JOIN FETCH c.challengeCategories cc JOIN FETCH cc.category where c.id=:id")
     Optional<Challenge> findWithCreatorById(Long id);
 
-    @Query("SELECT c FROM Challenge c JOIN FETCH c.creator u JOIN FETCH c.challengeCategories cc JOIN FETCH cc.category where c.id=:id and u.id=:creatorId")
+    @Query("SELECT DISTINCT c FROM Challenge c JOIN FETCH c.creator u JOIN FETCH c.challengeCategories cc JOIN FETCH cc.category where c.id=:id and u.id=:creatorId")
     Optional<Challenge> findByIdAndCreatorId(Long id, Long creatorId);
 
     @Query("SELECT c FROM Challenge c WHERE c.endDate < :today AND c.status <> 'COMPLETED'")
