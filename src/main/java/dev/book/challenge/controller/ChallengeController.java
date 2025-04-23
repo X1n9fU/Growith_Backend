@@ -3,10 +3,7 @@ package dev.book.challenge.controller;
 import dev.book.challenge.api.ChallengeApi;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
-import dev.book.challenge.dto.response.ChallengeCreateResponse;
-import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
-import dev.book.challenge.dto.response.ChallengeReadResponse;
-import dev.book.challenge.dto.response.ChallengeUpdateResponse;
+import dev.book.challenge.dto.response.*;
 import dev.book.challenge.service.ChallengeService;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -16,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,7 +69,9 @@ public class ChallengeController implements ChallengeApi {
         return ResponseEntity.ok().body("챌린지에서 나갔습니다");
     }
 
-
-
-
+    @GetMapping("top")
+    public ResponseEntity<List<ChallengeTopResponse>> topChallenge() {
+        List<ChallengeTopResponse> topChallenge = challengeService.findTopChallenge();
+        return ResponseEntity.ok().body(topChallenge);
+    }
 }

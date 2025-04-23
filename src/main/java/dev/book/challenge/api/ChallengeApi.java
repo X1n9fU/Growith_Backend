@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Tag(name = "챌린지 API", description = "챌린지에 생성, 조회, 수정 및 참여 관련 API ")
 public interface ChallengeApi {
     @Operation(summary = "챌린지 생성 API ", description = "사용자가 새로운 챌린지를 생성합니다.")
@@ -77,7 +79,8 @@ public interface ChallengeApi {
             @ApiResponse(responseCode = "404", description = "사용자가 속한 챌린지가 아닙니다.",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<String> leaveChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id);
+    ResponseEntity<String> leaveChallenge(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long id);
 
-
+    @Operation(summary = "인기 챌린지 조회 API ", description = "모집중인 챌린지 중 상위 3개를 조회 합니다.")
+    ResponseEntity<List<ChallengeTopResponse>> topChallenge();
 }

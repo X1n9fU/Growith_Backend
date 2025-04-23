@@ -2,13 +2,9 @@ package dev.book.challenge.service;
 
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.challenge.ChallengeCategory;
-import dev.book.challenge.category.ChallengeCategoryRepository;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
-import dev.book.challenge.dto.response.ChallengeCreateResponse;
-import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
-import dev.book.challenge.dto.response.ChallengeReadResponse;
-import dev.book.challenge.dto.response.ChallengeUpdateResponse;
+import dev.book.challenge.dto.response.*;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.exception.ErrorCode;
@@ -64,7 +60,7 @@ public class ChallengeService {
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
         Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         int participants = userChallengeRepository.countByChallengeId(challenge.getId());
-        return ChallengeReadDetailResponse.fromEntity(challenge,participants);
+        return ChallengeReadDetailResponse.fromEntity(challenge, participants);
     }
 
     @Transactional
@@ -112,6 +108,12 @@ public class ChallengeService {
         checkNotExist(user, challengeId);
         userEntity.minusChallengeCount();
         userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challengeId);
+
+    }
+
+    public List<ChallengeTopResponse> findTopChallenge() {
+        Pageable pageable = PageRequest.of(0, 3); //todo top 갯수 추가 조정
+        return challengeRepository.findTopChallenge(pageable);
 
     }
 

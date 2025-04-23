@@ -1,6 +1,8 @@
 package dev.book.challenge.repository;
 
+import dev.book.challenge.dto.response.ChallengeTopResponse;
 import dev.book.challenge.entity.Challenge;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,16 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
     @Query("SELECT c FROM Challenge c JOIN FETCH c.challengeCategories WHERE c.id=:challengeId")
     Optional<Challenge> findByIdJoinCategory(Long challengeId);
 
+
+    @Query("""
+    SELECT new dev.book.challenge.dto.response.ChallengeTopResponse(
+        c.id, c.title, c.capacity,COUNT(uc),c.status
+    )
+    FROM UserChallenge uc
+    LEFT JOIN uc.challenge c
+    WHERE c.status = 'RECRUITING'
+    GROUP BY c.id, c.title, c.capacity, c.status
+    ORDER BY COUNT(uc) DESC
+""")
+    List<ChallengeTopResponse> findTopChallenge(Pageable pageable);
 }
