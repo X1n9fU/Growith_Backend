@@ -98,7 +98,7 @@ public class Challenge extends BaseTimeEntity {
         });
     }
 
-    public void isOver(long countParticipants) {
+    public void isOver(int countParticipants) {
         if (countParticipants >= this.capacity) {
             throw new ChallengeException(CHALLENGE_CAPACITY_FULL);
         }

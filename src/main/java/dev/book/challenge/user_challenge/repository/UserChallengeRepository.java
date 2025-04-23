@@ -13,7 +13,7 @@ import java.util.List;
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
 
     @Query("SELECT COUNT(u) FROM UserChallenge u WHERE u.challenge.id=:id")
-    long countByChallengeId(Long id);
+    int countByChallengeId(Long id);
 
     boolean existsByUserIdAndChallengeId(Long id, Long challengeId);
 

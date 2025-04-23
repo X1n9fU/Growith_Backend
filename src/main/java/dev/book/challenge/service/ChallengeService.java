@@ -63,7 +63,8 @@ public class ChallengeService {
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
         Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
-        return ChallengeReadDetailResponse.fromEntity(challenge);
+        int participants = userChallengeRepository.countByChallengeId(challenge.getId());
+        return ChallengeReadDetailResponse.fromEntity(challenge,participants);
     }
 
     @Transactional
@@ -97,7 +98,7 @@ public class ChallengeService {
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
 
-        long countParticipants = userChallengeRepository.countByChallengeId(id);
+        int countParticipants = userChallengeRepository.countByChallengeId(id);
         challenge.isOver(countParticipants);
         userEntity.plusChallengeCount();
         UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);

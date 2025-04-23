@@ -43,7 +43,7 @@ public class ChallengeInviteService {
         isAlreadyInvited(inviteUser, challenge); // 이미 초대가 된 상황일때
 
 
-        long countParticipants = userChallengeRepository.countByChallengeId(challengeId);
+        int countParticipants = userChallengeRepository.countByChallengeId(challengeId);
         challenge.isOver(countParticipants);
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
