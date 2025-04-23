@@ -59,14 +59,14 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepository {
         if (title == null) {
             return null;
         }
-        return challenge.title.eq(title);
+        return challenge.title.containsIgnoreCase(title);
     }
 
     private BooleanExpression eqText(String text) {
         if (text == null) {
             return null;
         }
-        return challenge.text.eq(text);
+        return challenge.text.containsIgnoreCase(text);
     }
 
 
