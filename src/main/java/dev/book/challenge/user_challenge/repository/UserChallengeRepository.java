@@ -37,6 +37,6 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
 
 
 
-    @Query("SELECT uc.user FROM UserChallenge uc WHERE uc.challenge.id=:challengeId")
+    @Query("SELECT uc.user FROM UserChallenge uc JOIN UserEntity u ON uc.user.id=u.id WHERE uc.challenge.id=:challengeId")
     List<UserEntity> findUsersByChallengeId(Long challengeId);
 }

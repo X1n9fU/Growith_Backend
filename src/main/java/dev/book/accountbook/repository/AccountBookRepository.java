@@ -1,6 +1,7 @@
 package dev.book.accountbook.repository;
 
 import dev.book.accountbook.dto.response.AccountBookStatResponse;
+import dev.book.accountbook.dto.response.AccountBookWeekConsumePerUserResponse;
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.challenge.rank.dto.response.RankResponse;
@@ -13,7 +14,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -101,8 +101,8 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
     Integer sumSpendingInCategories(@Param("userId") Long userId,
                                     @Param("categoryType") CategoryType categoryType,
                                     @Param("categories") List<Category> category,
-                                    @Param("startDate") LocalDate startDate,
-                                    @Param("endDate") LocalDate endDate
+                                    @Param("startDate") LocalDateTime startDate,
+                                    @Param("endDate") LocalDateTime endDate
     );
 
 
@@ -125,4 +125,22 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
     ORDER BY COALESCE(SUM(ab.amount), 0L) ASC
 """)
     List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("""
+            SELECT new dev.book.accountbook.dto.response.AccountBookWeekConsumePerUserResponse(
+                u,
+                COALESCE(SUM(CASE WHEN a.updatedAt BETWEEN :startDate AND :endDate THEN a.amount END), 0L),
+                COALESCE(SUM(CASE WHEN a.updatedAt BETWEEN :lastStartDate AND :lastEndDate THEN a.amount END), 0L)
+            ) 
+            FROM AccountBook a
+            JOIN a.user u
+            WHERE a.type = 'SPEND'
+            GROUP BY u.id
+            """)
+    List<AccountBookWeekConsumePerUserResponse> findUserAndAmountByConsumeOfWeek(
+                                                    @Param("startDate") LocalDateTime startDate,
+                                                    @Param("endDate") LocalDateTime endDate,
+                                                    @Param("lastStartDate") LocalDateTime lastStartDate,
+                                                    @Param("lastEndDate") LocalDateTime lastEndDate
+    );
 }

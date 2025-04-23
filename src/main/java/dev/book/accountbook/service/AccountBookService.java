@@ -1,12 +1,12 @@
 package dev.book.accountbook.service;
 
-import dev.book.accountbook.dto.event.SpendCreatedEvent;
 import dev.book.accountbook.dto.request.AccountBookIncomeRequest;
 import dev.book.accountbook.dto.request.AccountBookRequest;
 import dev.book.accountbook.dto.request.AccountBookSpendListRequest;
 import dev.book.accountbook.dto.request.AccountBookSpendRequest;
 import dev.book.accountbook.dto.response.AccountBookIncomeResponse;
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
+import dev.book.accountbook.dto.response.BudgetResponse;
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
@@ -14,7 +14,9 @@ import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.achievement.achievement_user.dto.event.CreateFirstIncomeEvent;
+import dev.book.achievement.achievement_user.dto.event.GetWarningBudgetEvent;
 import dev.book.challenge.rank.SpendCreatedRankingEvent;
+import dev.book.global.config.Firebase.dto.LimitWarningFcmEvent;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
@@ -64,12 +66,25 @@ public class AccountBookService {
         AccountBook saved = accountBookRepository.save(accountBook);
 
         if (budgetRepository.existsById(user.getId())) {
-            publisher.publishEvent(new SpendCreatedEvent(user.getId(), user.getNickname()));
+            BudgetResponse response = budgetRepository.findBudgetWithTotal(user.getId());
+
+            if (response.total() >= response.budget() * 0.5) {
+                long usageRate = calcUsageRate(response);
+                //업적
+                publisher.publishEvent(new GetWarningBudgetEvent(user));
+                //fcm 알림
+                publisher.publishEvent(new LimitWarningFcmEvent(user.getId(), user.getNickname(), response.budget(), response.total(), usageRate));
+            }
         }
         publisher.publishEvent(new SpendCreatedRankingEvent(accountBook));
 
         return AccountBookSpendResponse.from(saved);
     }
+
+    private long calcUsageRate(BudgetResponse response) {
+        return (response.total() / response.budget()) * 100;
+    }
+
 
     @Transactional
     public AccountBookSpendResponse modifySpend(AccountBookSpendRequest request, Long id, Long userId) {

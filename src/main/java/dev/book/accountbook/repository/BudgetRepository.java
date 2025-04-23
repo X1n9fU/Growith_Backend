@@ -15,7 +15,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> , BudgetRe
     Optional<Budget> findByIdAndUserId(Long id, Long userId);
 
     @Query("""
-        SELECT b FROM Budget b JOIN FETCH UserEntity u WHERE b.month=:month
+        SELECT b FROM Budget b JOIN FETCH UserEntity u ON b.user.id=u.id WHERE b.month=:month
     """)
     List<Budget> findAllByMonthWithUser(@Param("month") int month);
 

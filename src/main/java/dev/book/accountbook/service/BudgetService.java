@@ -1,6 +1,5 @@
 package dev.book.accountbook.service;
 
-import dev.book.accountbook.dto.event.SpendCreatedEvent;
 import dev.book.accountbook.dto.request.BudgetRequest;
 import dev.book.accountbook.dto.response.BudgetResponse;
 import dev.book.accountbook.entity.Budget;
@@ -8,12 +7,6 @@ import dev.book.accountbook.exception.accountbook.AccountBookErrorCode;
 import dev.book.accountbook.exception.accountbook.AccountBookErrorException;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.achievement.achievement_user.dto.event.CreateBudgetEvent;
-import dev.book.achievement.achievement_user.dto.event.GetWarningBudgetEvent;
-import dev.book.global.config.Firebase.entity.FcmToken;
-import dev.book.global.config.Firebase.exception.FcmTokenErrorCode;
-import dev.book.global.config.Firebase.exception.FcmTokenErrorException;
-import dev.book.global.config.Firebase.repository.FcmTokenRepository;
-import dev.book.global.config.Firebase.service.FCMService;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
@@ -22,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDate;
 
@@ -32,9 +23,7 @@ import java.time.LocalDate;
 public class BudgetService {
     private final UserRepository userRepository;
     private final BudgetRepository budgetRepository;
-    private final FcmTokenRepository fcmTokenRepository;
 
-    private final FCMService fcmService;
     private final ApplicationEventPublisher eventPublisher;
 
     public BudgetResponse getBudget(Long userId) {
@@ -43,30 +32,13 @@ public class BudgetService {
         return budgetRepository.findBudgetWithTotal(user.getId());
     }
 
+    @Transactional
     public BudgetResponse createBudget(UserEntity user, BudgetRequest budgetRequest) {
         int date = LocalDate.now().getMonthValue();
         budgetRepository.save(new Budget(budgetRequest.budget(), date, user));
 
         eventPublisher.publishEvent(new CreateBudgetEvent(user));
         return budgetRepository.findBudgetWithTotal(user.getId());
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void sendLimitWarning(SpendCreatedEvent event) {
-        BudgetResponse response = budgetRepository.findBudgetWithTotal(event.userId());
-
-        if (response.total() >= response.budget() * 0.5) {
-            long usageRate = calcUsageRate(response);
-
-            FcmToken token = fcmTokenRepository.findByUserId(event.userId())
-                    .orElseThrow(() -> new FcmTokenErrorException(FcmTokenErrorCode.NOT_FOUND_FCM_TOKEN));
-
-            fcmService.sendSpendNotification(token.getToken(), event.nickname(), response.budget(), response.total(), usageRate);
-            //과소비 경고 업적
-            UserEntity user = userRepository.findById(event.userId())
-                            .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-            eventPublisher.publishEvent(new GetWarningBudgetEvent(user));
-        }
     }
 
     @Transactional
@@ -82,10 +54,6 @@ public class BudgetService {
     public void deleteBudget(Long userId, Long id) {
         Budget budget = findBudgetIdAndUserId(id, userId);
         budgetRepository.deleteById(budget.getId());
-    }
-
-    private long calcUsageRate(BudgetResponse response) {
-        return (response.total() / response.budget()) * 100;
     }
 
     private Budget findBudgetIdAndUserId(Long budgetId, Long userId) {

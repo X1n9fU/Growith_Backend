@@ -33,7 +33,7 @@ public class ChallengeInviteService {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-
+    @Transactional
     public void invite(Long challengeId, UserEntity user, ChallengeInviteRequest challengeInviteRequest) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         UserEntity inviteUser = userRepository.findByEmail(challengeInviteRequest.email()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));

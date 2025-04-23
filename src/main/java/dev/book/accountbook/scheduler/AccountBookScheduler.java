@@ -1,16 +1,22 @@
 package dev.book.accountbook.scheduler;
 
+import dev.book.accountbook.dto.response.AccountBookWeekConsumePerUserResponse;
 import dev.book.accountbook.entity.Budget;
+import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.repository.BudgetRepository;
 import dev.book.accountbook.service.StatService;
+import dev.book.accountbook.type.Frequency;
+import dev.book.accountbook.type.PeriodRange;
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.achievement.achievement_user.dto.event.SaveConsumeFromBudgetEvent;
+import dev.book.achievement.achievement_user.dto.event.SaveConsumeOfWeekEvent;
 import dev.book.achievement.achievement_user.dto.event.SuccessBudgetPlanEvent;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,12 +26,14 @@ import java.util.List;
 public class AccountBookScheduler {
 
     private final BudgetRepository budgetRepository;
+    private final AccountBookRepository accountBookRepository;
 
     private final StatService statService;
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Scheduled(cron = "0 0 0 1 * *") //매월 1일마다 예산 계획 성공 여부
+    @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul") //매월 1일마다 예산 계획 성공 여부
+    @Transactional
     public void checkBudgetSuccessfulOrNot(){
         int lastMonth = LocalDate.now().minusMonths(1).getMonth().getValue();
         //저번 달 예산 계획을 세운 사람들
@@ -43,16 +51,16 @@ public class AccountBookScheduler {
             int lastMonthBudget = statService.getTotalConsumeOfLastMonth(budget.getUser().getId());
             if (lastMonthBudget < budget.getBudgetLimit()){
                 // 저번 달 예산 계획과 비교하여 % 이상 절약한 사람들에게 업적 달성
-                calcSavedRateAndAchieve(budget.getUser(), budget.getBudgetLimit(), lastMonthBudget);
-                // 예산 계획에 성공한 사람들 횟수 +1
-                eventPublisher.publishEvent(new SuccessBudgetPlanEvent(budget.getUser()));
+                calcSavedRateAndAchieveBudget(budget.getUser(), budget.getBudgetLimit(), lastMonthBudget);
             }
         }
     }
 
-    private void calcSavedRateAndAchieve(UserEntity user, Integer thisAmount, Integer lastAmount) {
-        if (lastAmount != null && lastAmount > 0) {
-            double savedRate = ((double) (lastAmount - thisAmount) / lastAmount) * 100;
+    private void calcSavedRateAndAchieveBudget(UserEntity user, Integer limit, Integer lastAmount) {
+        if (lastAmount != null && lastAmount > 0 && limit > 0) {
+            // 예산 계획에 성공한 사람들 횟수 +1
+            eventPublisher.publishEvent(new SuccessBudgetPlanEvent(user));
+            double savedRate = ((double) (limit - lastAmount) / limit) * 100;
             if (savedRate >= 5.0)
                 eventPublisher.publishEvent(new SaveConsumeFromBudgetEvent(user, savedRate));
         }
@@ -61,6 +69,23 @@ public class AccountBookScheduler {
     @Scheduled(cron = "0 0 21 * * *")
     public void synchronizeAccount(){
 
+    }
+
+    @Scheduled(cron = "0 0 0 * * MON", zone = "Asia/Seoul") //매주 월요일마다 주의 소비내역 비교
+    @Transactional
+    public void checkConsumeOfWeekEveryMonday(){
+        PeriodRange periodRange = Frequency.LAST_WEEKLY.calcPeriod();
+        //저번주 일주일, 저저번주의 일주일의 소비 내역을 가져와서 비교
+        List<AccountBookWeekConsumePerUserResponse> accountBooks = accountBookRepository.findUserAndAmountByConsumeOfWeek(periodRange.currentStart(), periodRange.currentEnd(), periodRange.previousStart(), periodRange.previousEnd());
+        accountBooks.forEach(accountBook -> calcSavedRateAndAchieveWeek(accountBook.user(), accountBook.lastWeekAmount(), accountBook.twoWeeksAgoAmount()));
+    }
+
+    private void calcSavedRateAndAchieveWeek(UserEntity user, long lastWeekAmount, long twoWeeksAgoAmount) {
+        if (twoWeeksAgoAmount > 0 && lastWeekAmount > 0) {
+            double savedRate = ((double) (twoWeeksAgoAmount - lastWeekAmount) / twoWeeksAgoAmount) * 100;
+            if (savedRate >= 5.0)
+                eventPublisher.publishEvent(new SaveConsumeOfWeekEvent(user, savedRate));
+        }
     }
 
 }
