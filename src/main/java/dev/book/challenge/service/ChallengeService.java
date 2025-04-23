@@ -40,15 +40,19 @@ public class ChallengeService {
     private final CategoryRepository categoryRepository;
     private final ChallengeCategoryRepository challengeCategoryRepository;
 
+
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
         Challenge challenge = Challenge.of(challengeCreateRequest, user);
-        UserChallenge userChallenge = UserChallenge.of(user, challenge);
+        categories.forEach(category -> {
+            ChallengeCategory challengeCategory = new ChallengeCategory(challenge, category);
+            challenge.getChallengeCategories().add(challengeCategory);
+        });
+        Challenge savedChallenge = challengeRepository.save(challenge);
+        UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
         userChallengeRepository.save(userChallenge);
         individualAchievementStatusService.plusCreateChallenge(user);
-        List<ChallengeCategory> challengeCategory = categories.stream().map(category -> new ChallengeCategory(challenge, category)).toList();
-        challenge.getChallengeCategories().addAll(challengeCategory);
-        return ChallengeCreateResponse.fromEntity(challenge, categories);
+        return ChallengeCreateResponse.fromEntity(challenge);
 
     }
 
@@ -65,9 +69,9 @@ public class ChallengeService {
     @Transactional
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
         Challenge challenge = getMyChallenge(user.getId(), id);
+
         List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
-        List<ChallengeCategory> challengeCategories = categories.stream().map(category -> new ChallengeCategory(challenge, category)).toList();
-        challenge.updateInfo(challengeUpdateRequest, challengeCategories);
+        challenge.updateInfo(challengeUpdateRequest, categories);
         challengeRepository.flush();
         return ChallengeUpdateResponse.fromEntity(challenge, categories);
     }
