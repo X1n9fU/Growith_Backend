@@ -38,16 +38,12 @@ public class ChallengeService {
     private final UserChallengeRepository userChallengeRepository;
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final CategoryRepository categoryRepository;
-    private final ChallengeCategoryRepository challengeCategoryRepository;
 
 
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
         Challenge challenge = Challenge.of(challengeCreateRequest, user);
-        categories.forEach(category -> {
-            ChallengeCategory challengeCategory = new ChallengeCategory(challenge, category);
-            challenge.getChallengeCategories().add(challengeCategory);
-        });
+        categories.forEach(category -> new ChallengeCategory(challenge, category));
         Challenge savedChallenge = challengeRepository.save(challenge);
         UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
         userChallengeRepository.save(userChallenge);
