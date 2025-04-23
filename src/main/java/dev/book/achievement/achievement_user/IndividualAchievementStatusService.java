@@ -7,6 +7,7 @@ import dev.book.achievement.service.AchievementService;
 import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -46,6 +47,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusCompleteChallenge(CompleteChallengeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int completeChallenge = achievementStatus.plusCompleteChallenge();
@@ -61,6 +63,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusFailChallenge(FailChallengeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int failChallenge = achievementStatus.plusFailChallenge();
@@ -71,6 +74,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusCreateChallenge(CreateChallengeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int createChallenge = achievementStatus.plusCreateChallenge();
@@ -83,6 +87,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void pluCheckSpendAnalysis(CheckSpendAnalysisEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         long checkSpendAnalysis = achievementStatus.pluCheckSpendAnalysis();
@@ -91,19 +96,24 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void setCreateFirstIncomeTrue(CreateFirstIncomeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
-        achievementStatus.setCreateFirstIncomeTrue();
-        achievementService.saveAchievement(10L, event.user().getId());
+        if (!achievementStatus.isCreateFirstIncome()){
+            achievementStatus.setCreateFirstIncomeTrue();
+            achievementService.saveAchievement(10L, event.user().getId());
+        }
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void achieveSaveAccomplishmentOfWeek(SaveConsumeOfWeekEvent event){
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         //절약 %가 상한선 이상이면서, 사전에 업적 달성한 적이 없는 경우를 판단
         if (event.saveRate() >= 10.0 && !achievementStatus.isSaveTenPercentOnLastWeek())
             saveTenPercentOnLastWeek(event.user().getId(), achievementStatus);
-        else if (event.saveRate() >= 5.0 && !achievementStatus.isSaveFivePercentOnLastWeek())
+        //10% 절약 달성했다는 것은 5%도 당연히 달성한 업적
+        if (event.saveRate() >= 5.0 && !achievementStatus.isSaveFivePercentOnLastWeek())
             saveFivePercentOnLastWeek(event.user().getId(), achievementStatus);
     }
 
@@ -117,7 +127,9 @@ public class IndividualAchievementStatusService {
         achievementService.saveAchievement(12L, userId);
     }
 
+    //미구현 부분
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusConsecutiveNoSpend(ConsecutiveNoSpendEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int consecutiveNoSpend = achievementStatus.plusConsecutiveNoSpend();
@@ -128,6 +140,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusCreateBudget(CreateBudgetEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int createBudget = achievementStatus.plusCreateBudget();
@@ -140,6 +153,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusSuccessBudgetPlan(SuccessBudgetPlanEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         if (!achievementStatus.isSuccessBudgetPlanLastMonth()){
@@ -162,6 +176,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusGetWarningBudget(GetWarningBudgetEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int getWarningBudget = achievementStatus.plusGetWarningBudget();
@@ -169,6 +184,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void achieveSaveAccomplishmentFromBudget(SaveConsumeFromBudgetEvent event){
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         //절약 %가 상한선 이상이면서, 사전에 업적 달성한 적이 없는 경우를 판단
@@ -189,6 +205,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusInviteFriendToService(InviteFriendToServiceEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int inviteFriendToService = achievementStatus.plusInviteFriendToService();
@@ -201,6 +218,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusInviteFriendToChallenge(InviteFriendToChallengeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int inviteFriendToChallenge = achievementStatus.plusInviteFriendToChallenge();
@@ -211,6 +229,7 @@ public class IndividualAchievementStatusService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void plusShareTips(ShareTipsEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int shareTips = achievementStatus.plusShareTips();

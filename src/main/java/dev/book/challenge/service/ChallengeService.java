@@ -1,9 +1,7 @@
 package dev.book.challenge.service;
 
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.achievement.achievement_user.dto.event.CreateChallengeEvent;
 import dev.book.challenge.ChallengeCategory;
-import dev.book.challenge.category.ChallengeCategoryRepository;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -38,12 +36,10 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
-    private final IndividualAchievementStatusService individualAchievementStatusService;
     private final CategoryRepository categoryRepository;
-    private final ChallengeCategoryRepository challengeCategoryRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-
+    @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
         Challenge challenge = Challenge.of(challengeCreateRequest, user);
