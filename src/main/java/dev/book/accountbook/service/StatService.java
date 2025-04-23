@@ -9,8 +9,6 @@ import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.accountbook.type.PeriodRange;
 import dev.book.achievement.achievement_user.dto.event.CheckSpendAnalysisEvent;
-import dev.book.achievement.achievement_user.dto.event.SaveConsumeOfWeekEvent;
-import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
