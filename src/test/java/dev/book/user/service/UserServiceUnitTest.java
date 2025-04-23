@@ -35,9 +35,6 @@ class UserServiceUnitTest {
     private UserService userService;
 
     @Mock
-    private AuthService authService;
-
-    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -103,14 +100,14 @@ class UserServiceUnitTest {
         UserProfileUpdateRequest userProfileUpdateRequest = new UserProfileUpdateRequest(duplicateNickname, changeProfile);
 
         doThrow(new UserErrorException(UserErrorCode.DUPLICATE_NICKNAME))
-                .when(authService).validateNickname(duplicateNickname);
+                .when(userService).validateNickname(duplicateNickname);
 
         // when & then
         assertThatThrownBy(() -> userService.updateUserProfile(userProfileUpdateRequest, userDetails))
                 .isInstanceOf(UserErrorException.class)
                 .hasMessageContaining(UserErrorCode.DUPLICATE_NICKNAME.getMessage());
 
-        verify(authService).validateNickname(duplicateNickname);
+        verify(userService).validateNickname(duplicateNickname);
         verify(userRepository, never()).save(any());
 
     }
