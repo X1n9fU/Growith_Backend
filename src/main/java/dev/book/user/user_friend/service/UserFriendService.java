@@ -81,7 +81,7 @@ public class UserFriendService {
         //내가 나 자신에게 친구 요청
         invitationMyself(userFriend.getUser(), email);
         //이미 초대 내역이 완성된 토큰
-        hasExistingInvitation(userFriend.getFriend() != null, UserFriendErrorCode.ALREADY_MAKE_INVITATION);
+        hasExistingInvitation(userFriend.getFriend() != null, UserFriendErrorCode.ALREADY_MADE_INVITATION);
 
         UserEntity friend = getUserEntity(userRepository.findByEmail(email));
         userFriend.inviteFriend(friend);
