@@ -14,9 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "User API", description = "유저 프로필 조회, 수정, 유저 삭제 api")
 public interface UserSwaggerController {
@@ -40,7 +38,7 @@ public interface UserSwaggerController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "유저 프로필 수정 완료",
                     content = @Content(schema = @Schema(implementation = UserProfileResponse.class))),
-            @ApiResponse(responseCode = "400", description = "이미 존재하는 닉네임입니다"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임입니다"),
             @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다.")
     })
     ResponseEntity<UserProfileResponse> updateUserProfile(@RequestBody UserProfileUpdateRequest profileUpdateRequest,
@@ -62,5 +60,18 @@ public interface UserSwaggerController {
             @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다.")
     })
     ResponseEntity<?> checkIsUserLogin(@AuthenticationPrincipal CustomUserDetails userDetails);
+
+    @Operation(summary = "유저의 닉네임 중복 확인", description = "닉네임의 중복 여부를 체크합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "닉네임 설정 가능"),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임입니다")
+    })
+    ResponseEntity<Boolean> checkIsValidateNickname(@RequestParam(name = "nickname", required = true) String nickname);
+
+    @Operation(summary = "유저의 닉네임 삭제 (실제 사용 X)", description = "현재 유저의 닉네임을 삭제합니다. \"\" 상태로 저장됩니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "닉네임 삭제 완료"),
+    })
+    ResponseEntity<?> deleteUserNickname(@AuthenticationPrincipal CustomUserDetails userDetails);
 }
 

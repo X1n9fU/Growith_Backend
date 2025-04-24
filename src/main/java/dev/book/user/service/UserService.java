@@ -42,10 +42,10 @@ public class UserService {
 
         validateNickname(profileUpdateRequest.nickname());
 
-        UserEntity user = userDetails.user();
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         user.updateNickname(profileUpdateRequest.nickname());
         user.updateProfileImage(profileUpdateRequest.profileImageUrl());
-        userRepository.save(user);
         return UserProfileResponse.fromEntity(user);
     }
 
@@ -63,10 +63,10 @@ public class UserService {
      */
     @Transactional
     public void deleteUser(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
-        jwtUtil.deleteAccessTokenAndRefreshToken(request, response);
         UserEntity user = userDetails.user();
         refreshTokenService.deleteRefreshToken(user);
         userRepository.delete(user);
+        jwtUtil.deleteAccessTokenAndRefreshToken(request, response);
     }
 
     /**
@@ -90,5 +90,16 @@ public class UserService {
 
     public void checkIsUserLogin(CustomUserDetails userDetails) {
         individualAchievementStatusService.deterMineContinuous(userDetails.user());
+    }
+
+    public void checkIsValidateNickname(String nickname) {
+        validateNickname(nickname);
+    }
+
+    @Transactional
+    public void deleteUserNickname(CustomUserDetails userDetails) {
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        user.deleteNickname();
     }
 }

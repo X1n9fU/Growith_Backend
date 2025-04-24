@@ -53,4 +53,18 @@ public class UserController implements UserSwaggerController{
         userService.checkIsUserLogin(userDetails);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/validate/nickname")
+    public ResponseEntity<Boolean> checkIsValidateNickname(@RequestParam(name = "nickname", required = true) String nickname){
+        userService.checkIsValidateNickname(nickname);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/delete/nickname")
+    public ResponseEntity<?> deleteUserNickname(@AuthenticationPrincipal CustomUserDetails userDetails){
+        userService.deleteUserNickname(userDetails);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

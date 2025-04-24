@@ -99,4 +99,6 @@ public class UserEntity extends BaseTimeEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public void deleteNickname() { this.nickname = ""; }
+
 }
