@@ -97,14 +97,26 @@ public class UserService {
         user.updateCategory(categoryList);
     }
 
+    /**
+     * 유저의 로그인 상태를 true로 변경
+     * @param userDetails
+     */
     public void checkIsUserLogin(CustomUserDetails userDetails) {
         individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
     }
 
+    /**
+     * nickname 중복 체크 (중복이라면 409에러 반환)
+     * @param nickname
+     */
     public void checkIsValidateNickname(String nickname) {
         validateNickname(nickname);
     }
 
+    /**
+     * 유저의 닉네임 삭제
+     * @param userDetails
+     */
     @Transactional
     public void deleteUserNickname(CustomUserDetails userDetails) {
         UserEntity user = userRepository.findByEmail(userDetails.getUsername())
@@ -112,6 +124,11 @@ public class UserService {
         user.deleteNickname();
     }
 
+    /**
+     * 유저의 카테고리 반환
+     * @param userDetails
+     * @return
+     */
     public UserCategoryResponse getUserCategories(CustomUserDetails userDetails) {
         UserEntity user = userRepository.findByEmailWithCategories(userDetails.getUsername())
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
