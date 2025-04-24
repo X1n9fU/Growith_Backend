@@ -74,6 +74,23 @@ public enum Frequency {
 
             return new PeriodRange(thisYearStart, now, lastYearStart, lastYearEnd);
         }
+    },
+    LAST_WEEKLY("last_weekly") {
+
+        @Override
+        public LocalDateTime calcStartDate() {
+            return getStartOfCurrentWeek().minusWeeks(1); //이번주의 -1
+        }
+
+        @Override
+        public PeriodRange calcPeriod() {
+            LocalDateTime lastWeekStart = calcStartDate();
+            LocalDateTime lastWeekEnd = lastWeekStart.with(DayOfWeek.SUNDAY).with(LocalTime.MAX);
+            LocalDateTime twoWeekAgoStart = lastWeekStart.minusWeeks(1);
+            LocalDateTime twoWeeksAgoEnd = lastWeekEnd.minusWeeks(1);
+
+        return new PeriodRange(lastWeekStart, lastWeekEnd, twoWeekAgoStart, twoWeeksAgoEnd);
+    }
     };
 
     public abstract LocalDateTime calcStartDate();

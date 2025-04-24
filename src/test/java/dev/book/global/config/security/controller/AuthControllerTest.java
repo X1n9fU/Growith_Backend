@@ -1,7 +1,6 @@
 package dev.book.global.config.security.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.book.accountbook.type.Category;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
@@ -91,7 +90,7 @@ class AuthControllerTest {
 
         final ResultActions result = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new UserSignUpRequest( "nickname", List.of(Category.HOBBY)))));
+                .content(objectMapper.writeValueAsString(new UserSignUpRequest( "nickname", List.of("hobby")))));
 
         result.andExpect(status().isCreated());
 

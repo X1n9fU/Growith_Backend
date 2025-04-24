@@ -40,6 +40,8 @@ public class IndividualAchievementStatus {
 
     private int createBudget=0; //예산 계획 작성 횟수
 
+    private boolean successBudgetPlanLastMonth = false; //저번달에 예산 계획을 지켰는지
+
     private int successBudgetPlan=0; //예산 계획 지킨 횟수
 
     private int getWarningBudget=0; //과소비 경고 받은 횟수
@@ -107,8 +109,14 @@ public class IndividualAchievementStatus {
         return ++this.createBudget;
     }
 
+    public void setSuccessBudgetPlanLastMonth(boolean successBudgetPlanLastMonth) { this.successBudgetPlanLastMonth=successBudgetPlanLastMonth; }
+
     public int plusSuccessBudgetPlan(){
         return ++this.successBudgetPlan;
+    }
+
+    public void resetSuccessBudgetPlan(){
+        this.successBudgetPlan=0;
     }
 
     public int plusGetWarningBudget(){

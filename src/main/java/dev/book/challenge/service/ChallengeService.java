@@ -1,6 +1,6 @@
 package dev.book.challenge.service;
 
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.dto.event.CreateChallengeEvent;
 import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
@@ -16,6 +16,7 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,8 +35,8 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
-    private final IndividualAchievementStatusService individualAchievementStatusService;
     private final CategoryRepository categoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
 
     @Transactional
@@ -43,12 +44,15 @@ public class ChallengeService {
 
         UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
+
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         categories.forEach(category -> new ChallengeCategory(challenge, category));
+
         Challenge savedChallenge = challengeRepository.save(challenge);
         UserChallenge userChallenge = UserChallenge.of(creator, savedChallenge);
         userChallengeRepository.save(userChallenge);
-        individualAchievementStatusService.plusCreateChallenge(user);
+
+        eventPublisher.publishEvent(new CreateChallengeEvent(user));
         creator.plusChallengeCount();
         return ChallengeCreateResponse.fromEntity(challenge);
 
@@ -98,8 +102,10 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findByIdWithLock(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
+
         challenge.isParticipantsMoreThanCapacity();
         challenge.plusCurrentCapacity();
+
         userEntity.plusChallengeCount();
         UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);
         userChallengeRepository.save(userChallenge);
@@ -111,6 +117,7 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         checkNotExist(user, challenge.getId());
+
         userEntity.minusChallengeCount();
         challenge.minusCurrentCapacity();
         userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challenge.getId());

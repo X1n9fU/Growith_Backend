@@ -1,6 +1,7 @@
 package dev.book.accountbook.repository;
 
 import dev.book.accountbook.entity.Budget;
+import dev.book.user.entity.UserEntity;
 import dev.book.accountbook.repository.querydsl.BudgetRepositoryCustom;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +19,12 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> , BudgetRe
 
     @EntityGraph(attributePaths = {"user"})
     @Query("""
-        SELECT b FROM Budget b JOIN FETCH UserEntity u WHERE b.month=:month
+        SELECT b FROM Budget b JOIN FETCH UserEntity u ON b.user.id=u.id WHERE b.month=:month
     """)
     List<Budget> findAllByMonthWithUser(@Param("month") int month);
+
+    @Query("""
+        SELECT DISTINCT u FROM UserEntity u LEFT JOIN Budget b ON u.id=b.user.id WHERE b.user.id IS NOT NULL AND b.month=:month 
+    """)
+    List<UserEntity> findUsersWithoutBudgetAtMonth(@Param("month") int month);
 }

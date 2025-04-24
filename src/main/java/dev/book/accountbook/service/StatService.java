@@ -8,13 +8,13 @@ import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.accountbook.type.Frequency;
 import dev.book.accountbook.type.PeriodRange;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
-import dev.book.global.entity.Category;
+import dev.book.achievement.achievement_user.dto.event.CheckSpendAnalysisEvent;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +28,15 @@ public class StatService {
     private final UserRepository userRepository;
     private final AccountBookRepository accountBookRepository;
 
-    private final IndividualAchievementStatusService individualAchievementStatusService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public List<AccountBookStatResponse> statList(Long userId, Frequency frequency) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-        individualAchievementStatusService.pluCheckSpendAnalysis(user);
-
-        return getStatList(userId, frequency.calcStartDate());
+        List<AccountBookStatResponse> statResponses =  getStatList(userId, frequency.calcStartDate());
+        if (!statResponses.isEmpty()) //거래 내역이 존재하는 소비 분석을 진행 했을 경우
+            eventPublisher.publishEvent(new CheckSpendAnalysisEvent(user));
+        return statResponses;
     }
 
     @Transactional
@@ -49,7 +50,7 @@ public class StatService {
     public AccountBookConsumeResponse consume(Long userId, Frequency frequency) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        return getConsume(user, frequency);
+        return getConsume(user, frequency.calcPeriod());
     }
 
     private List<AccountBookStatResponse> getStatList(Long userId, LocalDateTime startDate) {
@@ -65,28 +66,11 @@ public class StatService {
                 .toList();
     }
 
-    private AccountBookConsumeResponse getConsume(UserEntity user, Frequency frequency) {
-        PeriodRange period = frequency.calcPeriod();
+    private AccountBookConsumeResponse getConsume(UserEntity user, PeriodRange period) {
         Integer thisAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, period.currentStart(), period.currentEnd());
         Integer lastAmount = accountBookRepository.sumSpending(user.getId(), CategoryType.SPEND, period.previousStart(), period.previousEnd());
 
-        if (Frequency.WEEKLY.equals(frequency))
-            calcSavedRateAndAchieve(user, thisAmount, lastAmount);
-
         return new AccountBookConsumeResponse(lastAmount - thisAmount);
-    }
-
-    private void calcSavedRateAndAchieve(UserEntity user, Integer thisAmount, Integer lastAmount) {
-        if (lastAmount != null && lastAmount > 0) {
-            double savedRate = ((double) (lastAmount - thisAmount) / lastAmount) * 100;
-            individualAchievementStatusService.achieveSaveAccomplishmentOfWeek(user, savedRate);
-        }
-    }
-
-    public AccountBookConsumeResponse getCategoryTotalConsume(Long userId, List<Category> category, LocalDateTime starDate, LocalDateTime endDate) {
-//        List<AccountBook> responses = accountBookRepository.findByCategory(userId, CategoryType.SPEND, category, starDate, LocalDateTime.now());
-        return null;
-        //todo 카테고리 리스트의 총 소비양
     }
 
     public int getTotalConsumeOfLastMonth(Long userId) {

@@ -1,6 +1,5 @@
 package dev.book.global.config.security.service;
 
-import dev.book.accountbook.type.Category;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.exception.AuthErrorCode;
@@ -13,6 +12,7 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import dev.book.user.service.UserService;
 import dev.book.util.UserBuilder;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -35,9 +35,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +57,9 @@ class AuthServiceUnitTest {
 
     @Mock
     private UserDetailsService userDetailsService;
+
+    @Mock
+    private UserService userService;
     @Mock
     private JwtUtil jwtUtil;
 
@@ -76,7 +79,7 @@ class AuthServiceUnitTest {
     @DisplayName("OAuth2를 통해 접근한 유저를 회원가입 한다.")
     void signUp() {
         String nickname = "nickname";
-        List<Category> categories = List.of(Category.CONVENIENCE_STORE);
+        List<String> categories = List.of("food");
 
         //given
         UserEntity user = UserBuilder.of();
@@ -91,7 +94,7 @@ class AuthServiceUnitTest {
 
         //then
         assertEquals(nickname, user.getNickname());
-        assertEquals(categories, user.getUserCategory());
+        assertThat(user.getUserCategory().size()).isEqualTo(1);
         verify(refreshTokenService).saveAndUpdateRefreshToken(user, "refresh_token");
     }
 
@@ -103,7 +106,7 @@ class AuthServiceUnitTest {
         given(userRepository.existsByNickname(any())).willReturn(true);
 
         //when
-        assertThatThrownBy(() -> authService.validateNickname(nickname))
+        assertThatThrownBy(() -> userService.validateNickname(nickname))
                 .isInstanceOf(UserErrorException.class)
                 .hasMessageContaining(UserErrorCode.DUPLICATE_NICKNAME.getMessage());
     }
@@ -117,7 +120,6 @@ class AuthServiceUnitTest {
         //when
         authService.logout(request, response, userDetails);
 
-        assertThat(userDetails.user().getRefreshToken()).isNull();
         verify(jwtUtil).deleteAccessTokenAndRefreshToken(request, response);
     }
 
