@@ -75,6 +75,7 @@ public class ChallengeInviteService {
         ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
         challengeInvite.accept();
         user.plusChallengeCount();
+        challengeInviteRepository.delete(challengeInvite);
         UserChallenge userChallenge = UserChallenge.of(user, challengeInvite.getChallenge());
         userChallengeRepository.save(userChallenge);
     }
@@ -83,5 +84,6 @@ public class ChallengeInviteService {
     public void rejectInvite(Long inviteId, UserEntity user) {
         ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
         challengeInvite.reject();
+        challengeInviteRepository.delete(challengeInvite);
     }
 }
