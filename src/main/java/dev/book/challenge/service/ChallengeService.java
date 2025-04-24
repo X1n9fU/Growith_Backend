@@ -7,13 +7,13 @@ import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.*;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
-import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
+import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static dev.book.challenge.exception.ErrorCode.*;
+import static dev.book.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class ChallengeService {
     @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
 
-        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow();
+        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         categories.forEach(category -> new ChallengeCategory(challenge, category));
@@ -61,7 +62,7 @@ public class ChallengeService {
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
 
-        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         return ChallengeReadDetailResponse.fromEntity(challenge);
     }
 
@@ -78,7 +79,7 @@ public class ChallengeService {
     @Transactional
     public void deleteChallenge(UserEntity user, Long id) {
 
-        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         Challenge challenge = getMyChallenge(creator.getId(), id);
         List<Long> userIds = userChallengeRepository.findUserIdByChallengeId(challenge.getId());
         List<UserEntity> users = userRepository.findAllById(userIds);
@@ -93,8 +94,8 @@ public class ChallengeService {
 
     @Transactional
     public void participate(UserEntity user, Long id) {
-        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
-        Challenge challenge = challengeRepository.findByIdWithLock(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
+        Challenge challenge = challengeRepository.findByIdWithLock(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
         challenge.isParticipantsMoreThanCapacity();
@@ -108,7 +109,7 @@ public class ChallengeService {
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
-        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         checkNotExist(user, challenge.getId());
         userEntity.minusChallengeCount();
         challenge.minusCurrentCapacity();
@@ -143,7 +144,7 @@ public class ChallengeService {
 
     private Challenge getMyChallenge(Long userId, Long id) {
 
-        return challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
+        return challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(CHALLENGE_INVALID));
     }
 
     public List<ChallengeReadResponse> findNewChallenge() {

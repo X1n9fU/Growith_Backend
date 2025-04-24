@@ -33,12 +33,6 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepository {
                 .from(challenge)
                 .where(eqTitle(title),
                         eqText(text))
-                .groupBy(
-                        challenge.id,
-                        challenge.title,
-                        challenge.capacity,
-                        challenge.status
-                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
