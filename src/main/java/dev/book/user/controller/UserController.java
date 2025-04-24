@@ -25,13 +25,19 @@ public class UserController implements UserSwaggerController{
                 .body(userService.getUserProfile(userDetails));
     }
 
-    //todo 업적, 통계, 경고 반환
-
     @PutMapping("/profile")
     public ResponseEntity<UserProfileResponse> updateUserProfile(@RequestBody UserProfileUpdateRequest profileUpdateRequest,
                                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok()
                 .body(userService.updateUserProfile(profileUpdateRequest, userDetails));
+    }
+
+    //todo 업적, 통계, 경고 반환
+
+    @GetMapping("/categories")
+    public ResponseEntity<?> getUserCategories(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok()
+                .body(userService.getUserCategories(userDetails));
     }
 
     @PutMapping("/categories")
@@ -65,6 +71,4 @@ public class UserController implements UserSwaggerController{
         userService.deleteUserNickname(userDetails);
         return ResponseEntity.ok().build();
     }
-
-
 }

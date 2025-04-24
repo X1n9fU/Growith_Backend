@@ -10,17 +10,20 @@ import dev.book.global.exception.category.CategoryException;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
+import dev.book.user.dto.response.UserCategoryResponse;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import dev.book.user.user_category.UserCategory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -101,5 +104,16 @@ public class UserService {
         UserEntity user = userRepository.findByEmail(userDetails.getUsername())
                         .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         user.deleteNickname();
+    }
+
+    public UserCategoryResponse getUserCategories(CustomUserDetails userDetails) {
+        UserEntity user = userRepository.findByEmailWithCategories(userDetails.getUsername())
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        List<UserCategory> categories = user.getUserCategory();
+        List<String> userCategories = new ArrayList<>();
+        for (UserCategory category : categories){
+            userCategories.add(category.getCategory().getKorean());
+        }
+        return new UserCategoryResponse(userCategories);
     }
 }
