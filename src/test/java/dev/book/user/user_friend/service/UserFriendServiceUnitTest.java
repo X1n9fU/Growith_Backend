@@ -65,7 +65,6 @@ class UserFriendServiceUnitTest {
     @InjectMocks
     UserFriendService userFriendService;
 
-    @Spy
     @InjectMocks
     AESUtil aesUtil;
 
@@ -165,14 +164,17 @@ class UserFriendServiceUnitTest {
         EncryptUserInfo encryptUserInfo = new EncryptUserInfo(userDetails.getUsername(), 1L, LocalDateTime.of(2025, 4, 21, 14, 29, 54));
         InvitingTokenAndJson invitingTokenAndJson = getInvitingTokenAndJson();
 
+        UserFriend userFriend = mock(UserFriend.class);
+        given(userFriend.getUser()).willReturn(userDetails.user());
+        given(userFriend.getFriend()).willReturn(null);  // 아직 초대되지 않은 상태
+
         //토큰 받은 유저
         UserEntity invitedUser = UserBuilder.of("test2@test.com");
         userDetails = new CustomUserDetails(invitedUser);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
 
-        UserFriend userFriend = mock(UserFriend.class);
         given(objectMapper.readValue(eq(invitingTokenAndJson.jsonToken()), eq(EncryptUserInfo.class))).willReturn(encryptUserInfo);
-        given(userFriendRepository.findByInvitingUserAndRequestedAt(any(), any())).willReturn(Optional.ofNullable(userFriend));
+        given(userFriendRepository.findByInvitingUserAndRequestedAt(any(), any())).willReturn(Optional.of(userFriend));
         given(userRepository.findByEmail(invitedUser.getEmail())).willReturn(Optional.of(invitedUser));
 
         //when
