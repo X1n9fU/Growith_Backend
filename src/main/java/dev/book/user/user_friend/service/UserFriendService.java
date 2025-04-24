@@ -29,6 +29,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,7 @@ public class UserFriendService {
     public InvitingUserTokenResponseDto getInviteUserToken(CustomUserDetails userDetails) throws Exception {
         Long id = userDetails.user().getId();
         String email = userDetails.getUsername();
+        //초대를 보낸 유저의 정보로 암호화 토큰 생성
         EncryptUserInfo encryptUserInfo = new EncryptUserInfo(email, id, LocalDateTime.now());
         String token = AESUtil.encrypt(objectMapper.writeValueAsString(encryptUserInfo));
         String safeToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
@@ -55,11 +58,15 @@ public class UserFriendService {
     public void getWebHookFromKakao(KakaoResponseDto kakaoResponseDto) throws Exception {
         String requestUserToken = kakaoResponseDto.invitingUserToken();
         EncryptUserInfo userInfo = decryptToken(requestUserToken);
-        UserEntity invitingUser = userRepository.findById(userInfo.id())
-                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        //암호화된 토큰을 복호화하여 초대 토큰을 보낸 유저 저장
+        UserEntity invitingUser = getUserEntity(userRepository.findById(userInfo.id()));
+
+        hasExistingInvitation(userFriendRepository.existsByUserAndRequestedAt(invitingUser, userInfo.localDateTime()), UserFriendErrorCode.DUPLICATE_INVITATION);
+
         userFriendRepository.save(UserFriend.of(invitingUser, userInfo.localDateTime()));
     }
 
+    //토큰이 포함된 url로 접근, 초대 토큰을 받은 상태를 처리
     @Transactional
     public void getTokenAndMakeInvitation(CustomUserDetails userDetails, HttpServletResponse response, String token) throws Exception {
         invitedUserMakeInvitation(userDetails.getUsername(), token);
@@ -69,18 +76,21 @@ public class UserFriendService {
     public void invitedUserMakeInvitation(String email, String token) throws Exception {
         EncryptUserInfo userInfo = decryptToken(token);
         UserFriend userFriend = userFriendRepository.findByInvitingUserAndRequestedAt(userInfo.id(), userInfo.localDateTime())
-                .orElseThrow(() -> new UserErrorException(UserErrorCode.INVITING_NOT_FOUND));
-        UserEntity friend = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserFriendException(UserFriendErrorCode.INVITING_NOT_FOUND));
+
+        //내가 나 자신에게 친구 요청
+        invitationMyself(userFriend.getUser(), email);
+        //이미 초대 내역이 완성된 토큰
+        hasExistingInvitation(userFriend.getFriend() != null, UserFriendErrorCode.ALREADY_MAKE_INVITATION);
+
+        UserEntity friend = getUserEntity(userRepository.findByEmail(email));
         userFriend.inviteFriend(friend);
         eventPublisher.publishEvent(new InviteFriendToServiceEvent(userFriend.getUser()));
     }
 
-    private EncryptUserInfo decryptToken(String safeToken) throws Exception {
-        String token = URLDecoder.decode(safeToken, StandardCharsets.UTF_8);
-        String decryptUserInfo = AESUtil.decrypt(token);
-        objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.readValue(decryptUserInfo, EncryptUserInfo.class);
+    private void invitationMyself(UserEntity user, String email) {
+        if (Objects.equals(user.getEmail(), email))
+            throw new UserFriendException(UserFriendErrorCode.MYSELF_INVITATION);
     }
 
     public List<FriendListResponseDto> getFriendList(CustomUserDetails userDetails) {
@@ -114,20 +124,39 @@ public class UserFriendService {
         userFriendRepository.delete(friendRequest);
     }
 
+    @Transactional
+    public void deleteFriend(CustomUserDetails userDetails, Long friendId) {
+        UserEntity friend = getUserEntity(friendId);
+        //양방향 삭제
+        userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(userDetails.user(), friend);
+        userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(friend, userDetails.user());
+    }
+
+    private EncryptUserInfo decryptToken(String safeToken) throws Exception {
+        String token = URLDecoder.decode(safeToken, StandardCharsets.UTF_8);
+        String decryptUserInfo = AESUtil.decrypt(token);
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper.readValue(decryptUserInfo, EncryptUserInfo.class);
+    }
+
     private UserFriend getRequestByUserAndFriend(UserEntity user, Long friendId) {
-        UserEntity requestFriendUser = userRepository.findById(friendId)
-                        .orElseThrow(() -> new UserErrorException(UserErrorCode.FRIEND_NOT_FOUND));
+        UserEntity requestFriendUser = getUserEntity(friendId);
         return userFriendRepository.findByUserAndFriendAndIsRequestIsTrue(requestFriendUser, user)
                 .orElseThrow(() -> new UserFriendException(UserFriendErrorCode.FRIEND_REQUEST_NOT_FOUND));
     }
 
+    private UserEntity getUserEntity(Long friendId) {
+        return userRepository.findById(friendId)
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+    }
 
-    @Transactional
-    public void deleteFriend(CustomUserDetails userDetails, Long friendId) {
-        UserEntity friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new UserErrorException(UserErrorCode.FRIEND_NOT_FOUND));
-        //양방향 삭제
-        userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(userDetails.user(), friend);
-        userFriendRepository.deleteByUserAndFriendAndIsAcceptIsTrue(friend, userDetails.user());
+    private UserEntity getUserEntity(Optional<UserEntity> userRepository) {
+        return userRepository
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+    }
+
+    private void hasExistingInvitation(boolean userFriendRepository, UserFriendErrorCode duplicateInvitation) {
+        if (userFriendRepository)
+            throw new UserFriendException(duplicateInvitation);
     }
 }
