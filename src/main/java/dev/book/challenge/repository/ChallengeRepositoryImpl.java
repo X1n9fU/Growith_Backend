@@ -21,13 +21,13 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-
     @Override
     public Page<ChallengeReadResponse> search(String title, String text, Pageable pageable) {
         List<ChallengeReadResponse> content = jpaQueryFactory.select(Projections.constructor(ChallengeReadResponse.class,
                         challenge.id,
                         challenge.title,
                         challenge.capacity,
+                        challenge.currentCapacity,
                         challenge.status
                 ))
                 .from(challenge)
@@ -50,14 +50,14 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepository {
         if (title == null) {
             return null;
         }
-        return challenge.title.eq(title);
+        return challenge.title.containsIgnoreCase(title);
     }
 
     private BooleanExpression eqText(String text) {
         if (text == null) {
             return null;
         }
-        return challenge.text.eq(text);
+        return challenge.text.containsIgnoreCase(text);
     }
 
 

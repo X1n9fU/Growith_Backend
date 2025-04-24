@@ -86,13 +86,13 @@ public class UserService {
 
     public void checkCategoriesAndUpdate(List<String> categories, UserEntity user) {
         List<Category> categoryList = categoryRepository.findByCategoryIn(categories);
-        if (categoryList.size() != categories.size())
+        if (!categories.isEmpty() && categoryList.size() != categories.size())
             throw new CategoryException(CategoryErrorCode.CATEGORY_BAD_REQUEST);
         user.updateCategory(categoryList);
     }
 
     public void checkIsUserLogin(CustomUserDetails userDetails) {
-        individualAchievementStatusService.deterMineContinuous(userDetails.user());
+        individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
     }
 
     public void checkIsValidateNickname(String nickname) {

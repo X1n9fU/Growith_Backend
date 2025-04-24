@@ -1,14 +1,23 @@
 package dev.book.challenge.scheduler;
 
+import dev.book.accountbook.repository.AccountBookRepository;
+import dev.book.accountbook.type.CategoryType;
+import dev.book.achievement.achievement_user.dto.event.CompleteChallengeEvent;
+import dev.book.achievement.achievement_user.dto.event.FailChallengeEvent;
+import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
+import dev.book.global.entity.Category;
+import dev.book.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -16,17 +25,27 @@ import java.util.List;
 public class ChallengeScheduler {
     private final ChallengeRepository challengeRepository;
     private final UserChallengeRepository userChallengeRepository;
+    private final AccountBookRepository accountBookRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *") //매일 자정에 챌린지 close
     @Transactional
     public void closeChallenge() {
         LocalDate today = LocalDate.now();
         List<Challenge> challenges = challengeRepository.findChallengesToUpdate(today);
         for (Challenge challenge : challenges){
             challenge.completeChallenge();
-            List<Long> userIds = userChallengeRepository.findUserIdByChallengeId(challenge.getId());
+            List<UserEntity> users = userChallengeRepository.findUsersByChallengeId(challenge.getId());
             //챌린지의 기간 동안의 내역을 가져와서 챌린지의 한도 내역과 비교
-
+            List<Category> categoryList = ChallengeCategory.getCategoryList(challenge.getChallengeCategories());
+            users.forEach( user-> {
+                Integer sumOfCategories = accountBookRepository.sumSpendingInCategories(
+                        user.getId(), CategoryType.SPEND, categoryList, challenge.getStartDate().atStartOfDay(), challenge.getEndDate().atTime(LocalTime.MAX));
+                if (sumOfCategories <= challenge.getAmount())
+                    eventPublisher.publishEvent(new CompleteChallengeEvent(user));
+                else
+                    eventPublisher.publishEvent(new FailChallengeEvent(user));
+            });
         }
     }
 }

@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChallengeReadDetailResponse(Long id, String creator, String title, Release release, Integer amount,
-                                          Integer capacity, List<CategoryDto> challengeCategory, Status status,
+                                          Integer capacity, Integer participants, List<CategoryDto> challengeCategory,
+                                          Status status,
                                           LocalDate startDate,
                                           LocalDate endDate, LocalDateTime createDate,
                                           LocalDateTime modifyDate) {
@@ -21,6 +22,7 @@ public record ChallengeReadDetailResponse(Long id, String creator, String title,
                 challenge.getRelease(),
                 challenge.getAmount(),
                 challenge.getCapacity(),
+                challenge.getCurrentCapacity(),
                 challenge.getChallengeCategories().stream().map(challengeCategory -> new CategoryDto(challengeCategory.getCategory().getKorean())).toList(),
                 challenge.getStatus(),
                 challenge.getStartDate(),

@@ -1,10 +1,10 @@
 package dev.book.global.config.security.handler;
 
-import dev.book.user.user_friend.service.UserFriendService;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.oauth2.OAuth2AuthService;
 import dev.book.global.config.security.util.CookieUtil;
 import dev.book.user.enums.UserLoginState;
+import dev.book.user.user_friend.service.UserFriendService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 @Component
@@ -56,11 +56,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
 
+    /**
+     * 친구 초대 URL로 접근한 유저인 경우, 친구를 요청한 유저의 토큰이 존재
+     * 해당 토큰을 통해 누구의 초대로 접속한 것인지 판단하여 친구 요청 생성
+     * @param authentication
+     * @param safeToken
+     */
     private void handleFriendInvitation(Authentication authentication, String safeToken) {
         if (safeToken == null) return;
 
         try {
-            String invitationToken = URLEncoder.encode(safeToken, StandardCharsets.UTF_8);
+            String invitationToken = URLDecoder.decode(safeToken, StandardCharsets.UTF_8);
             userFriendService.invitedUserMakeInvitation(authentication.getName(), invitationToken);
         } catch (Exception e) {
             logger.error("친구 요청 처리 중 오류 발생", e);

@@ -46,9 +46,11 @@ public class AchievementService {
                 .orElseThrow(() -> new AchievementException(AchievementErrorCode.ACHIEVEMENT_BAD_REQUEST));
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-        AchievementUser achievementUser = new AchievementUser(user, achievement);
-        achievementUserRepository.save(achievementUser);
-        eventPublisher.publishEvent(new GetAchievementEvent(achievement, userId));
+        if (!achievementUserRepository.existsByAchievementAndUser(achievement, user)){ //업적이 존재하지 않으면 새로 등록
+            AchievementUser achievementUser = new AchievementUser(user, achievement);
+            achievementUserRepository.save(achievementUser);
+            eventPublisher.publishEvent(new GetAchievementEvent(achievement, userId));
+        }
     }
 
 

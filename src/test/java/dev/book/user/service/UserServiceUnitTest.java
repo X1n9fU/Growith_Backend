@@ -3,7 +3,6 @@ package dev.book.user.service;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtAuthenticationToken;
 import dev.book.global.config.security.jwt.JwtUtil;
-import dev.book.global.config.security.service.AuthService;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.entity.UserEntity;
@@ -33,9 +32,6 @@ class UserServiceUnitTest {
 
     @InjectMocks
     private UserService userService;
-
-    @Mock
-    private AuthService authService;
 
     @Mock
     private UserRepository userRepository;
@@ -103,14 +99,14 @@ class UserServiceUnitTest {
         UserProfileUpdateRequest userProfileUpdateRequest = new UserProfileUpdateRequest(duplicateNickname, changeProfile);
 
         doThrow(new UserErrorException(UserErrorCode.DUPLICATE_NICKNAME))
-                .when(authService).validateNickname(duplicateNickname);
+                .when(userService).validateNickname(duplicateNickname);
 
         // when & then
         assertThatThrownBy(() -> userService.updateUserProfile(userProfileUpdateRequest, userDetails))
                 .isInstanceOf(UserErrorException.class)
                 .hasMessageContaining(UserErrorCode.DUPLICATE_NICKNAME.getMessage());
 
-        verify(authService).validateNickname(duplicateNickname);
+        verify(userService).validateNickname(duplicateNickname);
         verify(userRepository, never()).save(any());
 
     }

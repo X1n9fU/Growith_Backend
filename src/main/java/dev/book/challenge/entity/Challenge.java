@@ -14,6 +14,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
@@ -26,7 +28,9 @@ import static dev.book.challenge.exception.ErrorCode.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@DynamicInsert
 public class Challenge extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,6 +49,8 @@ public class Challenge extends BaseTimeEntity {
     private List<ChallengeCategory> challengeCategories = new ArrayList<>();
 
     private Integer capacity;
+    @ColumnDefault(value = "1")
+    private Integer currentCapacity;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -54,7 +60,7 @@ public class Challenge extends BaseTimeEntity {
     private LocalDate endDate;
 
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserChallenge> userChallenges;
+    private List<UserChallenge> userChallenges = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
@@ -98,8 +104,8 @@ public class Challenge extends BaseTimeEntity {
         });
     }
 
-    public void isOver(long countParticipants) {
-        if (countParticipants >= this.capacity) {
+    public void isParticipantsMoreThanCapacity() {
+        if (this.currentCapacity >= this.capacity) {
             throw new ChallengeException(CHALLENGE_CAPACITY_FULL);
         }
     }
@@ -125,5 +131,13 @@ public class Challenge extends BaseTimeEntity {
     public void completeChallenge() {
         if (Status.IN_PROGRESS.equals(this.status))
             this.status = Status.COMPLETED;
+    }
+
+    public void plusCurrentCapacity() {
+        this.currentCapacity++;
+    }
+
+    public void minusCurrentCapacity() {
+        this.currentCapacity++;
     }
 }

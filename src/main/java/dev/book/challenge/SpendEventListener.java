@@ -23,19 +23,14 @@ public class SpendEventListener {
     private final RankService rankService;
     private final SimpMessagingTemplate messagingTemplate;
 
-
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSpendCreatedEvent(SpendCreatedRankingEvent event) {
 
         AccountBook accountBook = event.accountBook();
         Long userId = accountBook.getUser().getId();
         LocalDateTime spendDate = accountBook.getEndDate();
-
         Category spendCategory = accountBook.getCategory();
-
-
         List<Challenge> joinedChallenges = userChallengeRepository.findChallengesByUserAndDate(userId, spendCategory.getId(), spendDate.toLocalDate());
-
         // 참여자 전체 순위 재계산 후 전송
         for (Challenge challenge : joinedChallenges) {
             rankService.checkRank(challenge.getId());
