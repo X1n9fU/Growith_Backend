@@ -41,6 +41,7 @@ public class AccountBookService {
     private final ApplicationEventPublisher publisher;
     private final CategoryRepository categoryRepository;
     private final AccountBookRepository accountBookRepository;
+    private final Double LIMIT_WARNING = 0.5;
 
     @Transactional
     public AccountBookSpendResponse getSpendOne(Long id, Long userId) {
@@ -68,7 +69,7 @@ public class AccountBookService {
         if (budgetRepository.existsById(user.getId())) {
             BudgetResponse response = budgetRepository.findBudgetWithTotal(user.getId());
 
-            if (response.total() >= response.budget() * 0.5) {
+            if (response.total() >= response.budget() * LIMIT_WARNING) {
                 long usageRate = calcUsageRate(response);
                 //업적
                 publisher.publishEvent(new GetWarningBudgetEvent(user));

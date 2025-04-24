@@ -32,6 +32,8 @@ public class AccountBookScheduler {
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final ApplicationEventPublisher eventPublisher;
 
+    private final Double LIMIT_SAVE_RATE = 5.0;
+
     @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul") //매월 1일마다 예산 계획 성공 여부
     @Transactional
     public void checkBudgetSuccessfulOrNot(){
@@ -61,7 +63,7 @@ public class AccountBookScheduler {
             // 예산 계획에 성공한 사람들 횟수 +1
             eventPublisher.publishEvent(new SuccessBudgetPlanEvent(user));
             double savedRate = ((double) (limit - lastAmount) / limit) * 100;
-            if (savedRate >= 5.0)
+            if (savedRate >= LIMIT_SAVE_RATE)
                 eventPublisher.publishEvent(new SaveConsumeFromBudgetEvent(user, savedRate));
         }
     }
@@ -83,7 +85,7 @@ public class AccountBookScheduler {
     private void calcSavedRateAndAchieveWeek(UserEntity user, long lastWeekAmount, long twoWeeksAgoAmount) {
         if (twoWeeksAgoAmount > 0 && lastWeekAmount > 0) {
             double savedRate = ((double) (twoWeeksAgoAmount - lastWeekAmount) / twoWeeksAgoAmount) * 100;
-            if (savedRate >= 5.0)
+            if (savedRate >= LIMIT_SAVE_RATE)
                 eventPublisher.publishEvent(new SaveConsumeOfWeekEvent(user, savedRate));
         }
     }
