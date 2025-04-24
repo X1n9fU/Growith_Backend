@@ -111,11 +111,11 @@ public class UserEntity extends BaseTimeEntity {
 
     public void deleteNickname() { this.nickname = ""; }
 
-    public void plusChallengeCount() {
+    public void plusParticipatingChallenge() {
         this.participatingChallenges++;
     }
 
-    public void minusChallengeCount() {
+    public void minusParticipatingChallenge() {
         this.participatingChallenges--;
     }
 
