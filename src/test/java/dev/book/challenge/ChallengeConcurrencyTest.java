@@ -44,6 +44,7 @@ public class ChallengeConcurrencyTest {
     @WithMockUser
     void ChallengeConcurrency() throws InterruptedException {
 
+        //given
         int numThreads = 100; //100명
         CountDownLatch countDownLatch = new CountDownLatch(numThreads);
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
@@ -71,8 +72,8 @@ public class ChallengeConcurrencyTest {
         Challenge savedChallenge = challengeRepository.save(challenge);
 
         for (int i = 1; i <= numThreads; i++) {
-            final int index = i;
 
+            int index = i;
             executorService.execute(() -> {
                 try {
                     UserEntity userEntity = userRepository.findByEmail("test@naver.com" + index).orElseThrow();
@@ -94,8 +95,9 @@ public class ChallengeConcurrencyTest {
             });
         }
         countDownLatch.await();
-
+        //when
         Challenge updatedChallenge = challengeRepository.findById(savedChallenge.getId()).orElseThrow();
+        //then
         assertThat(updatedChallenge.getCurrentCapacity()).isEqualTo(101);
     }
 }
