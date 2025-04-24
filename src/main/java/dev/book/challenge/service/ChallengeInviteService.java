@@ -39,7 +39,7 @@ public class ChallengeInviteService {
         UserEntity inviteUser = userRepository.findByEmail(challengeInviteRequest.email()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         isNotParticipant(challengeId, user);// 자신이 참가하지않은 챌린지에 초대 하는 상황
         isAlreadyInvited(inviteUser, challenge); // 이미 초대가 된 상황일때
-        challenge.isOver();
+        challenge.isParticipantsMoreThanCapacity();
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
         individualAchievementStatusService.plusInviteFriendToChallenge(user);

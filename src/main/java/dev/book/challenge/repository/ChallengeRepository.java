@@ -48,11 +48,11 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
                 FROM Challenge c
                 WHERE c.status = 'RECRUITING'
                 AND  c.release = 'PUBLIC'
-                AND c.createdAt BETWEEN :startToday AND :endToday
+                AND c.createdAt BETWEEN :startDate AND :endToday
             """)
-    List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startToday, LocalDateTime endToday);
+    List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Challenge c WHERE c.id = :id")
-    Optional<Challenge> findByIdWithRock(Long id);
+    Optional<Challenge> findByIdWithLock(Long id);
 }

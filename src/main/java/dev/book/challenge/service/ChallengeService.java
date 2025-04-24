@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 import static dev.book.challenge.exception.ErrorCode.*;
@@ -95,10 +94,10 @@ public class ChallengeService {
     @Transactional
     public void participate(UserEntity user, Long id) {
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
-        Challenge challenge = challengeRepository.findByIdWithRock(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.findByIdWithLock(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
-        challenge.isOver();
+        challenge.isParticipantsMoreThanCapacity();
         challenge.plusCurrentCapacity();
         userEntity.plusChallengeCount();
         UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);
@@ -151,8 +150,8 @@ public class ChallengeService {
 
         Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startToday = now.toLocalDate().atStartOfDay();
-        LocalDateTime endToday = now.toLocalDate().atTime(LocalTime.MAX);
-        return challengeRepository.findNewChallenge(pageable, startToday, endToday);
+        LocalDateTime endDateTime = now.toLocalDate().atStartOfDay();// 오늘이 비교시 끝 부분
+        LocalDateTime startDateTime = endDateTime.minusDays(3); // 3일전이 비교시 시작부분
+        return challengeRepository.findNewChallenge(pageable, startDateTime, endDateTime);
     }
 }
