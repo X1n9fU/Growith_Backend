@@ -7,6 +7,6 @@ public record ChallengeTopResponse(Long id, String title,
                                    Integer capacity, Long participants, Status status) {
 
     public static ChallengeTopResponse fromEntity(Challenge challenge, Long participants) {
-        return new ChallengeTopResponse(challenge.getId(), challenge.getTitle(), challenge.getAmount(), participants, challenge.getStatus());
+        return new ChallengeTopResponse(challenge.getId(), challenge.getTitle(), challenge.getCapacity(), participants, challenge.getStatus());
     }
 }
