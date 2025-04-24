@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record AccountBookIncomeRequest(
@@ -29,10 +30,10 @@ public record AccountBookIncomeRequest(
         LocalDateTime endDate,
 
         @Schema(description = "실제 수입 발생한 시간 수동 입력", example = "2025-04-23T00:42:39")
-        LocalDateTime occurredAt,
+        LocalDate occurredAt,
 
         Repeat repeat,
-        @Schema(description = "카테고리", example = "food", allowableValues = {
+        @Schema(description = "카테고리", example = "salary", allowableValues = {
                 "transfer", "salary", "saving_investment"
         })
         String category

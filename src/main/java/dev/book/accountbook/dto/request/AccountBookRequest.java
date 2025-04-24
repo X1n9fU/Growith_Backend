@@ -6,6 +6,7 @@ import dev.book.accountbook.type.Frequency;
 import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface AccountBookRequest {
@@ -16,7 +17,7 @@ public interface AccountBookRequest {
     Repeat repeat();
     CategoryType categoryType();
     String category();
-    LocalDateTime occurredAt();
+    LocalDate occurredAt();
 
     default AccountBook toEntity(UserEntity user, Category category) {
         Frequency frequency = null;

@@ -3,11 +3,12 @@ package dev.book.accountbook.dto.response;
 import dev.book.accountbook.dto.request.Repeat;
 import dev.book.accountbook.entity.AccountBook;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record AccountBookIncomeResponse(
         Long id, String title, String category, int amount, LocalDateTime updatedAt,
-        String memo, LocalDateTime endDate, LocalDateTime occurredAt, Repeat repeat
+        String memo, LocalDateTime endDate, LocalDate occurredAt, Repeat repeat
 ) {
     public static AccountBookIncomeResponse from(AccountBook entity) {
         return new AccountBookIncomeResponse(

@@ -4,6 +4,7 @@ import dev.book.accountbook.type.CategoryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record AccountBookSpendRequest(
@@ -27,7 +28,7 @@ public record AccountBookSpendRequest(
 
         @NotNull
         @Schema(description = "실제 지출 발생한 시간 수동 입력", example = "2025-04-17T23:00:00")
-        LocalDateTime occurredAt,
+        LocalDate occurredAt,
 
         Repeat repeat,
         @Schema(description = "카테고리", example = "food", allowableValues = {
