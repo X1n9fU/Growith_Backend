@@ -5,6 +5,7 @@ import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.dto.response.UserAchievementResponse;
 import dev.book.user.dto.response.UserCategoryResponse;
+import dev.book.user.dto.response.UserChallengeInfoResponse;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,11 +75,16 @@ public class UserController implements UserSwaggerController{
         return ResponseEntity.ok().build();
     }
 
-    //todo 업적, 통계, 경고 반환
     @GetMapping("/achievement")
     public ResponseEntity<List<UserAchievementResponse>> getUserAchievement(@AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok()
                 .body(userService.getUserAchievement(userDetails));
+    }
+
+    @GetMapping("/challenge")
+    public ResponseEntity<UserChallengeInfoResponse> getUserChallengeInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok()
+                .body(userService.getUserChallengeInfo(userDetails));
     }
 
 }

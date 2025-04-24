@@ -43,6 +43,8 @@ public class UserEntity extends BaseTimeEntity {
 
     private int participatingChallenges = 0;
 
+    private int finishedChallenge = 0;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategory> userCategory = new ArrayList<>();
 
@@ -115,6 +117,18 @@ public class UserEntity extends BaseTimeEntity {
 
     public void minusChallengeCount() {
         this.participatingChallenges--;
+    }
+
+    public void plusCompleteChallenge(){
+        this.completedChallenges++;
+    }
+
+    public void plusSavings(long plusSavings){
+        this.savings += plusSavings;
+    }
+
+    public void plusFinishedChallenge(){
+        this.finishedChallenge++;
     }
 
 }

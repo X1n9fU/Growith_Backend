@@ -14,6 +14,7 @@ import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.dto.response.UserAchievementResponse;
 import dev.book.user.dto.response.UserCategoryResponse;
+import dev.book.user.dto.response.UserChallengeInfoResponse;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
@@ -130,5 +131,11 @@ public class UserService {
                                 achievementUser.getAchievement().getContent(),
                                 achievementUser.getCreatedAt()
                 )).toList();
+    }
+
+    public UserChallengeInfoResponse getUserChallengeInfo(CustomUserDetails userDetails) {
+        UserEntity user = userDetails.user();
+        return new UserChallengeInfoResponse(user.getSavings(), user.getCompletedChallenges(),
+                user.getParticipatingChallenges(), user.getFinishedChallenge());
     }
 }
