@@ -1,6 +1,8 @@
 package dev.book.user.service;
 
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.entity.AchievementUser;
+import dev.book.achievement.achievement_user.repository.AchievementUserRepository;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
@@ -10,6 +12,7 @@ import dev.book.global.exception.category.CategoryException;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
+import dev.book.user.dto.response.UserAchievementResponse;
 import dev.book.user.dto.response.UserCategoryResponse;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.entity.UserEntity;
@@ -32,6 +35,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final AchievementUserRepository achievementUserRepository;
+
     private final RefreshTokenService refreshTokenService;
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final JwtUtil jwtUtil;
@@ -115,5 +120,15 @@ public class UserService {
             userCategories.add(category.getCategory().getKorean());
         }
         return new UserCategoryResponse(userCategories);
+    }
+
+    public List<UserAchievementResponse> getUserAchievement(CustomUserDetails userDetails) {
+        List<AchievementUser> achievementUsers = achievementUserRepository.findAllByUser(userDetails.user());
+        return achievementUsers.stream().map(
+                achievementUser -> new UserAchievementResponse(
+                                achievementUser.getAchievement().getTitle(),
+                                achievementUser.getAchievement().getContent(),
+                                achievementUser.getCreatedAt()
+                )).toList();
     }
 }
