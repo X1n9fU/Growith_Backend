@@ -3,6 +3,7 @@ package dev.book.user.controller;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
+import dev.book.user.dto.response.UserCategoryResponse;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,10 +33,8 @@ public class UserController implements UserSwaggerController{
                 .body(userService.updateUserProfile(profileUpdateRequest, userDetails));
     }
 
-    //todo 업적, 통계, 경고 반환
-
     @GetMapping("/categories")
-    public ResponseEntity<?> getUserCategories(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<UserCategoryResponse> getUserCategories(@AuthenticationPrincipal CustomUserDetails userDetails){
         return ResponseEntity.ok()
                 .body(userService.getUserCategories(userDetails));
     }
@@ -71,4 +70,7 @@ public class UserController implements UserSwaggerController{
         userService.deleteUserNickname(userDetails);
         return ResponseEntity.ok().build();
     }
+
+    //todo 업적, 통계, 경고 반환
+
 }
