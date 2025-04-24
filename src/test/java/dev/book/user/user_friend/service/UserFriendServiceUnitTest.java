@@ -14,6 +14,7 @@ import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
 import dev.book.user.user_friend.dto.response.InvitingUserTokenResponseDto;
 import dev.book.user.user_friend.dto.response.KakaoResponseDto;
 import dev.book.user.user_friend.entity.UserFriend;
+import dev.book.user.user_friend.exception.UserFriendException;
 import dev.book.user.user_friend.repository.UserFriendRepository;
 import dev.book.user.user_friend.util.AESUtil;
 import dev.book.util.UserBuilder;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -135,6 +137,26 @@ class UserFriendServiceUnitTest {
     }
 
     @Test
+    @DisplayName("초대 내역이 이미 생성되어있을 경우 에러를 반환한다.")
+    void isExistedInvitation() throws Exception {
+        //given
+        EncryptUserInfo encryptUserInfo = new EncryptUserInfo(userDetails.getUsername(), null, LocalDateTime.of(2025, 4, 21, 14, 29, 54));
+        InvitingTokenAndJson invitingTokenAndJson = getInvitingTokenAndJson();
+
+        given(objectMapper.readValue(eq(invitingTokenAndJson.jsonToken()), eq(EncryptUserInfo.class))).willReturn(encryptUserInfo);
+        given(userRepository.findById(any())).willReturn(Optional.ofNullable(userDetails.user()));
+        given(userFriendRepository.existsByUserAndRequestedAt(any(), any())).willReturn(true); //에러 생성 부분
+
+        //when, 사전에 생성한 토큰으로 받은 웹훅
+        KakaoResponseDto kakaoResponseDto = new KakaoResponseDto("chat", 1000L, "hash", invitingTokenAndJson.invitingUserTokenResponseDto().invitingUserToken());
+
+        //then
+        assertThatThrownBy(() -> userFriendService.getWebHookFromKakao(kakaoResponseDto))
+                .isInstanceOf(UserFriendException.class)
+                .hasMessageContaining("이미 존재하는 초대 요청입니다.");
+    }
+
+    @Test
     @WithMockUser("test@test.com")
     @DisplayName("초대 토큰을 받아 초대 내역을 완성한다.")
     void getTokenAndMakeInvitation() throws Exception {
@@ -161,6 +183,45 @@ class UserFriendServiceUnitTest {
         verify(eventPublisher).publishEvent(any(InviteFriendToServiceEvent.class));
     }
 
+    @Test
+    @DisplayName("초대 내역이 생성되어 있을 경우 에러를 반환한다.")
+    void isAlreadyHaveInvitation() throws Exception {
+        //given
+        //초대 토큰 생성
+        EncryptUserInfo encryptUserInfo = new EncryptUserInfo(userDetails.getUsername(), 1L, LocalDateTime.of(2025, 4, 21, 14, 29, 54));
+        InvitingTokenAndJson invitingTokenAndJson = getInvitingTokenAndJson();
+        given(objectMapper.readValue(eq(invitingTokenAndJson.jsonToken()), eq(EncryptUserInfo.class))).willReturn(encryptUserInfo);
+
+        UserEntity invitingUser = userDetails.user();
+        UserEntity invitedUser = UserBuilder.of("test2@test.com");
+
+        UserFriend userFriend = UserFriend.of(invitingUser, invitedUser);
+        given(userFriendRepository.findByInvitingUserAndRequestedAt(any(), any())).willReturn(Optional.of(userFriend));
+
+        //when, then
+        assertThatThrownBy(() -> userFriendService.getTokenAndMakeInvitation(userDetails, response, invitingTokenAndJson.invitingUserTokenResponseDto.invitingUserToken()))
+                .isInstanceOf(UserFriendException.class)
+                .hasMessageContaining("이미 초대 요청이 만들어진 상태입니다");
+    }
+
+    @Test
+    @DisplayName("내가 나에게 초대를 할 경우 에러가 발생한다.")
+    void isInvitationMySelf() throws Exception {
+        //given
+        //초대 토큰 생성
+        EncryptUserInfo encryptUserInfo = new EncryptUserInfo(userDetails.getUsername(), 1L, LocalDateTime.of(2025, 4, 21, 14, 29, 54));
+        InvitingTokenAndJson invitingTokenAndJson = getInvitingTokenAndJson();
+        given(objectMapper.readValue(eq(invitingTokenAndJson.jsonToken()), eq(EncryptUserInfo.class))).willReturn(encryptUserInfo);
+
+        UserEntity invitingUser = userDetails.user();
+        UserFriend userFriend = UserFriend.of(invitingUser, encryptUserInfo.localDateTime());
+        given(userFriendRepository.findByInvitingUserAndRequestedAt(any(), any())).willReturn(Optional.of(userFriend));
+
+        //when, then
+        assertThatThrownBy(() -> userFriendService.getTokenAndMakeInvitation(userDetails, response, invitingTokenAndJson.invitingUserTokenResponseDto.invitingUserToken()))
+                .isInstanceOf(UserFriendException.class)
+                .hasMessageContaining("내가 나에게 초대 요청을 보낼 수 없습니다.");
+    }
 
     @Test
     @DisplayName("친구 요청 내역을 반환한다.")
