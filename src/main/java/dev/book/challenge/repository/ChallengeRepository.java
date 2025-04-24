@@ -3,8 +3,10 @@ package dev.book.challenge.repository;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeTopResponse;
 import dev.book.challenge.entity.Challenge;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -51,4 +53,9 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
                 AND c.createdAt BETWEEN :startToday AND :endToday
             """)
     List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startToday, LocalDateTime endToday);
+
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Challenge c WHERE c.id = :id")
+    Optional<Challenge> findByIdWithRock(Long id);
 }
