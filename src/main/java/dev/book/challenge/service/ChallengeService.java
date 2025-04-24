@@ -41,6 +41,7 @@ public class ChallengeService {
 
     @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
+
         UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow();
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
@@ -55,11 +56,13 @@ public class ChallengeService {
     }
 
     public Page<ChallengeReadResponse> searchChallenge(String title, String text, int page, int size) {
+
         Pageable pageable = PageRequest.of(page - 1, size);
         return challengeRepository.search(title, text, pageable);
     }
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
+
         Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         int participants = userChallengeRepository.countByChallengeId(challenge.getId());
         return ChallengeReadDetailResponse.fromEntity(challenge, participants);
@@ -67,8 +70,8 @@ public class ChallengeService {
 
     @Transactional
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
-        Challenge challenge = getMyChallenge(user.getId(), id);
 
+        Challenge challenge = getMyChallenge(user.getId(), id);
         List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
         challenge.updateInfo(challengeUpdateRequest, categories);
         challengeRepository.flush();
@@ -77,13 +80,16 @@ public class ChallengeService {
 
     @Transactional
     public void deleteChallenge(UserEntity user, Long id) {
+
         UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         Challenge challenge = getMyChallenge(creator.getId(), id);
         List<Long> userIds = userChallengeRepository.findUserIdByChallengeId(challenge.getId());
         List<UserEntity> users = userRepository.findAllById(userIds);
+
         for (UserEntity participant : users) {
             participant.minusChallengeCount();
         }
+
         challengeRepository.delete(challenge);
 
 
@@ -91,11 +97,11 @@ public class ChallengeService {
 
     @Transactional
     public void participate(UserEntity user, Long id) {
+
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
-
         int countParticipants = userChallengeRepository.countByChallengeId(id);
         challenge.isOver(countParticipants);
         userEntity.plusChallengeCount();
@@ -106,6 +112,7 @@ public class ChallengeService {
 
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
+
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         checkNotExist(user, challengeId);
         userEntity.minusChallengeCount();
@@ -114,31 +121,37 @@ public class ChallengeService {
     }
 
     public List<ChallengeTopResponse> findTopChallenge() {
+
         Pageable pageable = PageRequest.of(0, 3); //todo top 갯수 추가 조정
         return challengeRepository.findTopChallenge(pageable);
 
     }
 
     private void checkExist(UserEntity user, Long id) {
+
         boolean isExist = userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), id);
+
         if (isExist) {
             throw new ChallengeException(CHALLENGE_ALREADY_JOINED);
         }
+
     }
 
     private void checkNotExist(UserEntity user, Long challengeId) {
         boolean isNotExist = !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
+
         if (isNotExist) {
             throw new ChallengeException(CHALLENGE_NOT_FOUND_USER);
         }
     }
 
     private Challenge getMyChallenge(Long userId, Long id) {
-        Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
-        return challenge;
+
+        return challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
     }
 
     public List<ChallengeReadResponse> findNewChallenge() {
+
         Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startToday = now.toLocalDate().atStartOfDay();
