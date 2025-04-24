@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,9 +27,12 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class ChallengeConcurrencyTest {
+
     @Autowired
     private ChallengeRepository challengeRepository;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -39,6 +43,7 @@ public class ChallengeConcurrencyTest {
     @DisplayName("동시에 참여했을 때 동시성 테스트.")
     @WithMockUser
     void ChallengeConcurrency() throws InterruptedException {
+
         int numThreads = 100; //100명
         CountDownLatch countDownLatch = new CountDownLatch(numThreads);
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);

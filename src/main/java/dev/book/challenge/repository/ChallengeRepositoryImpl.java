@@ -21,7 +21,6 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-
     @Override
     public Page<ChallengeReadResponse> search(String title, String text, Pageable pageable) {
         List<ChallengeReadResponse> content = jpaQueryFactory.select(Projections.constructor(ChallengeReadResponse.class,

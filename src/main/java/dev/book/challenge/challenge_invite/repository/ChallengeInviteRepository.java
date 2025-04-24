@@ -10,8 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface ChallengeInviteRepository extends JpaRepository<ChallengeInvite, Long> {
-    boolean existsByInviteUserIdAndChallengeId(Long inviteUserId, Long challengeId);
 
+    boolean existsByInviteUserIdAndChallengeId(Long inviteUserId, Long challengeId);
 
     List<ChallengeInvite> findAllByInviteUserId(Long id);
 

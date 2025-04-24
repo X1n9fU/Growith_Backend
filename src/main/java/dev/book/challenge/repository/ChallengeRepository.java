@@ -31,7 +31,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
     @Query("SELECT c FROM Challenge c JOIN FETCH c.challengeCategories WHERE c.id=:challengeId")
     Optional<Challenge> findByIdJoinCategory(Long challengeId);
 
-
     @Query("""
                 SELECT new dev.book.challenge.dto.response.ChallengeTopResponse(
                     c.id, c.title, c.capacity,c.currentCapacity,c.status
@@ -41,7 +40,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
                 AND c.release ='PUBLIC'
             """)
     List<ChallengeTopResponse> findTopChallenge(Pageable pageable);
-
 
     @Query("""
                 SELECT new dev.book.challenge.dto.response.ChallengeReadResponse(
@@ -53,7 +51,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
                 AND c.createdAt BETWEEN :startToday AND :endToday
             """)
     List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startToday, LocalDateTime endToday);
-
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Challenge c WHERE c.id = :id")

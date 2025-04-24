@@ -15,6 +15,7 @@ import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_ACCEPT;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ChallengeInvite extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

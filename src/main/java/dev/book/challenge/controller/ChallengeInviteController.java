@@ -16,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/challenges")
 public class ChallengeInviteController implements ChallengeInviteApi {
+
     private final ChallengeInviteService challengeInviteService;
 
     @PostMapping("/{id}/invites")

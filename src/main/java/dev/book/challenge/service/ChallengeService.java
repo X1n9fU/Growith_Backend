@@ -48,7 +48,7 @@ public class ChallengeService {
         Challenge savedChallenge = challengeRepository.save(challenge);
         UserChallenge userChallenge = UserChallenge.of(creator, savedChallenge);
         userChallengeRepository.save(userChallenge);
-        //individualAchievementStatusService.plusCreateChallenge(user);
+        individualAchievementStatusService.plusCreateChallenge(user);
         creator.plusChallengeCount();
         return ChallengeCreateResponse.fromEntity(challenge);
 
@@ -90,12 +90,10 @@ public class ChallengeService {
 
         challengeRepository.delete(challenge);
 
-
     }
 
     @Transactional
     public void participate(UserEntity user, Long id) {
-
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         Challenge challenge = challengeRepository.findByIdWithRock(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
