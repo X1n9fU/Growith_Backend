@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChallengeCategory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

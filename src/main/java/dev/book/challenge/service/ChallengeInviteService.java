@@ -35,19 +35,17 @@ public class ChallengeInviteService {
 
     @Transactional
     public void invite(Long challengeId, UserEntity user, ChallengeInviteRequest challengeInviteRequest) {
+
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         UserEntity inviteUser = userRepository.findByEmail(challengeInviteRequest.email()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
 
-
         isNotParticipant(challengeId, user);// 자신이 참가하지않은 챌린지에 초대 하는 상황
-
         isAlreadyInvited(inviteUser, challenge); // 이미 초대가 된 상황일때
 
-
-        long countParticipants = userChallengeRepository.countByChallengeId(challengeId);
-        challenge.isOver(countParticipants);
+        challenge.isParticipantsMoreThanCapacity();
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
+
         eventPublisher.publishEvent(new InviteFriendToChallengeEvent(user));
 
     }
@@ -66,22 +64,28 @@ public class ChallengeInviteService {
 
     @Transactional(readOnly = true)
     public List<ChallengeInviteResponse> getMyInviteList(UserEntity user) {
+
         List<ChallengeInvite> challengeInvites = challengeInviteRepository.findAllByInviteUserId(user.getId());
-        List<ChallengeInviteResponse> challengeInviteResponses = challengeInvites.stream().map(ChallengeInviteResponse::fromEntity).toList();
-        return challengeInviteResponses;
+        return challengeInvites.stream().map(ChallengeInviteResponse::fromEntity).toList();
     }
 
     @Transactional
     public void acceptInvite(Long inviteId, UserEntity user) {
+
         ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
         challengeInvite.accept();
+        user.plusChallengeCount();
+        challengeInviteRepository.delete(challengeInvite);
+
         UserChallenge userChallenge = UserChallenge.of(user, challengeInvite.getChallenge());
         userChallengeRepository.save(userChallenge);
     }
 
     @Transactional
     public void rejectInvite(Long inviteId, UserEntity user) {
+
         ChallengeInvite challengeInvite = challengeInviteRepository.findByIdAndInviteUserId(inviteId, user.getId()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND_INVITED));
         challengeInvite.reject();
+        challengeInviteRepository.delete(challengeInvite);
     }
 }

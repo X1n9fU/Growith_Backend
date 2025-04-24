@@ -26,14 +26,16 @@ public class BudgetService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public BudgetResponse getBudget(Long userId) {
+    public BudgetResponse getBudget(Long id, Long userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        return budgetRepository.findBudgetWithTotal(user.getId());
+        return budgetRepository.findBudgetWithTotal(id);
     }
 
     @Transactional
     public BudgetResponse createBudget(UserEntity user, BudgetRequest budgetRequest) {
+        validAlreadyExistBudget(user.getId());
+
         int date = LocalDate.now().getMonthValue();
         budgetRepository.save(new Budget(budgetRequest.budget(), date, user));
 
@@ -56,7 +58,14 @@ public class BudgetService {
         budgetRepository.deleteById(budget.getId());
     }
 
+    private void validAlreadyExistBudget(Long userId) {
+        if (budgetRepository.existsByUserId(userId)) {
+            throw new AccountBookErrorException(AccountBookErrorCode.DUPLICATE_BUDGET);
+        }
+    }
+
     private Budget findBudgetIdAndUserId(Long budgetId, Long userId) {
+
         return budgetRepository.findByIdAndUserId(budgetId, userId).orElseThrow(() -> new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_BUDGET));
     }
 }
