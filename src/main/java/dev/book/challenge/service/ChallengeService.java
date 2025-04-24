@@ -2,22 +2,19 @@ package dev.book.challenge.service;
 
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.challenge.ChallengeCategory;
-import dev.book.challenge.category.ChallengeCategoryRepository;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
-import dev.book.challenge.dto.response.ChallengeCreateResponse;
-import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
-import dev.book.challenge.dto.response.ChallengeReadResponse;
-import dev.book.challenge.dto.response.ChallengeUpdateResponse;
+import dev.book.challenge.dto.response.*;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
-import dev.book.challenge.exception.ErrorCode;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
+import dev.book.user.exception.UserErrorException;
+import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,10 +22,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
-import static dev.book.challenge.exception.ErrorCode.CHALLENGE_NOT_FOUND_USER;
+import static dev.book.challenge.exception.ErrorCode.*;
+import static dev.book.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -38,34 +36,40 @@ public class ChallengeService {
     private final UserChallengeRepository userChallengeRepository;
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-
+    @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
+
+        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
-        Challenge challenge = Challenge.of(challengeCreateRequest, user);
+        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         categories.forEach(category -> new ChallengeCategory(challenge, category));
         Challenge savedChallenge = challengeRepository.save(challenge);
-        UserChallenge userChallenge = UserChallenge.of(user, savedChallenge);
+        UserChallenge userChallenge = UserChallenge.of(creator, savedChallenge);
         userChallengeRepository.save(userChallenge);
         individualAchievementStatusService.plusCreateChallenge(user);
+        creator.plusChallengeCount();
         return ChallengeCreateResponse.fromEntity(challenge);
 
     }
 
     public Page<ChallengeReadResponse> searchChallenge(String title, String text, int page, int size) {
+
         Pageable pageable = PageRequest.of(page - 1, size);
         return challengeRepository.search(title, text, pageable);
     }
 
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
-        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+
+        Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         return ChallengeReadDetailResponse.fromEntity(challenge);
     }
 
     @Transactional
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
-        Challenge challenge = getMyChallenge(user.getId(), id);
 
+        Challenge challenge = getMyChallenge(user.getId(), id);
         List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
         challenge.updateInfo(challengeUpdateRequest, categories);
         challengeRepository.flush();
@@ -74,49 +78,81 @@ public class ChallengeService {
 
     @Transactional
     public void deleteChallenge(UserEntity user, Long id) {
-        Challenge challenge = getMyChallenge(user.getId(), id);
+
+        UserEntity creator = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
+        Challenge challenge = getMyChallenge(creator.getId(), id);
+        List<Long> userIds = userChallengeRepository.findUserIdByChallengeId(challenge.getId());
+        List<UserEntity> users = userRepository.findAllById(userIds);
+
+        for (UserEntity participant : users) {
+            participant.minusChallengeCount();
+        } // 만약에 챌린지가 완료후 챌린지가 삭제 되면 이것도 삭제되는데
+
         challengeRepository.delete(challenge);
 
     }
 
     @Transactional
     public void participate(UserEntity user, Long id) {
-
-        Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
+        Challenge challenge = challengeRepository.findByIdWithLock(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
-
-        long countParticipants = userChallengeRepository.countByChallengeId(id);
-        challenge.isOver(countParticipants);
-        UserChallenge userChallenge = UserChallenge.of(user, challenge);
+        challenge.isParticipantsMoreThanCapacity();
+        challenge.plusCurrentCapacity();
+        userEntity.plusChallengeCount();
+        UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);
         userChallengeRepository.save(userChallenge);
     }
 
 
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
+        checkNotExist(user, challenge.getId());
+        userEntity.minusChallengeCount();
+        challenge.minusCurrentCapacity();
+        userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challenge.getId());
 
-        checkNotExist(user, challengeId);
-        userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(), challengeId);
+    }
+
+    public List<ChallengeTopResponse> findTopChallenge() {
+
+        Pageable pageable = PageRequest.of(0, 3); //todo top 갯수 추가 조정
+        return challengeRepository.findTopChallenge(pageable);
 
     }
 
     private void checkExist(UserEntity user, Long id) {
+
         boolean isExist = userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), id);
+
         if (isExist) {
             throw new ChallengeException(CHALLENGE_ALREADY_JOINED);
         }
+
     }
 
     private void checkNotExist(UserEntity user, Long challengeId) {
         boolean isNotExist = !userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), challengeId);
+
         if (isNotExist) {
             throw new ChallengeException(CHALLENGE_NOT_FOUND_USER);
         }
     }
 
     private Challenge getMyChallenge(Long userId, Long id) {
-        Challenge challenge = challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_INVALID));
-        return challenge;
+
+        return challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(CHALLENGE_INVALID));
+    }
+
+    public List<ChallengeReadResponse> findNewChallenge() {
+
+        Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime endDateTime = now.toLocalDate().atStartOfDay();// 오늘이 비교시 끝 부분
+        LocalDateTime startDateTime = endDateTime.minusDays(3); // 3일전이 비교시 시작부분
+        return challengeRepository.findNewChallenge(pageable, startDateTime, endDateTime);
     }
 }

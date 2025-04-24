@@ -13,8 +13,8 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class RankController {
-    private final RankService rankService;
 
+    private final RankService rankService;
 
     @MessageMapping("challenge/{challengeId}/rank")
     public void checkRank(@DestinationVariable Long challengeId) {

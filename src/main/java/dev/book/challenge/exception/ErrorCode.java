@@ -12,6 +12,7 @@ public enum ErrorCode {
     CHALLENGE_CAPACITY_FULL(HttpStatus.CONFLICT, "참여 인원이 초과 하였습니다."),
     CHALLENGE_ALREADY_JOINED(HttpStatus.CONFLICT, "이미 참여된 챌린지 입니다."),
     CHALLENGE_ALREADY_INVITED(HttpStatus.CONFLICT, "이미 초대된 요청입니다."),
+    CHALLENGE_ALREADY_ACCEPT(HttpStatus.CONFLICT, "이미 수락한 요청입니다."),
     CHALLENGE_INVITE_INVALID(HttpStatus.CONFLICT, "초대할 권한이 없습니다."),
     CHALLENGE_NOT_FOUND_INVITED(HttpStatus.NOT_FOUND, "챌린지 초대의 유효한 접근이 아닙니다."),
     CHALLENGE_NOT_FOUND_USER(HttpStatus.NOT_FOUND, "챌린지에 속해있지 않은 사용자 입니다."),
