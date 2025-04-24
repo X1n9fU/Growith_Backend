@@ -181,7 +181,7 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
     Integer sumSpendingInCategories(@Param("userId") Long userId,
                                     @Param("categoryType") CategoryType categoryType,
                                     @Param("categories") List<Category> category,
-                                    @Param("startDate") LocalDateTime startDate,
-                                    @Param("endDate") LocalDateTime endDate
+                                    @Param("startDate") LocalDate startDate,
+                                    @Param("endDate") LocalDate endDate
     );
 }
