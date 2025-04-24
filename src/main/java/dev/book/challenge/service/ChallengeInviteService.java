@@ -32,15 +32,14 @@ public class ChallengeInviteService {
     private final UserRepository userRepository;
     private final IndividualAchievementStatusService individualAchievementStatusService;
 
-
+    @Transactional
     public void invite(Long challengeId, UserEntity user, ChallengeInviteRequest challengeInviteRequest) {
 
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         UserEntity inviteUser = userRepository.findByEmail(challengeInviteRequest.email()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         isNotParticipant(challengeId, user);// 자신이 참가하지않은 챌린지에 초대 하는 상황
         isAlreadyInvited(inviteUser, challenge); // 이미 초대가 된 상황일때
-        int countParticipants = userChallengeRepository.countByChallengeId(challengeId);
-        challenge.isOver(countParticipants);
+        challenge.isOver();
         ChallengeInvite challengeInvite = ChallengeInvite.of(user, inviteUser, challenge);
         challengeInviteRepository.save(challengeInvite);
         individualAchievementStatusService.plusInviteFriendToChallenge(user);

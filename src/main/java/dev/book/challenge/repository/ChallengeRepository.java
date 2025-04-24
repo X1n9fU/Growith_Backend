@@ -32,29 +32,23 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
 
     @Query("""
                 SELECT new dev.book.challenge.dto.response.ChallengeTopResponse(
-                    c.id, c.title, c.capacity,COUNT(uc),c.status
+                    c.id, c.title, c.capacity,c.currentCapacity,c.status
                 )
-                FROM UserChallenge uc
-                LEFT JOIN uc.challenge c
+                FROM Challenge c
                 WHERE c.status = 'RECRUITING'
                 AND c.release ='PUBLIC'
-                GROUP BY c.id, c.title, c.capacity, c.status
-                ORDER BY COUNT(uc) DESC
             """)
     List<ChallengeTopResponse> findTopChallenge(Pageable pageable);
 
 
     @Query("""
                 SELECT new dev.book.challenge.dto.response.ChallengeReadResponse(
-                    c.id, c.title, c.capacity,COUNT(uc),c.status
+                    c.id, c.title, c.capacity,c.currentCapacity,c.status
                 )
-                FROM UserChallenge uc
-                LEFT JOIN uc.challenge c
+                FROM Challenge c
                 WHERE c.status = 'RECRUITING'
                 AND  c.release = 'PUBLIC'
                 AND c.createdAt BETWEEN :startToday AND :endToday
-                GROUP BY c.id, c.title, c.capacity, c.status
-                ORDER BY COUNT(uc) DESC
             """)
     List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startToday, LocalDateTime endToday);
 }

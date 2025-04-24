@@ -48,12 +48,12 @@ public class ChallengeInvite extends BaseTimeEntity {
     public void accept() {
         this.isAccept = true;
         this.inviteUser.plusChallengeCount();
+        this.challenge.plusCurrentCapacity();
     }
 
     public void reject() {
-        if(this.isAccept){
+        if (this.isAccept) {
             throw new ChallengeException(CHALLENGE_ALREADY_ACCEPT);
         }
-        this.isAccept = false;
     }
 }

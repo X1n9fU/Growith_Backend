@@ -9,19 +9,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChallengeReadDetailResponse(Long id, String creator, String title, Release release, Integer amount,
-                                          Integer capacity, int participants ,List<CategoryDto> challengeCategory, Status status,
+                                          Integer capacity, Integer participants, List<CategoryDto> challengeCategory,
+                                          Status status,
                                           LocalDate startDate,
                                           LocalDate endDate, LocalDateTime createDate,
                                           LocalDateTime modifyDate) {
 
-    public static ChallengeReadDetailResponse fromEntity(Challenge challenge,int participants) {
+    public static ChallengeReadDetailResponse fromEntity(Challenge challenge) {
         return new ChallengeReadDetailResponse(challenge.getId(),
                 challenge.getCreator().getName(),
                 challenge.getTitle(),
                 challenge.getRelease(),
                 challenge.getAmount(),
                 challenge.getCapacity(),
-                participants,
+                challenge.getCurrentCapacity(),
                 challenge.getChallengeCategories().stream().map(challengeCategory -> new CategoryDto(challengeCategory.getCategory().getKorean())).toList(),
                 challenge.getStatus(),
                 challenge.getStartDate(),

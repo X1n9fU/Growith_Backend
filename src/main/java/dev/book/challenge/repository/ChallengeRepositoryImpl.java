@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static dev.book.challenge.entity.QChallenge.challenge;
-import static dev.book.challenge.user_challenge.entity.QUserChallenge.userChallenge;
 
 
 @Repository
@@ -29,11 +28,10 @@ public class ChallengeRepositoryImpl implements ChallengeJpaRepository {
                         challenge.id,
                         challenge.title,
                         challenge.capacity,
-                        userChallenge.count().intValue(),
+                        challenge.currentCapacity,
                         challenge.status
                 ))
                 .from(challenge)
-                .leftJoin(userChallenge).on(userChallenge.challenge.eq(challenge))
                 .where(eqTitle(title),
                         eqText(text))
                 .groupBy(

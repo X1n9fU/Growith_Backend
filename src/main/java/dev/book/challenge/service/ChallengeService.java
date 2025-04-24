@@ -26,8 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import static dev.book.challenge.exception.ErrorCode.CHALLENGE_ALREADY_JOINED;
-import static dev.book.challenge.exception.ErrorCode.CHALLENGE_NOT_FOUND_USER;
+import static dev.book.challenge.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +48,7 @@ public class ChallengeService {
         Challenge savedChallenge = challengeRepository.save(challenge);
         UserChallenge userChallenge = UserChallenge.of(creator, savedChallenge);
         userChallengeRepository.save(userChallenge);
-        individualAchievementStatusService.plusCreateChallenge(user);
+        //individualAchievementStatusService.plusCreateChallenge(user);
         creator.plusChallengeCount();
         return ChallengeCreateResponse.fromEntity(challenge);
 
@@ -64,8 +63,7 @@ public class ChallengeService {
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
 
         Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
-        int participants = userChallengeRepository.countByChallengeId(challenge.getId());
-        return ChallengeReadDetailResponse.fromEntity(challenge, participants);
+        return ChallengeReadDetailResponse.fromEntity(challenge);
     }
 
     @Transactional
@@ -88,7 +86,7 @@ public class ChallengeService {
 
         for (UserEntity participant : users) {
             participant.minusChallengeCount();
-        }
+        } // 만약에 챌린지가 완료후 챌린지가 삭제 되면 이것도 삭제되는데
 
         challengeRepository.delete(challenge);
 
@@ -102,8 +100,8 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(id).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
         checkExist(user, id);
-        int countParticipants = userChallengeRepository.countByChallengeId(id);
-        challenge.isOver(countParticipants);
+        challenge.isOver();
+        challenge.plusCurrentCapacity();
         userEntity.plusChallengeCount();
         UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);
         userChallengeRepository.save(userChallenge);
@@ -112,11 +110,12 @@ public class ChallengeService {
 
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
-
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND));
-        checkNotExist(user, challengeId);
+        checkNotExist(user, challenge.getId());
         userEntity.minusChallengeCount();
-        userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challengeId);
+        challenge.minusCurrentCapacity();
+        userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challenge.getId());
 
     }
 
