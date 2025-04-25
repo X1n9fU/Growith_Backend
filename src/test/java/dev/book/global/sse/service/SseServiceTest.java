@@ -1,7 +1,7 @@
 package dev.book.global.sse.service;
 
 import dev.book.achievement.dto.AchievementResponseDto;
-import dev.book.global.sse.dto.SseAchievementResponse;
+import dev.book.global.sse.dto.response.SseAchievementResponse;
 import dev.book.global.sse.repository.SseEmitterRepository;
 import dev.book.global.sse.type.SseType;
 import org.junit.jupiter.api.DisplayName;
