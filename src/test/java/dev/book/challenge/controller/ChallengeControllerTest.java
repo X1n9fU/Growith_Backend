@@ -3,13 +3,9 @@ package dev.book.challenge.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
-import dev.book.challenge.dto.response.ChallengeCreateResponse;
-import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
-import dev.book.challenge.dto.response.ChallengeReadResponse;
-import dev.book.challenge.dto.response.ChallengeUpdateResponse;
+import dev.book.challenge.dto.response.*;
 import dev.book.challenge.service.ChallengeService;
 import dev.book.challenge.type.Release;
-import dev.book.challenge.type.Status;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -147,7 +143,7 @@ class ChallengeControllerTest {
                 10,
                 1,
                 List.of(new ChallengeReadDetailResponse.CategoryDto("SHOPPING")),
-                Status.RECRUITING,
+                RECRUITING,
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 2, 1),
                 LocalDateTime.now(),
@@ -182,7 +178,7 @@ class ChallengeControllerTest {
                 2000,
                 20,
                 List.of(new ChallengeUpdateResponse.CategoryDto("SHOPPING")),
-                Status.RECRUITING,
+                RECRUITING,
                 LocalDate.of(2024, 5, 1),
                 LocalDate.of(2024, 5, 31),
                 LocalDateTime.now(),
@@ -222,5 +218,80 @@ class ChallengeControllerTest {
         mockMvc.perform(delete("/api/v1/challenges/{id}/exit", challengeId))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().string("챌린지에서 나갔습니다"));
+    }
+
+    @Test
+    @DisplayName("인기 챌린지 조회 시 200 OK 와 인기 챌린지 정보를 반환한다. ")
+    void searchTopChallenge() throws Exception {
+
+        // given
+        ChallengeTopResponse response = new ChallengeTopResponse(
+                1L,
+                "제목",
+                5,
+                40,
+                RECRUITING
+        );
+
+        given(challengeService.findTopChallenge()).willReturn(List.of(response));
+        mockMvc.perform(get("/api/v1/challenges/top"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].title").value("제목"))
+                .andExpect(jsonPath("$[0].capacity").value(5))
+                .andExpect(jsonPath("$[0].participants").value(40))
+                .andExpect(jsonPath("$[0].status").value("RECRUITING"));
+
+    }
+
+    @Test
+    @DisplayName("신규 챌린지 조회 시 200 OK 와 신규 챌린지 정보를 반환한다. ")
+    void searchNewChallenge() throws Exception {
+
+        // given
+        ChallengeReadResponse response = new ChallengeReadResponse(
+                1L,
+                "제목",
+                5,
+                40,
+                RECRUITING
+        );
+
+        given(challengeService.findNewChallenge()).willReturn(List.of(response));
+        mockMvc.perform(get("/api/v1/challenges/new"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].title").value("제목"))
+                .andExpect(jsonPath("$[0].capacity").value(5))
+                .andExpect(jsonPath("$[0].participants").value(40))
+                .andExpect(jsonPath("$[0].status").value("RECRUITING"));
+
+    }
+
+    @Test
+    @DisplayName("내 챌린지 조회 시 200 OK 와 내 챌린지 정보를 반환한다. ")
+    void searchMyChallenge() throws Exception {
+
+        // given
+        ChallengeParticipantResponse challengeParticipantResponse = new ChallengeParticipantResponse(
+                1L,
+                "제목",
+                5000,
+                50000,
+                3,
+                false
+        );
+
+        given(challengeService.findMyChallenge(any())).willReturn(List.of(challengeParticipantResponse));
+
+        mockMvc.perform(get("/api/v1/challenges/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].name").value("제목"))
+                .andExpect(jsonPath("$[0].totalSpend").value(5000))
+                .andExpect(jsonPath("$[0].amount").value(50000))
+                .andExpect(jsonPath("$[0].endDay").value(3))
+                .andExpect(jsonPath("$[0].isSuccess").value(false));
+
     }
 }
