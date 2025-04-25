@@ -10,6 +10,7 @@ import dev.book.global.config.security.handler.OAuth2SuccessHandler;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.oauth2.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,6 +33,9 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Value("${springdoc.servers.production.url}")
+    private String DOMAIN;
 
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
@@ -85,7 +89,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080","http://localhost:63342"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080","http://localhost:63342", DOMAIN));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Cache-Control"));
         config.setMaxAge(3600L);
