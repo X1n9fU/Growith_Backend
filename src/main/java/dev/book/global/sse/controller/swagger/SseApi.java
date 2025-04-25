@@ -1,7 +1,7 @@
 package dev.book.global.sse.controller.swagger;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
-import dev.book.global.sse.dto.SseAchievementResponse;
+import dev.book.global.sse.dto.response.SseAchievementResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
