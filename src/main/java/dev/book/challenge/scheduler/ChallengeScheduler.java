@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -40,11 +39,15 @@ public class ChallengeScheduler {
             List<Category> categoryList = ChallengeCategory.getCategoryList(challenge.getChallengeCategories());
             users.forEach( user-> {
                 Integer sumOfCategories = accountBookRepository.sumSpendingInCategories(
-                        user.getId(), CategoryType.SPEND, categoryList, challenge.getStartDate().atStartOfDay(), challenge.getEndDate().atTime(LocalTime.MAX));
-                if (sumOfCategories <= challenge.getAmount())
+                        user.getId(), CategoryType.SPEND, categoryList, challenge.getStartDate(), challenge.getEndDate());
+                if (sumOfCategories <= challenge.getAmount()){
+                    user.plusCompleteChallenge();
+                    user.plusSavings(challenge.getAmount() - sumOfCategories);
                     eventPublisher.publishEvent(new CompleteChallengeEvent(user));
-                else
+                } else{
                     eventPublisher.publishEvent(new FailChallengeEvent(user));
+                }
+                user.plusFinishedChallenge();
             });
         }
     }

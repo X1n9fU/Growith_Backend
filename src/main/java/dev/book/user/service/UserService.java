@@ -1,6 +1,8 @@
 package dev.book.user.service;
 
 import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.entity.AchievementUser;
+import dev.book.achievement.achievement_user.repository.AchievementUserRepository;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.config.security.jwt.JwtUtil;
 import dev.book.global.config.security.service.refresh.RefreshTokenService;
@@ -10,17 +12,22 @@ import dev.book.global.exception.category.CategoryException;
 import dev.book.global.repository.CategoryRepository;
 import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
+import dev.book.user.dto.response.UserAchievementResponse;
+import dev.book.user.dto.response.UserCategoryResponse;
+import dev.book.user.dto.response.UserChallengeInfoResponse;
 import dev.book.user.dto.response.UserProfileResponse;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
+import dev.book.user.user_category.UserCategory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +36,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final AchievementUserRepository achievementUserRepository;
+
     private final RefreshTokenService refreshTokenService;
     private final IndividualAchievementStatusService individualAchievementStatusService;
     private final JwtUtil jwtUtil;
@@ -42,10 +51,10 @@ public class UserService {
 
         validateNickname(profileUpdateRequest.nickname());
 
-        UserEntity user = userDetails.user();
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         user.updateNickname(profileUpdateRequest.nickname());
         user.updateProfileImage(profileUpdateRequest.profileImageUrl());
-        userRepository.save(user);
         return UserProfileResponse.fromEntity(user);
     }
 
@@ -63,10 +72,10 @@ public class UserService {
      */
     @Transactional
     public void deleteUser(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
-        jwtUtil.deleteAccessTokenAndRefreshToken(request, response);
         UserEntity user = userDetails.user();
         refreshTokenService.deleteRefreshToken(user);
         userRepository.delete(user);
+        jwtUtil.deleteAccessTokenAndRefreshToken(request, response);
     }
 
     /**
@@ -88,7 +97,62 @@ public class UserService {
         user.updateCategory(categoryList);
     }
 
+    /**
+     * 유저의 로그인 상태를 true로 변경
+     * @param userDetails
+     */
     public void checkIsUserLogin(CustomUserDetails userDetails) {
         individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
+    }
+
+    /**
+     * nickname 중복 체크 (중복이라면 409에러 반환)
+     * @param nickname
+     */
+    public void checkIsValidateNickname(String nickname) {
+        validateNickname(nickname);
+    }
+
+    /**
+     * 유저의 닉네임 삭제
+     * @param userDetails
+     */
+    @Transactional
+    public void deleteUserNickname(CustomUserDetails userDetails) {
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                        .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        user.deleteNickname();
+    }
+
+    /**
+     * 유저의 카테고리 반환
+     * @param userDetails
+     * @return
+     */
+    public UserCategoryResponse getUserCategories(CustomUserDetails userDetails) {
+        UserEntity user = userRepository.findByEmailWithCategories(userDetails.getUsername())
+                .orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
+        List<UserCategory> categories = user.getUserCategory();
+        List<String> userCategories = new ArrayList<>();
+        for (UserCategory category : categories){
+            userCategories.add(category.getCategory().getKorean());
+        }
+        return new UserCategoryResponse(userCategories);
+    }
+
+    public List<UserAchievementResponse> getUserAchievement(CustomUserDetails userDetails) {
+        List<AchievementUser> achievementUsers = achievementUserRepository.findAllByUser(userDetails.user());
+        return achievementUsers.stream().map(
+                achievementUser -> new UserAchievementResponse(
+                                achievementUser.getAchievement().getTitle(),
+                                achievementUser.getAchievement().getContent(),
+                                achievementUser.getCreatedAt()
+                )).toList();
+    }
+
+    public UserChallengeInfoResponse getUserChallengeInfo(CustomUserDetails userDetails) {
+        UserEntity user = userDetails.user();
+        return new UserChallengeInfoResponse(user.getSavings(), user.getCompletedChallenges(),
+                user.getParticipatingChallenges(), user.getFinishedChallenge());
     }
 }

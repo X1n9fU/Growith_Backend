@@ -1,5 +1,6 @@
 package dev.book.user.entity;
 
+import dev.book.achievement.achievement_user.entity.AchievementUser;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
 import dev.book.global.entity.BaseTimeEntity;
@@ -42,6 +43,8 @@ public class UserEntity extends BaseTimeEntity {
 
     private int participatingChallenges = 0;
 
+    private int finishedChallenge = 0;
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategory> userCategory = new ArrayList<>();
 
@@ -54,6 +57,8 @@ public class UserEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserChallenge> userChallenges = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AchievementUser> achievements = new ArrayList<>();
 
     //todo 알림 설정 필요
     //todo 이후 entity과의 관계 설정 필요
@@ -104,11 +109,26 @@ public class UserEntity extends BaseTimeEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public void plusChallengeCount() {
+    public void deleteNickname() { this.nickname = ""; }
+
+    public void plusParticipatingChallenge() {
         this.participatingChallenges++;
     }
 
-    public void minusChallengeCount() {
+    public void minusParticipatingChallenge() {
         this.participatingChallenges--;
     }
+
+    public void plusCompleteChallenge(){
+        this.completedChallenges++;
+    }
+
+    public void plusSavings(long plusSavings){
+        this.savings += plusSavings;
+    }
+
+    public void plusFinishedChallenge(){
+        this.finishedChallenge++;
+    }
+
 }

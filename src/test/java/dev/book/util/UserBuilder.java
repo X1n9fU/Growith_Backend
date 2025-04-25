@@ -1,7 +1,10 @@
 package dev.book.util;
 
+import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 public class UserBuilder {
@@ -15,6 +18,9 @@ public class UserBuilder {
     private static String name = NAME;
     private static String nickname = NICKNAME;
     private static String profileImageUrl = PROFILE_IMAGE_URL;
+    private static List<Category> categoryList
+            = List.of(new Category("food", "음식"), new Category("cafe_snack", "카페 / 간식") );
+
 
     public static UserEntity of() {
         return UserEntity.builder()
@@ -40,6 +46,12 @@ public class UserBuilder {
                 .name(name)
                 .profileImageUrl(profileImageUrl)
                 .build();
+    }
+
+    public static UserEntity withCategory(){
+        UserEntity user = UserBuilder.of();
+        user.updateCategory(categoryList);
+        return user;
     }
 
     public static UserEntity newUser(String email, String name){

@@ -19,4 +19,9 @@ public class Achievement {
     private String title;
 
     private String content;
+
+    public Achievement(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

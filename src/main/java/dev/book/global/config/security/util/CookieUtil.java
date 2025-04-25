@@ -21,8 +21,9 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-//        cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setMaxAge(maxAge);
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 
@@ -41,8 +42,9 @@ public class CookieUtil {
             if (cookie.getName().equals(name)) {
                 cookie.setValue("");
                 cookie.setMaxAge(0);
-//                cookie.setSecure(true);
+                cookie.setSecure(true);
                 cookie.setPath("/");
+                cookie.setAttribute("SameSite", "None");
                 response.addCookie(cookie);
             }
         }

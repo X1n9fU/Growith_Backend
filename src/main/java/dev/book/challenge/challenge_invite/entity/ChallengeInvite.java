@@ -48,7 +48,7 @@ public class ChallengeInvite extends BaseTimeEntity {
 
     public void accept() {
         this.isAccept = true;
-        this.inviteUser.plusChallengeCount();
+        this.inviteUser.plusParticipatingChallenge();
         this.challenge.plusCurrentCapacity();
     }
 

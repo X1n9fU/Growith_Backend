@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@Tag(name = "친구 API", description = "친구 초대 토큰 발급, 친구 조회, 삭제 api")
+@Tag(name = "친구 API", description = "친구 초대 토큰 발급, 친구 조회, 친구 요청 관리, 삭제 api")
 public interface UserFriendSwaggerController {
 
     @Operation(summary = "친구 초대 토큰 발급", description = "`카카오톡 공유하기` 전 친구 초대 토큰을 발급 후 포함하여 `공유하기`를 보냅니다.")

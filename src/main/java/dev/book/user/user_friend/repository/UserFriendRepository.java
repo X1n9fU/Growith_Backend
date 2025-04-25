@@ -29,4 +29,6 @@ public interface UserFriendRepository extends JpaRepository<UserFriend, Long> {
 
     @Modifying
     void deleteByUserAndFriendAndIsAcceptIsTrue(UserEntity user, UserEntity friend);
+
+    boolean existsByUserAndRequestedAt(UserEntity invitingUser, LocalDateTime localDateTime);
 }

@@ -53,7 +53,7 @@ public class ChallengeService {
         userChallengeRepository.save(userChallenge);
 
         eventPublisher.publishEvent(new CreateChallengeEvent(user));
-        creator.plusChallengeCount();
+        creator.plusParticipatingChallenge();
         return ChallengeCreateResponse.fromEntity(challenge);
 
     }
@@ -89,7 +89,7 @@ public class ChallengeService {
         List<UserEntity> users = userRepository.findAllById(userIds);
 
         for (UserEntity participant : users) {
-            participant.minusChallengeCount();
+            participant.minusParticipatingChallenge();
         } // 만약에 챌린지가 완료후 챌린지가 삭제 되면 이것도 삭제되는데
 
         challengeRepository.delete(challenge);
@@ -106,7 +106,7 @@ public class ChallengeService {
         challenge.isParticipantsMoreThanCapacity();
         challenge.plusCurrentCapacity();
 
-        userEntity.plusChallengeCount();
+        userEntity.plusParticipatingChallenge();
         UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);
         userChallengeRepository.save(userChallenge);
     }
@@ -118,7 +118,7 @@ public class ChallengeService {
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         checkNotExist(user, challenge.getId());
 
-        userEntity.minusChallengeCount();
+        userEntity.minusParticipatingChallenge();
         challenge.minusCurrentCapacity();
         userChallengeRepository.deleteByUserIdAndChallengeId(userEntity.getId(), challenge.getId());
 
