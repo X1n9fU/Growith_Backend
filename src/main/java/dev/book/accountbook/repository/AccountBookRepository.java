@@ -124,22 +124,18 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
     @Query("""
     SELECT new dev.book.challenge.rank.dto.response.RankResponse(
         u.name,
-        COALESCE(SUM(ab.amount), 0L)
+        COALESCE(SUM(ab.amount), 0)
     )
     FROM UserEntity u
     LEFT JOIN AccountBook ab ON ab.user = u 
         AND ab.type = 'SPEND'
         AND ab.occurredAt BETWEEN :startDate AND :endDate
-    LEFT JOIN ab.category c
+        AND ab.category IN :categories
     WHERE u.id IN :participantIds
-      AND (
-        c IN :categories
-        OR ab IS NULL
-      )
     GROUP BY u.id, u.name
-    ORDER BY COALESCE(SUM(ab.amount), 0L) ASC
+    ORDER BY COALESCE(SUM(ab.amount), 0) ASC
 """)
-    List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDateTime startDate, LocalDateTime endDate);
+    List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDate startDate, LocalDate endDate);
 
     @Query("""
                 SELECT a
