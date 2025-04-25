@@ -135,13 +135,7 @@ class ChallengeControllerTest {
     void searchChallengeById() throws Exception {
         // given
         ChallengeReadDetailResponse response = new ChallengeReadDetailResponse(
-                1L,
-                "작성자",
-                "제목",
-                Release.PUBLIC,
-                1000,
-                10,
-                1,
+                1L, "작성자", "제목", Release.PUBLIC, 1000, 10, 1,
                 List.of(new ChallengeReadDetailResponse.CategoryDto("SHOPPING")),
                 RECRUITING,
                 LocalDate.of(2024, 1, 1),
@@ -170,12 +164,7 @@ class ChallengeControllerTest {
                 LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)
         );
 
-        ChallengeUpdateResponse response = new ChallengeUpdateResponse(
-                1L,
-                "수정된 제목",
-                "수정된 내용",
-                Release.PUBLIC,
-                2000,
+        ChallengeUpdateResponse response = new ChallengeUpdateResponse(1L, "수정된 제목", "수정된 내용", Release.PUBLIC, 2000,
                 20,
                 List.of(new ChallengeUpdateResponse.CategoryDto("SHOPPING")),
                 RECRUITING,
@@ -225,13 +214,7 @@ class ChallengeControllerTest {
     void searchTopChallenge() throws Exception {
 
         // given
-        ChallengeTopResponse response = new ChallengeTopResponse(
-                1L,
-                "제목",
-                5,
-                40,
-                RECRUITING
-        );
+        ChallengeTopResponse response = new ChallengeTopResponse(1L, "제목", 5, 40, RECRUITING);
 
         given(challengeService.findTopChallenge()).willReturn(List.of(response));
         mockMvc.perform(get("/api/v1/challenges/top"))
@@ -249,13 +232,7 @@ class ChallengeControllerTest {
     void searchNewChallenge() throws Exception {
 
         // given
-        ChallengeReadResponse response = new ChallengeReadResponse(
-                1L,
-                "제목",
-                5,
-                40,
-                RECRUITING
-        );
+        ChallengeReadResponse response = new ChallengeReadResponse(1L, "제목", 5, 40, RECRUITING);
 
         given(challengeService.findNewChallenge()).willReturn(List.of(response));
         mockMvc.perform(get("/api/v1/challenges/new"))
@@ -274,13 +251,7 @@ class ChallengeControllerTest {
 
         // given
         ChallengeParticipantResponse challengeParticipantResponse = new ChallengeParticipantResponse(
-                1L,
-                "제목",
-                5000,
-                50000,
-                3,
-                false
-        );
+                1L, "제목", 5000, 50000, 3, false);
 
         given(challengeService.findMyChallenge(any())).willReturn(List.of(challengeParticipantResponse));
 
