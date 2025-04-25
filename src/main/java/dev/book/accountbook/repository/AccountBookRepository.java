@@ -126,7 +126,7 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
                     COALESCE(SUM(ab.amount), 0)
                 )
                 FROM UserEntity u
-                LEFT JOIN AccountBook ab ON ab.user = u 
+                LEFT JOIN AccountBook ab ON ab.user = u
                     AND ab.type = 'SPEND'
                     AND ab.occurredAt BETWEEN :startDate AND :endDate
                     AND ab.category IN :categories
