@@ -4,6 +4,7 @@ import dev.book.achievement.dto.AchievementResponseDto;
 import dev.book.achievement.entity.Achievement;
 import dev.book.achievement.repository.AchievementRepository;
 import dev.book.global.config.security.dto.CustomUserDetails;
+import dev.book.global.sse.controller.swagger.SseApi;
 import dev.book.global.sse.service.SseService;
 import dev.book.global.sse.type.SseType;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/sse")
-public class SseController {
+public class SseController implements SseApi {
 
     private final SseService sseService;
     private final AchievementRepository achievementRepository;
