@@ -1,0 +1,68 @@
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 깃 레포에 올린 파일 불러오기
+        uses: actions/checkout@v4
+
+      - name: gradlew 실행 권한 부여
+        run: chmod +x ./gradlew
+
+      - name: 테스트 및 빌드
+        run: ./gradlew clean build -x test
+
+      - name: 이름고정
+        run: |
+          mv ./build/libs/*SNAPSHOT.jar ./book-0.0.1-SNAPSHOT.jar
+
+      - name: 빌드된 파일 전송 전 기존 jar 삭제
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST}}
+          username: ${{ secrets.EC_USERNAME}}
+          key: ${{ secrets.EC2_PRIVATE_KEY}}
+          script: |
+            rm -f /home/ubuntu/book-0.0.1-SNAPSHOT.jar
+
+      - name: SCP로 EC2에 빌드된 파일 전송
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST}}
+          username: ${{ secrets.EC2_USERNAME}}
+          key: ${{ secrets.EC2_PRIVATE_KEY}}
+          source: ./book-0.0.1-SNAPSHOT.jar
+          target: /home/ubuntu/
+
+      - name: ssh->ec2로 접속
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST}}
+          username: ${{ secrets.EC2_USERNAME}}
+          key: ${{ secrets.EC2_PRIVATE_KEY}}
+          script_stop: true
+          script: |
+            sudo fuser -k -n tcp 8080 || true
+            
+            export AES_SECRET=${{ secrets.AES_SECRET }}
+            export CODEF_ACCESS_TOKEN=${{ secrets.CODEF_ACCESS_TOKEN }}
+            export CODEF_CLIENT_ID=${{ secrets.CODEF_CLIENT_ID }}
+            export CODEF_CLIENT_SECRET=${{ secrets.CODEF_CLIENT_SECRET }}
+            export CODEF_PUBLIC_KEY=${{ secrets.CODEF_PUBLIC_KEY }}
+            export firebase_url=${{ secrets.FIREBASE_URL }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
+            export OAUTH2_CLIENT_ID=${{ secrets.OAUTH2_CLIENT_ID }}
+            export OAUTH2_CLIENT_SECRET=${{ secrets.OAUTH2_CLIENT_SECRET }}
+            export OAUTH2_REDIRECT_URI=${{ secrets.OAUTH2_REDIRECT_URI }}
+            export SERVER_IP=${{ secrets.SERVER_IP }}
+            export spring_datasource_driver_class_name=${{ secrets.DRIVER_CLASS_NAME }}
+            export spring_datasource_password=${{ secrets.DB_PASSWORD }}
+            export spring_datasource_url=${{ secrets.DB_URL }}
+            export spring_datasource_username=${{ secrets.DB_USERNAME }}
+            
+            sudo systemctl restart book
