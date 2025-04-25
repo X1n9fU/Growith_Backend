@@ -1,7 +1,7 @@
 package dev.book.global.sse.service;
 
 import dev.book.achievement.dto.AchievementResponseDto;
-import dev.book.global.sse.dto.SseResponse;
+import dev.book.global.sse.dto.SseAchievementResponse;
 import dev.book.global.sse.repository.SseEmitterRepository;
 import dev.book.global.sse.type.SseType;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ class SseServiceTest {
 
         SseEmitter sseEmitter = mock(SseEmitter.class);
         Map<String, Object> eventCache = Map.of(
-                "1_2", new SseResponse("1_2", "업적1", "내용", SseType.ACHIEVEMENT.name())
+                "1_2", new SseAchievementResponse("1_2", "업적1", "내용", SseType.ACHIEVEMENT.name())
         );
 
         given(sseEmitterRepository.save(any(), any())).willReturn(sseEmitter);
@@ -67,10 +67,10 @@ class SseServiceTest {
         given(sseEmitterRepository.findAllEmitterStartsWithUserId(String.valueOf(userId))).willReturn(Map.of());
 
         //when
-        sseService.send(userId, achievementResponseDto, SseType.ACHIEVEMENT.name());
+        sseService.sendAchievementToUser(userId, achievementResponseDto);
 
         //then
-        verify(sseEmitterRepository).saveEventCache(anyString(), any(SseResponse.class));
+        verify(sseEmitterRepository).saveEventCache(anyString(), any(SseAchievementResponse.class));
     }
 
     @Test
@@ -85,11 +85,11 @@ class SseServiceTest {
         given(sseEmitterRepository.findAllEmitterStartsWithUserId(String.valueOf(userId))).willReturn(sseEmitterMap);
 
         //when
-        sseService.send(userId, achievementResponseDto, SseType.ACHIEVEMENT.name());
+        sseService.sendAchievementToUser(userId, achievementResponseDto);
 
         //then
         verify(sseEmitter).send(any(SseEmitter.SseEventBuilder.class)); //전송 로직 추가
-        verify(sseEmitterRepository).saveEventCache(anyString(), any(SseResponse.class));
+        verify(sseEmitterRepository).saveEventCache(anyString(), any(SseAchievementResponse.class));
     }
 
 }

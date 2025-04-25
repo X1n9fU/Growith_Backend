@@ -1,7 +1,7 @@
 package dev.book.global.sse.controller.swagger;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
-import dev.book.global.sse.dto.SseResponse;
+import dev.book.global.sse.dto.SseAchievementResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +20,7 @@ public interface SseApi {
             "\n\n Last-Event-ID 는 마지막에 도착한 event의 값으로 헤더에 넣어 보내주시면 됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "SSE 구독 완료",
-                    content = @Content(schema = @Schema(implementation = SseResponse.class)))
+                    content = @Content(schema = @Schema(implementation = SseAchievementResponse.class)))
     })
     ResponseEntity<SseEmitter> subscribe(@AuthenticationPrincipal CustomUserDetails userDetails,
                                          @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId);
@@ -30,7 +30,7 @@ public interface SseApi {
             "                                           \n\n 현재 업적 1번 (첫 챌린지 달성)에 대한 알림만 보내게 됩니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "SSE 알림 전송 완료",
-                    content = @Content(schema = @Schema(implementation = SseResponse.class)))
+                    content = @Content(schema = @Schema(implementation = SseAchievementResponse.class)))
     })
     ResponseEntity<?> send(@AuthenticationPrincipal CustomUserDetails userDetails);
 

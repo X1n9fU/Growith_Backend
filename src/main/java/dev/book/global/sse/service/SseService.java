@@ -1,8 +1,11 @@
 package dev.book.global.sse.service;
 
 import dev.book.achievement.dto.AchievementResponseDto;
-import dev.book.global.sse.dto.SseResponse;
+import dev.book.global.sse.dto.SseAchievementResponse;
+import dev.book.global.sse.dto.SseTipResponse;
 import dev.book.global.sse.repository.SseEmitterRepository;
+import dev.book.global.sse.type.SseType;
+import dev.book.tip.TipResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -37,7 +40,7 @@ public class SseService {
             events.entrySet().stream()
                 .filter(entry -> lastEventId.compareTo(entry.getKey())<0)
                 .forEach(entry -> {
-                    SseResponse event = (SseResponse) entry.getValue();
+                    SseAchievementResponse event = (SseAchievementResponse) entry.getValue();
                     sendToClient(emitter, entry.getKey(), event, event.name());
                 });
             sseEmitterRepository.deleteAllEventCacheStartsWithUserId(String.valueOf(userId));
@@ -51,19 +54,32 @@ public class SseService {
      * @param userId
      * @param achievement
      */
-    public void send(Long userId, AchievementResponseDto achievement, String name) {
+    public void sendAchievementToUser(Long userId, AchievementResponseDto achievement) {
         Map<String, SseEmitter> sseEmitters = sseEmitterRepository.findAllEmitterStartsWithUserId(String.valueOf(userId));
         String emitterId = userId + "_" + System.currentTimeMillis();
-        SseResponse sseResponse = new SseResponse(emitterId, achievement.title(), achievement.content(), name);
+        SseAchievementResponse sseAchievementResponse = new SseAchievementResponse(emitterId, achievement.title(), achievement.content(), SseType.ACHIEVEMENT.name());
         if (sseEmitters.isEmpty()){ //emitter가 존재하지 않을 경우, 백그라운드에서 SSE 이벤트가 발생하였을 경우
-            sseEmitterRepository.saveEventCache(emitterId, sseResponse); //event 캐시에만 저장해놓고 subscribe 되었을 때 반환하도록 한다.
+            sseEmitterRepository.saveEventCache(emitterId, sseAchievementResponse); //event 캐시에만 저장해놓고 subscribe 되었을 때 반환하도록 한다.
         }
         else {
             sseEmitters.forEach((key, emitter) -> {
-                sseEmitterRepository.saveEventCache(emitterId, sseResponse);
-                sendToClient(emitter, emitterId, sseResponse, sseResponse.name());
+                sseEmitterRepository.saveEventCache(emitterId, sseAchievementResponse);
+                sendToClient(emitter, emitterId, sseAchievementResponse, sseAchievementResponse.name());
             });
         }
+    }
+
+    /**
+     * 전체 emitter에게 event(TipResponse)를 전송합니다.
+     * @param tip
+     */
+    public void sendTipToAllUsers(TipResponse tip) {
+        String eventId = "tip_" + System.currentTimeMillis();
+        SseTipResponse sseTipResponse = new SseTipResponse(eventId, tip.writer(), tip.content(), SseType.TIP.name());
+
+        Map<String, SseEmitter> emitters = sseEmitterRepository.findAllEmitters(); // 전체 유저에게 브로드캐스트
+        emitters.forEach((emitterId, emitter)
+                -> sendToClient(emitter, emitterId, sseTipResponse, SseType.TIP.name()));
     }
 
     private void sendToClient(SseEmitter emitter, String emitterId, Object value, String name) {

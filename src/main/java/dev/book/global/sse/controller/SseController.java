@@ -6,7 +6,6 @@ import dev.book.achievement.repository.AchievementRepository;
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.global.sse.controller.swagger.SseApi;
 import dev.book.global.sse.service.SseService;
-import dev.book.global.sse.type.SseType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +36,7 @@ public class SseController implements SseApi {
     public ResponseEntity<?> send(@AuthenticationPrincipal CustomUserDetails userDetails){
         Optional<Achievement> achievement = achievementRepository.findById(1L);
         AchievementResponseDto achievementResponseDto = AchievementResponseDto.from(achievement.get());
-        sseService.send(userDetails.user().getId(), achievementResponseDto, SseType.ACHIEVEMENT.name());
+        sseService.sendAchievementToUser(userDetails.user().getId(), achievementResponseDto);
         return null;
     }
 }

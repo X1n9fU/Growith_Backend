@@ -74,7 +74,7 @@ public class AchievementService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleSseAchievementNotification(GetAchievementEvent event){
         AchievementResponseDto achievementResponseDto = AchievementResponseDto.from(event.achievement());
-        sseService.send(event.userId(), achievementResponseDto, SseType.ACHIEVEMENT.name());
+        sseService.sendAchievementToUser(event.userId(), achievementResponseDto);
     }
 
 
