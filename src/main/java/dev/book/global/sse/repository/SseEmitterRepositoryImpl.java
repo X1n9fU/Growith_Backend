@@ -39,6 +39,11 @@ public class SseEmitterRepositoryImpl implements SseEmitterRepository{
     }
 
     @Override
+    public Map<String, SseEmitter> findAllEmitters() {
+        return emitters;
+    }
+
+    @Override
     public void deleteEmitterById(String emitterId) {
         emitters.remove(emitterId);
 

@@ -1,11 +1,11 @@
 package dev.book.global.sse.service;
 
 import dev.book.achievement.dto.AchievementResponseDto;
-import dev.book.global.sse.dto.SseAchievementResponse;
-import dev.book.global.sse.dto.SseTipResponse;
+import dev.book.global.sse.dto.response.SseAchievementResponse;
+import dev.book.global.sse.dto.response.SseTipResponse;
 import dev.book.global.sse.repository.SseEmitterRepository;
 import dev.book.global.sse.type.SseType;
-import dev.book.tip.TipResponse;
+import dev.book.tip.dto.response.TipResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
