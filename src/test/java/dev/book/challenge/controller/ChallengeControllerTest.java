@@ -292,6 +292,5 @@ class ChallengeControllerTest {
                 .andExpect(jsonPath("$[0].amount").value(50000))
                 .andExpect(jsonPath("$[0].endDay").value(3))
                 .andExpect(jsonPath("$[0].isSuccess").value(false));
-
     }
 }

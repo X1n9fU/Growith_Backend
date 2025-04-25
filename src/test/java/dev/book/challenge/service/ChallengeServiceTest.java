@@ -75,7 +75,6 @@ class ChallengeServiceTest {
     void createChallenge() {
 
         // given
-
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity creator = UserBuilder.of("이메일", "사용자");
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
@@ -271,10 +270,9 @@ class ChallengeServiceTest {
         given(userRepository.findByEmail(any())).willReturn(Optional.of(noCreator));
         given(challengeRepository.findByIdWithLock(any())).willReturn(Optional.of(challenge));
         given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(false);
-        // when
-
         doThrow(new ChallengeException(CHALLENGE_CAPACITY_FULL))
                 .when(challenge).isParticipantsMoreThanCapacity();
+        //when
         // then
         assertThatThrownBy(() -> challengeService.participate(noCreator, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("참여 인원이 초과 하였습니다.");
