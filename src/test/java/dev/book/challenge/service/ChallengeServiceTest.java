@@ -1,5 +1,6 @@
 package dev.book.challenge.service;
 
+import dev.book.accountbook.repository.AccountBookRepository;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.ChallengeCreateResponse;
@@ -10,6 +11,8 @@ import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.exception.ChallengeException;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
+import dev.book.global.entity.Category;
+import dev.book.global.repository.CategoryRepository;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.repository.UserRepository;
 import dev.book.util.UserBuilder;
@@ -19,23 +22,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static dev.book.challenge.exception.ErrorCode.CHALLENGE_CAPACITY_FULL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ChallengeServiceTest {
@@ -52,10 +55,19 @@ class ChallengeServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CategoryRepository categoryRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private AccountBookRepository accountBookRepository;
+
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 2, 1);
-        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, "NONE", start, end);
+        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, List.of("SHOPPING"), start, end);
     }
 
     @Test
@@ -63,10 +75,14 @@ class ChallengeServiceTest {
     void createChallenge() {
 
         // given
+
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity creator = UserBuilder.of("이메일", "사용자");
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
         given(challengeRepository.save(any())).willReturn(challenge);
+        given(userRepository.findByEmail(any())).willReturn(Optional.of(creator));
+        Category category = new Category("SHOPPING", "쇼핑");
+        given(categoryRepository.findByCategoryIn(any())).willReturn(List.of(category));
 
         // when
         ChallengeCreateResponse response = challengeService.createChallenge(creator, challengeCreateRequest);
@@ -141,7 +157,7 @@ class ChallengeServiceTest {
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
-        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "NONE", start, end);
+        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, List.of("SHOPPING"), start, end);
 
         //when
         ChallengeUpdateResponse challengeUpdateResponse = challengeService.updateChallenge(creator, 1L, updateRequest);
@@ -156,28 +172,17 @@ class ChallengeServiceTest {
     void updateNotChallenge() {
 
         //given
-        ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity creator = UserBuilder.of("이메일1", "작성자");
-
-        ReflectionTestUtils.setField(creator, "id", 1L);
 
         UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
 
-        ReflectionTestUtils.setField(noCreator, "id", 2L);
-
-
-        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-
-
-        given(challengeRepository.findByIdAndCreatorId(1L, creator.getId())).willReturn(Optional.of(challenge));
         given(challengeRepository.findByIdAndCreatorId(1L, noCreator.getId())).willReturn(Optional.empty());
 
         LocalDate start = LocalDate.of(2024, 2, 1);
         LocalDate end = LocalDate.of(2024, 3, 1);
-        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, "NONE", start, end);
+        ChallengeUpdateRequest updateRequest = new ChallengeUpdateRequest("수정", "수정", "PUBLIC", 1000, 5, List.of("SHOPPING"), start, end);
 
         //when
-        challengeService.deleteChallenge(creator, 1L);
         //then
         assertThatThrownBy(() -> challengeService.updateChallenge(noCreator, 1L, updateRequest)).isInstanceOf(ChallengeException.class)
                 .hasMessage("수정 및 삭제 권한이 없습니다.");
@@ -191,6 +196,7 @@ class ChallengeServiceTest {
         UserEntity creator = UserBuilder.of("이메일1", "작성자");
 
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
+        given(userRepository.findByEmail(any())).willReturn(Optional.of(creator));
         given(challengeRepository.findByIdAndCreatorId(any(), any())).willReturn(Optional.of(challenge));
 
         //when
@@ -207,21 +213,13 @@ class ChallengeServiceTest {
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity creator = UserBuilder.of("이메일1", "작성자");
 
-        ReflectionTestUtils.setField(creator, "id", 1L);
-
         UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
 
+        given(userRepository.findByEmail(any())).willReturn(Optional.of(noCreator));
 
-        ReflectionTestUtils.setField(noCreator, "id", 2L);
-
-
-        Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-
-        given(challengeRepository.findByIdAndCreatorId(1L, creator.getId())).willReturn(Optional.of(challenge));
         given(challengeRepository.findByIdAndCreatorId(1L, noCreator.getId())).willReturn(Optional.empty());
 
         //when
-        challengeService.deleteChallenge(creator, 1L);
         //then
         assertThatThrownBy(() -> challengeService.deleteChallenge(noCreator, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("수정 및 삭제 권한이 없습니다.");
@@ -237,9 +235,8 @@ class ChallengeServiceTest {
         UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
 
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
-        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
-        given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(false);
-        given(userChallengeRepository.countByChallengeId(1L)).willReturn(4L);
+        given(userRepository.findByEmail(any())).willReturn(Optional.of(noCreator));
+        given(challengeRepository.findByIdWithLock(any())).willReturn(Optional.of(challenge));
         // when
         challengeService.participate(noCreator, 1L);
         // then
@@ -252,12 +249,10 @@ class ChallengeServiceTest {
         //given
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         UserEntity user = UserBuilder.of("이메일1", "사용자");
-
-
-        ReflectionTestUtils.setField(user, "id", 1L);
-
         Challenge challenge = Challenge.of(challengeCreateRequest, user);
-        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+
+        given(userRepository.findByEmail(any())).willReturn(Optional.of(user));
+        given(challengeRepository.findByIdWithLock(any())).willReturn(Optional.of(challenge));
         given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(true);
         // when
         // then
@@ -268,20 +263,20 @@ class ChallengeServiceTest {
 
     @Test
     @DisplayName("모집인원 초과한 챌린지는 참여할수 없다.")
-    void FullParticipate() {
+    void fullParticipate() {
         // given
-        ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity user = UserBuilder.of("이메일1", "사용자");
+        Challenge challenge = mock(Challenge.class);
 
-
-        ReflectionTestUtils.setField(user, "id", 1L);
-        Challenge challenge = Challenge.of(challengeCreateRequest, user);
-        given(challengeRepository.findById(any())).willReturn(Optional.of(challenge));
+        UserEntity noCreator = UserBuilder.of("이메일1", "사용자");
+        given(userRepository.findByEmail(any())).willReturn(Optional.of(noCreator));
+        given(challengeRepository.findByIdWithLock(any())).willReturn(Optional.of(challenge));
         given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(false);
-        given(userChallengeRepository.countByChallengeId(any())).willReturn(5L);
         // when
+
+        doThrow(new ChallengeException(CHALLENGE_CAPACITY_FULL))
+                .when(challenge).isParticipantsMoreThanCapacity();
         // then
-        assertThatThrownBy(() -> challengeService.participate(user, 1L)).isInstanceOf(ChallengeException.class)
+        assertThatThrownBy(() -> challengeService.participate(noCreator, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("참여 인원이 초과 하였습니다.");
 
     }

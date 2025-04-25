@@ -8,7 +8,6 @@ import dev.book.challenge.dto.response.ChallengeReadDetailResponse;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeUpdateResponse;
 import dev.book.challenge.service.ChallengeService;
-import dev.book.challenge.type.ChallengeCategory;
 import dev.book.challenge.type.Release;
 import dev.book.challenge.type.Status;
 import dev.book.global.config.security.dto.CustomUserDetails;
@@ -71,7 +70,7 @@ class ChallengeControllerTest {
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 2, 1);
-        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, "NONE", start, end);
+        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, List.of("SHOPPING"), start, end);
     }
 
     @Test
@@ -82,7 +81,7 @@ class ChallengeControllerTest {
         ChallengeCreateRequest challengeCreateRequest = createRequest();
         ChallengeCreateResponse challengeCreateResponse = new ChallengeCreateResponse(
                 1L, "제목", "내용", PUBLIC,
-                1000, 5, ChallengeCategory.NONE, RECRUITING,
+                1000, 5, List.of(new ChallengeCreateResponse.CategoryDto("SHOPING")), RECRUITING,
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 2, 1),
                 LocalDateTime.now(),
@@ -107,11 +106,11 @@ class ChallengeControllerTest {
     void searchChallenge() throws Exception {
         // given
         ChallengeReadResponse response1 = new ChallengeReadResponse(
-                1L, "제목", 10, Status.RECRUITING
+                1L, "제목", 10, 1, RECRUITING
         );
 
         ChallengeReadResponse response2 = new ChallengeReadResponse(
-                2L, "제목", 5, Status.RECRUITING
+                2L, "제목", 5, 1, RECRUITING
         );
 
         List<ChallengeReadResponse> list = List.of(response1, response2);
@@ -146,7 +145,8 @@ class ChallengeControllerTest {
                 Release.PUBLIC,
                 1000,
                 10,
-                ChallengeCategory.NONE,
+                1,
+                List.of(new ChallengeReadDetailResponse.CategoryDto("SHOPPING")),
                 Status.RECRUITING,
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 2, 1),
@@ -170,7 +170,7 @@ class ChallengeControllerTest {
     void updateChallenge() throws Exception {
         // given
         ChallengeUpdateRequest request = new ChallengeUpdateRequest(
-                "수정된 제목", "수정된 내용", "PUBLIC", 2000, 20, "NONE",
+                "수정된 제목", "수정된 내용", "PUBLIC", 2000, 20, List.of("SHOPPING"),
                 LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)
         );
 
@@ -181,7 +181,7 @@ class ChallengeControllerTest {
                 Release.PUBLIC,
                 2000,
                 20,
-                ChallengeCategory.NONE,
+                List.of(new ChallengeUpdateResponse.CategoryDto("SHOPPING")),
                 Status.RECRUITING,
                 LocalDate.of(2024, 5, 1),
                 LocalDate.of(2024, 5, 31),

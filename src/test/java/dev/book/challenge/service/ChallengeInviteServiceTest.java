@@ -16,8 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -37,11 +39,13 @@ class ChallengeInviteServiceTest {
     private UserChallengeRepository userChallengeRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private ChallengeCreateRequest createRequest() {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 2, 1);
-        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, "NONE", start, end);
+        return new ChallengeCreateRequest("제목", "내용", "PUBLIC", 1000, 5, List.of("SHOPPING"), start, end);
     }
 
     @Test
