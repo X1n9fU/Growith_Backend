@@ -72,7 +72,6 @@ public class SseService {
                     .id(emitterId)
                     .name(name)
                     .data(value));
-            sseEmitterRepository.deleteEventCacheById(emitterId); //전송한 event는 삭제
         } catch (IOException | IllegalStateException e){
             sseEmitterRepository.deleteEmitterById(emitterId);
         }
