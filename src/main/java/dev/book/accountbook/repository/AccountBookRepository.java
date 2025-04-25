@@ -6,7 +6,6 @@ import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.type.CategoryType;
 import dev.book.challenge.rank.dto.response.RankResponse;
 import dev.book.global.entity.Category;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -122,19 +121,19 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
 
 
     @Query("""
-    SELECT new dev.book.challenge.rank.dto.response.RankResponse(
-        u.name,
-        COALESCE(SUM(ab.amount), 0)
-    )
-    FROM UserEntity u
-    LEFT JOIN AccountBook ab ON ab.user = u 
-        AND ab.type = 'SPEND'
-        AND ab.occurredAt BETWEEN :startDate AND :endDate
-        AND ab.category IN :categories
-    WHERE u.id IN :participantIds
-    GROUP BY u.id, u.name
-    ORDER BY COALESCE(SUM(ab.amount), 0) ASC
-""")
+                SELECT new dev.book.challenge.rank.dto.response.RankResponse(
+                    u.name,
+                    COALESCE(SUM(ab.amount), 0)
+                )
+                FROM UserEntity u
+                LEFT JOIN AccountBook ab ON ab.user = u 
+                    AND ab.type = 'SPEND'
+                    AND ab.occurredAt BETWEEN :startDate AND :endDate
+                    AND ab.category IN :categories
+                WHERE u.id IN :participantIds
+                GROUP BY u.id, u.name
+                ORDER BY COALESCE(SUM(ab.amount), 0) ASC
+            """)
     List<RankResponse> findByUserSpendingRanks(List<Long> participantIds, List<Category> categories, LocalDate startDate, LocalDate endDate);
 
     @Query("""
@@ -159,10 +158,10 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
             GROUP BY u.id
             """)
     List<AccountBookWeekConsumePerUserResponse> findUserAndAmountByConsumeOfWeek(
-                                                    @Param("startDate") LocalDateTime startDate,
-                                                    @Param("endDate") LocalDateTime endDate,
-                                                    @Param("lastStartDate") LocalDateTime lastStartDate,
-                                                    @Param("lastEndDate") LocalDateTime lastEndDate
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("lastStartDate") LocalDateTime lastStartDate,
+            @Param("lastEndDate") LocalDateTime lastEndDate
     );
 
     @Query("""
@@ -180,4 +179,13 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
                                     @Param("startDate") LocalDate startDate,
                                     @Param("endDate") LocalDate endDate
     );
+
+    @Query("""
+            SELECT COALESCE( SUM(ab.amount),0)
+            FROM AccountBook ab
+            WHERE ab.user.id =:userId 
+            AND ab.category IN :categories
+            AND ab.type = 'SPEND' 
+            """)
+    long findTotalSpendByUserIdAndChallengeCategory(Long userId, List<Category> categories);
 }
