@@ -1,6 +1,7 @@
 package dev.book.user.controller;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
+import dev.book.user.controller.swagger.UserApi;
 import dev.book.user.dto.request.UserCategoriesRequest;
 import dev.book.user.dto.request.UserProfileUpdateRequest;
 import dev.book.user.dto.response.UserAchievementResponse;
@@ -20,7 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-public class UserController implements UserSwaggerController{
+public class UserController implements UserApi {
 
     private final UserService userService;
 

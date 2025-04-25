@@ -1,4 +1,4 @@
-package dev.book.global.config.security.controller;
+package dev.book.global.config.security.controller.swagger;
 
 import dev.book.global.config.security.dto.CustomUserDetails;
 import dev.book.user.dto.request.UserSignUpRequest;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag( name = "Auth API", description = "회원가입, 로그아웃, 토큰 재발급 api")
-public interface AuthSwaggerController {
+public interface AuthApi {
 
     @Operation(summary = "회원가입 진행", description = "OAuth2 로그인 후 새로 등록된 유저의 나머지 사항(nickname, category)를 입력받습니다.")
     @ApiResponses(value = {

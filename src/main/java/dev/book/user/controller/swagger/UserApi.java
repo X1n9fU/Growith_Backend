@@ -1,4 +1,4 @@
-package dev.book.user.controller;
+package dev.book.user.controller.swagger;
 
 import dev.book.accountbook.dto.response.AccountBookSpendResponse;
 import dev.book.global.config.security.dto.CustomUserDetails;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "유저 API", description = "유저 프로필 조회, 수정, 삭제, 카테고리 관리, 마이페이지의 업적, 통계 반환 api")
-public interface UserSwaggerController {
+public interface UserApi {
 
     @Operation(summary = "유저 삭제(회원 탈퇴)", description = "현재 로그인된 유저를 탈퇴시킵니다.")
     @ApiResponses(value = {

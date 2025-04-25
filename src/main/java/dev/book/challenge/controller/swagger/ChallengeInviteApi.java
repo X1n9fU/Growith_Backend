@@ -1,4 +1,4 @@
-package dev.book.challenge.api;
+package dev.book.challenge.controller.swagger;
 
 import dev.book.challenge.dto.request.ChallengeInviteRequest;
 import dev.book.challenge.dto.response.ChallengeInviteResponse;
