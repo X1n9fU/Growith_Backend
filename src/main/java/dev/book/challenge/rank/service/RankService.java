@@ -31,7 +31,7 @@ public class RankService {
         List<ChallengeCategory> challengeCategories = challenge.getChallengeCategories();
         List<Category> categories = challengeCategories.stream().map(ChallengeCategory::getCategory).toList();
 
-        List<RankResponse> rankResponses = accountBookRepository.findByUserSpendingRanks(participantIds, categories, challenge.getStartDate().atStartOfDay(), challenge.getEndDate().atTime(23, 59, 59, 999_999_999));
+        List<RankResponse> rankResponses = accountBookRepository.findByUserSpendingRanks(participantIds, categories, challenge.getStartDate(), challenge.getEndDate());
         simpMessagingTemplate.convertAndSend("/sub/challenge/" + challengeId + "/rank", rankResponses);
 
 

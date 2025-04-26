@@ -1,5 +1,7 @@
 package dev.book.challenge.service;
 
+import dev.book.accountbook.repository.AccountBookRepository;
+import dev.book.accountbook.type.CategoryType;
 import dev.book.achievement.achievement_user.dto.event.CreateChallengeEvent;
 import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
@@ -23,7 +25,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static dev.book.challenge.exception.ErrorCode.*;
@@ -38,6 +43,7 @@ public class ChallengeService {
     private final CategoryRepository categoryRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
+    private final AccountBookRepository accountBookRepository;
 
     @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
@@ -161,5 +167,44 @@ public class ChallengeService {
         LocalDateTime endDateTime = now.toLocalDate().atStartOfDay();// 오늘이 비교시 끝 부분
         LocalDateTime startDateTime = endDateTime.minusDays(3); // 3일전이 비교시 시작부분
         return challengeRepository.findNewChallenge(pageable, startDateTime, endDateTime);
+    }
+
+    public List<ChallengeParticipantResponse> findMyChallenge(UserEntity user) {
+
+        Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
+        List<Long> challengeIds = userChallengeRepository.findChallengeByUserId(user.getId(), pageable);
+
+        List<ChallengeParticipantResponse> challengeParticipantResponses = new ArrayList<>();
+        for (Long challengeId : challengeIds) {
+            Challenge challenge = challengeRepository.findByIdJoinCategory(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
+            List<Category> categories = challenge.getChallengeCategories().stream().map(ChallengeCategory::getCategory).toList();
+
+            long totalSpend = accountBookRepository.sumSpendingInCategories(user.getId(), CategoryType.SPEND, categories, challenge.getStartDate(), challenge.getEndDate());
+            Integer amount = challenge.getAmount();
+
+            LocalDate currentDate = LocalDate.now();
+            LocalDate endDate = challenge.getEndDate();
+            int endDay = (int) ChronoUnit.DAYS.between(currentDate, endDate);
+            boolean isSuccess = isSuccess(totalSpend, amount);
+
+            // 소비만 모으면됨
+            ChallengeParticipantResponse response = new ChallengeParticipantResponse(
+                    challenge.getId(),
+                    challenge.getTitle(),
+                    totalSpend,
+                    amount,
+                    endDay,
+                    isSuccess
+            );
+            challengeParticipantResponses.add(response);
+
+        }
+        return challengeParticipantResponses;
+
+    }
+
+    // 챌린지의 목표금액보다 총 사용 금액이 같거나 적다면 성공
+    private boolean isSuccess(long totalSpend, Integer amount) {
+        return totalSpend <= amount;
     }
 }
