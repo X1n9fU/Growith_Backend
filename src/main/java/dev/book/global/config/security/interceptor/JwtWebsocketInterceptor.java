@@ -1,10 +1,16 @@
 package dev.book.global.config.security.interceptor;
 
+import dev.book.global.config.security.jwt.JwtAuthenticationToken;
+import dev.book.global.config.security.jwt.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -12,9 +18,12 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class JwtWebsocketInterceptor implements HandshakeInterceptor {
 
     private final static String ACCESS_TOKEN = "access_token";
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
 
     // 웹소켓연결전 실행되는 메소드
     @Override
@@ -29,12 +38,22 @@ public class JwtWebsocketInterceptor implements HandshakeInterceptor {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(ACCESS_TOKEN)) {
                         String token = cookie.getValue();
-                        attributes.put("access_token", token);
+
+                            String email = jwtUtil.validateToken(token);
+                            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                            if (userDetails != null) {
+                                SecurityContextHolder.getContext().setAuthentication(
+                                        new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
+                                attributes.put(ACCESS_TOKEN, token);
+                                return true;
+                            }else SecurityContextHolder.clearContext();
+
+                        }
                     }
                 }
             }
-        }
-        return true;
+        return false;
     }
 
     @Override
