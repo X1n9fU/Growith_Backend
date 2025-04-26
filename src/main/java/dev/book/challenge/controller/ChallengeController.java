@@ -80,4 +80,9 @@ public class ChallengeController implements ChallengeApi {
         List<ChallengeReadResponse> challengeReadResponses = challengeService.findNewChallenge();
         return ResponseEntity.ok().body(challengeReadResponses);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<ChallengeParticipantResponse>> searchMyChallenge(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok().body(challengeService.findMyChallenge(userDetails.user()));
+    }
 }
