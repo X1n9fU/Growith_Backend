@@ -76,6 +76,7 @@ public class Challenge extends BaseTimeEntity {
         this.startDate = startDate;
         this.endDate = endDate;
         this.creator = creator;
+        this.currentCapacity = 1;
     }
 
 

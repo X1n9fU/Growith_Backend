@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,9 +29,9 @@ public class SpendEventListener {
 
         AccountBook accountBook = event.accountBook();
         Long userId = accountBook.getUser().getId();
-        LocalDateTime spendDate = accountBook.getEndDate();
+        LocalDate spendDate = accountBook.getOccurredAt();
         Category spendCategory = accountBook.getCategory();
-        List<Challenge> joinedChallenges = userChallengeRepository.findChallengesByUserAndDate(userId, spendCategory.getId(), spendDate.toLocalDate());
+        List<Challenge> joinedChallenges = userChallengeRepository.findChallengesByUserAndDate(userId, spendCategory.getId(), spendDate);
         // 참여자 전체 순위 재계산 후 전송
         for (Challenge challenge : joinedChallenges) {
             rankService.checkRank(challenge.getId());

@@ -32,14 +32,12 @@ public class ChallengeInviteController implements ChallengeInviteApi {
     }
 
     @PatchMapping("/invites/{id}/accept")
-
     public ResponseEntity<?> acceptInvite(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
         challengeInviteService.acceptInvite(id, userDetails.user());
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/invites/{id}/reject")
-
     public ResponseEntity<?> rejectInvite(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
         challengeInviteService.rejectInvite(id, userDetails.user());
         return ResponseEntity.ok().build();
