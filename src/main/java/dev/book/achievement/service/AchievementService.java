@@ -13,13 +13,14 @@ import dev.book.global.config.Firebase.exception.FcmTokenErrorCode;
 import dev.book.global.config.Firebase.exception.FcmTokenErrorException;
 import dev.book.global.config.Firebase.repository.FcmTokenRepository;
 import dev.book.global.config.Firebase.service.FCMService;
+import dev.book.global.sse.service.SseService;
+import dev.book.global.sse.type.SseType;
 import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorCode;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -28,13 +29,14 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class AchievementService {
 
-    private final ApplicationEventPublisher eventPublisher;
-    private final FCMService fcmService;
     private final FcmTokenRepository fcmTokenRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final AchievementUserRepository achievementUserRepository;
     private final AchievementRepository achievementRepository;
     private final UserRepository userRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
+    private final FCMService fcmService;
+    private final SseService sseService;
 
     /**
      * 업적 저장 후 fcm 알림 발송 & 웹소켓을 통한 실시간 유저 알림
@@ -70,9 +72,9 @@ public class AchievementService {
      * @param event
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleWebSocketAchievementNotification(GetAchievementEvent event){
+    public void handleSseAchievementNotification(GetAchievementEvent event){
         AchievementResponseDto achievementResponseDto = AchievementResponseDto.from(event.achievement());
-        messagingTemplate.convertAndSendToUser(String.valueOf(event.userId()), "/sub/achievement/"+event.achievement().getId(), achievementResponseDto);
+        sseService.send(event.userId(), achievementResponseDto, SseType.ACHIEVEMENT.name());
     }
 
 

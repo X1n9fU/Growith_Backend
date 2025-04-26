@@ -1,6 +1,6 @@
 package dev.book.challenge.controller;
 
-import dev.book.challenge.api.ChallengeApi;
+import dev.book.challenge.controller.swagger.ChallengeApi;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.*;

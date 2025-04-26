@@ -1,5 +1,6 @@
 package dev.book.user.user_friend.controller;
 
+import dev.book.user.user_friend.controller.swagger.UserFriendApi;
 import dev.book.user.user_friend.dto.response.FriendListResponseDto;
 import dev.book.user.user_friend.dto.response.FriendRequestListResponseDto;
 import dev.book.user.user_friend.dto.response.InvitingUserTokenResponseDto;
@@ -17,7 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/friends")
-public class UserFriendController implements UserFriendSwaggerController{
+public class UserFriendController implements UserFriendApi {
 
     private final UserFriendService userFriendService;
 
