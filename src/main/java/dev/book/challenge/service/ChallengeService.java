@@ -132,7 +132,7 @@ public class ChallengeService {
 
     public List<ChallengeTopResponse> findTopChallenge() {
 
-        Pageable pageable = PageRequest.of(0, 3); //todo top 갯수 추가 조정
+        Pageable pageable = PageRequest.of(0, 10);
         return challengeRepository.findTopChallenge(pageable);
 
     }
@@ -162,16 +162,16 @@ public class ChallengeService {
 
     public List<ChallengeReadResponse> findNewChallenge() {
 
-        Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
+        Pageable pageable = PageRequest.of(0, 10);
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime endDateTime = now.toLocalDate().atStartOfDay();// 오늘이 비교시 끝 부분
+        LocalDateTime endDateTime = now.toLocalDate().atTime(23, 59, 59, 999_999_999);// 오늘 비교시 끝 부분
         LocalDateTime startDateTime = endDateTime.minusDays(3); // 3일전이 비교시 시작부분
         return challengeRepository.findNewChallenge(pageable, startDateTime, endDateTime);
     }
 
     public List<ChallengeParticipantResponse> findMyChallenge(UserEntity user) {
 
-        Pageable pageable = PageRequest.of(0, 3); //todo new  갯수 추가 조정
+        Pageable pageable = PageRequest.of(0, 10);
         List<Long> challengeIds = userChallengeRepository.findChallengeByUserId(user.getId(), pageable);
 
         List<ChallengeParticipantResponse> challengeParticipantResponses = new ArrayList<>();

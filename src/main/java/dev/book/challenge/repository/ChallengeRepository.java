@@ -48,7 +48,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
                 FROM Challenge c
                 WHERE c.status = 'RECRUITING'
                 AND  c.release = 'PUBLIC'
-                AND c.createdAt BETWEEN :startDate AND :endToday
+                AND c.createdAt BETWEEN :startDateTime AND :endDateTime
             """)
     List<ChallengeReadResponse> findNewChallenge(Pageable pageable, LocalDateTime startDateTime, LocalDateTime endDateTime);
 
