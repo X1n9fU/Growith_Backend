@@ -17,8 +17,7 @@ public class TipController {
     private final TipService tipService;
 
     @PostMapping
-    public ResponseEntity<?> createTip(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                       @RequestBody TipRequest tipRequest){
+    public ResponseEntity<?> createTip(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody TipRequest tipRequest){
         tipService.createTip(userDetails, tipRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
