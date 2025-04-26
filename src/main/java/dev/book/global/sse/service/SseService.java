@@ -27,7 +27,7 @@ public class SseService {
      * @return
      */
     public SseEmitter subscribe(Long userId, String lastEventId) {
-        String emitterId = userId + "_" + System.currentTimeMillis();
+        String emitterId = getEmitterId(userId);
         SseEmitter emitter = sseEmitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
 
         emitter.onCompletion(() -> sseEmitterRepository.deleteEmitterById(emitterId));
@@ -56,7 +56,7 @@ public class SseService {
      */
     public void sendAchievementToUser(Long userId, AchievementResponseDto achievement) {
         Map<String, SseEmitter> sseEmitters = sseEmitterRepository.findAllEmitterStartsWithUserId(String.valueOf(userId));
-        String emitterId = userId + "_" + System.currentTimeMillis();
+        String emitterId = getEmitterId(userId);
         SseAchievementResponse sseAchievementResponse = new SseAchievementResponse(emitterId, achievement.title(), achievement.content(), SseType.ACHIEVEMENT.name());
         if (sseEmitters.isEmpty()){ //emitter가 존재하지 않을 경우, 백그라운드에서 SSE 이벤트가 발생하였을 경우
             sseEmitterRepository.saveEventCache(emitterId, sseAchievementResponse); //event 캐시에만 저장해놓고 subscribe 되었을 때 반환하도록 한다.
@@ -91,6 +91,10 @@ public class SseService {
         } catch (IOException | IllegalStateException e){
             sseEmitterRepository.deleteEmitterById(emitterId);
         }
+    }
+
+    private static String getEmitterId(Long userId) {
+        return userId + "_" + System.currentTimeMillis();
     }
 
 }
