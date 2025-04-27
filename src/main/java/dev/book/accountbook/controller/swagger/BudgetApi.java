@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Tag(name = "Budget", description = "예산 등록 / 조회")
+@Tag(name = "예산 API", description = "예산 등록 / 조회")
 public interface BudgetApi {
 
     @Operation(
