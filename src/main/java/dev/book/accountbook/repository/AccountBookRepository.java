@@ -178,13 +178,4 @@ public interface AccountBookRepository extends JpaRepository<AccountBook, Long> 
                                     @Param("startDate") LocalDate startDate,
                                     @Param("endDate") LocalDate endDate
     );
-
-    @Query("""
-            SELECT COALESCE( SUM(ab.amount),0)
-            FROM AccountBook ab
-            WHERE ab.user.id =:userId 
-            AND ab.category IN :categories
-            AND ab.type = 'SPEND' 
-            """)
-    long findTotalSpendByUserIdAndChallengeCategory(Long userId, List<Category> categories);
 }

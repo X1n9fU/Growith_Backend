@@ -1,7 +1,7 @@
 package dev.book.global.config.security.controller;
 
+import dev.book.global.config.security.controller.swagger.AuthApi;
 import dev.book.global.config.security.dto.CustomUserDetails;
-import dev.book.global.config.security.dto.TokenDto;
 import dev.book.global.config.security.service.AuthService;
 import dev.book.user.dto.request.UserSignUpRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-public class AuthController implements AuthSwaggerController{
+public class AuthController implements AuthApi {
 
     private final AuthService authService;
 
