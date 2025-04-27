@@ -2,7 +2,6 @@ package dev.book.challenge.user_challenge.repository;
 
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
-import dev.book.user.entity.UserEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
@@ -18,6 +18,8 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     int countByChallengeId(Long id);
 
     boolean existsByUserIdAndChallengeId(Long id, Long challengeId);
+
+    Optional<UserChallenge> findByUserIdAndChallengeId(Long id, Long challengeId);
 
     void deleteByUserIdAndChallengeId(Long userId, Long challengeId);
 
@@ -37,9 +39,15 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     List<Challenge> findChallengesByUserAndDate(Long userId, Long categoryId, LocalDate spendDate);
 
 
-    @Query("SELECT uc.user FROM UserChallenge uc JOIN UserEntity u ON uc.user.id=u.id WHERE uc.challenge.id=:challengeId")
-    List<UserEntity> findUsersByChallengeId(Long challengeId);
+    @Query("SELECT uc FROM UserChallenge uc JOIN UserEntity u ON uc.user.id=u.id JOIN Challenge c ON uc.challenge.id=c.id WHERE uc.challenge.id=:challengeId")
+    List<UserChallenge> findUsersByChallengeId(Long challengeId);
 
-    @Query("SELECT uc.challenge.id FROM UserChallenge uc WHERE uc.user.id=:id")
-    List<Long> findChallengeByUserId(Long id, Pageable pageable);
+    @Query("""
+            SELECT uc FROM UserChallenge uc
+            JOIN FETCH uc.challenge c
+            JOIN FETCH c.challengeCategories cc
+            JOIN FETCH cc.category ca
+            WHERE uc.user.id=:id
+            """)
+    List<UserChallenge> findChallengeByUserId(Long id, Pageable pageable);
 }

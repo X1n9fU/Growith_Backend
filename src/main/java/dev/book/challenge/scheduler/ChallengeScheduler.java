@@ -7,6 +7,7 @@ import dev.book.achievement.achievement_user.dto.event.FailChallengeEvent;
 import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.repository.ChallengeRepository;
+import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.challenge.type.Status;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
@@ -43,15 +44,17 @@ public class ChallengeScheduler {
 
         for (Challenge challenge : completedChallenges) {
             challenge.completeChallenge();
-            List<UserEntity> users = userChallengeRepository.findUsersByChallengeId(challenge.getId());
+            List<UserChallenge> userChallenges = userChallengeRepository.findUsersByChallengeId(challenge.getId());
             //챌린지의 기간 동안의 내역을 가져와서 챌린지의 한도 내역과 비교
             List<Category> categoryList = ChallengeCategory.getCategoryList(challenge.getChallengeCategories());
-            users.forEach(user -> {
+            userChallenges.forEach( userChallenge-> {
+                UserEntity user = userChallenge.getUser();
                 Integer sumOfCategories = accountBookRepository.sumSpendingInCategories(
                         user.getId(), CategoryType.SPEND, categoryList, challenge.getStartDate(), challenge.getEndDate());
                 if (sumOfCategories <= challenge.getAmount()) {
                     user.plusCompleteChallenge();
                     user.plusSavings(challenge.getAmount() - sumOfCategories);
+                    userChallenge.success();
                     eventPublisher.publishEvent(new CompleteChallengeEvent(user));
                 } else {
                     eventPublisher.publishEvent(new FailChallengeEvent(user));
