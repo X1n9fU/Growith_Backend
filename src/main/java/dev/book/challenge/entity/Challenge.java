@@ -141,4 +141,8 @@ public class Challenge extends BaseTimeEntity {
     public void minusCurrentCapacity() {
         this.currentCapacity++;
     }
+
+    public void startChallenge() {
+        this.status = Status.IN_PROGRESS;
+    }
 }

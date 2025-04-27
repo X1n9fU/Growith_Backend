@@ -8,6 +8,7 @@ import dev.book.challenge.ChallengeCategory;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.repository.ChallengeRepository;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
+import dev.book.challenge.type.Status;
 import dev.book.challenge.user_challenge.repository.UserChallengeRepository;
 import dev.book.global.entity.Category;
 import dev.book.user.entity.UserEntity;
@@ -28,12 +29,20 @@ public class ChallengeScheduler {
     private final AccountBookRepository accountBookRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Scheduled(cron = "0 0 0 * * *") //매일 자정에 챌린지 close
+    @Scheduled(cron = " 0 0 0 * * * ") //매일 자정에 챌린지 close
     @Transactional
-    public void closeChallenge() {
+    public void updateChallengeStatus() {
         LocalDate today = LocalDate.now();
-        List<Challenge> challenges = challengeRepository.findChallengesToUpdate(today);
-        for (Challenge challenge : challenges){
+
+        List<Status> startStatuses = List.of(Status.RECRUITING, Status.RECRUITED);
+        List<Challenge> startChallenges = challengeRepository.findChallengesToStart(today, startStatuses);
+        for (Challenge challenge : startChallenges) {
+            challenge.startChallenge();
+        }
+
+        List<Challenge> completedChallenges = challengeRepository.findChallengesToUpdate(today);
+
+        for (Challenge challenge : completedChallenges) {
             challenge.completeChallenge();
             List<UserChallenge> userChallenges = userChallengeRepository.findUsersByChallengeId(challenge.getId());
             //챌린지의 기간 동안의 내역을 가져와서 챌린지의 한도 내역과 비교
@@ -42,12 +51,12 @@ public class ChallengeScheduler {
                 UserEntity user = userChallenge.getUser();
                 Integer sumOfCategories = accountBookRepository.sumSpendingInCategories(
                         user.getId(), CategoryType.SPEND, categoryList, challenge.getStartDate(), challenge.getEndDate());
-                if (sumOfCategories <= challenge.getAmount()){
+                if (sumOfCategories <= challenge.getAmount()) {
                     user.plusCompleteChallenge();
                     user.plusSavings(challenge.getAmount() - sumOfCategories);
                     userChallenge.success();
                     eventPublisher.publishEvent(new CompleteChallengeEvent(user));
-                } else{
+                } else {
                     eventPublisher.publishEvent(new FailChallengeEvent(user));
                 }
                 user.plusFinishedChallenge();

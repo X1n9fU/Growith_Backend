@@ -30,6 +30,7 @@ import java.util.List;
 import static dev.book.challenge.type.Release.PUBLIC;
 import static dev.book.challenge.type.Status.RECRUITING;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -234,7 +235,7 @@ class ChallengeControllerTest {
         // given
         ChallengeReadResponse response = new ChallengeReadResponse(1L, "제목", 5, 40, RECRUITING);
 
-        given(challengeService.findNewChallenge()).willReturn(List.of(response));
+        given(challengeService.findNewChallenge(anyInt(),anyInt())).willReturn(List.of(response));
         mockMvc.perform(get("/api/v1/challenges/new"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
@@ -253,7 +254,7 @@ class ChallengeControllerTest {
         ChallengeParticipantResponse challengeParticipantResponse = new ChallengeParticipantResponse(
                 1L, "제목", 5000, 50000, 3, false);
 
-        given(challengeService.findMyChallenge(any())).willReturn(List.of(challengeParticipantResponse));
+        given(challengeService.findMyChallenge(any(), anyInt(), anyInt())).willReturn(List.of(challengeParticipantResponse));
 
         mockMvc.perform(get("/api/v1/challenges/me"))
                 .andExpect(status().isOk())
