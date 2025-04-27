@@ -24,6 +24,10 @@ public class UserChallenge {
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
+    private boolean isSuccess = false;
+
+    private boolean isWriteTip = false;
+
     private UserChallenge(UserEntity user, Challenge challenge) {
         this.user = user;
         this.challenge = challenge;
@@ -31,5 +35,13 @@ public class UserChallenge {
 
     public static UserChallenge of(UserEntity user, Challenge challenge) {
         return new UserChallenge(user, challenge);
+    }
+
+    public void success(){
+        this.isSuccess = true;
+    }
+
+    public void writeTip(){
+        this.isWriteTip = true;
     }
 }

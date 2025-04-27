@@ -172,11 +172,11 @@ public class ChallengeService {
     public List<ChallengeParticipantResponse> findMyChallenge(UserEntity user) {
 
         Pageable pageable = PageRequest.of(0, 10);
-        List<Long> challengeIds = userChallengeRepository.findChallengeByUserId(user.getId(), pageable);
+        List<UserChallenge> userChallenges = userChallengeRepository.findChallengeByUserId(user.getId(), pageable);
 
         List<ChallengeParticipantResponse> challengeParticipantResponses = new ArrayList<>();
-        for (Long challengeId : challengeIds) {
-            Challenge challenge = challengeRepository.findByIdJoinCategory(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
+        for (UserChallenge userChallenge : userChallenges) {
+            Challenge challenge = userChallenge.getChallenge();
             List<Category> categories = challenge.getChallengeCategories().stream().map(ChallengeCategory::getCategory).toList();
 
             long totalSpend = accountBookRepository.sumSpendingInCategories(user.getId(), CategoryType.SPEND, categories, challenge.getStartDate(), challenge.getEndDate());
@@ -185,7 +185,8 @@ public class ChallengeService {
             LocalDate currentDate = LocalDate.now();
             LocalDate endDate = challenge.getEndDate();
             int endDay = (int) ChronoUnit.DAYS.between(currentDate, endDate);
-            boolean isSuccess = isSuccess(totalSpend, amount);
+            boolean isSuccess = userChallenge.isSuccess();
+            boolean isWriteTip = userChallenge.isWriteTip();
 
             // 소비만 모으면됨
             ChallengeParticipantResponse response = new ChallengeParticipantResponse(
@@ -194,17 +195,14 @@ public class ChallengeService {
                     totalSpend,
                     amount,
                     endDay,
-                    isSuccess
+                    isSuccess,
+                    isWriteTip
+
             );
             challengeParticipantResponses.add(response);
 
         }
         return challengeParticipantResponses;
 
-    }
-
-    // 챌린지의 목표금액보다 총 사용 금액이 같거나 적다면 성공
-    private boolean isSuccess(long totalSpend, Integer amount) {
-        return totalSpend <= amount;
     }
 }

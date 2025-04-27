@@ -13,6 +13,8 @@ public interface SseEmitterRepository{
 
     Map<String, Object> findAllEventCacheStartsWithUserId(String id);
 
+    Map<String, SseEmitter> findAllEmitters();
+
     void deleteEmitterById(String id);
 
     void deleteAllEmitterStartsWithUserId(String id);
