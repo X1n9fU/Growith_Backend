@@ -30,7 +30,7 @@ public class ChallengeScheduler {
 
     @Scheduled(cron = " 0 0 0 * * * ") //매일 자정에 챌린지 close
     @Transactional
-    public void closeChallenge() {
+    public void updateChallengeStatus() {
         LocalDate today = LocalDate.now();
 
         List<Status> startStatuses = List.of(Status.RECRUITING, Status.RECRUITED);
@@ -39,9 +39,9 @@ public class ChallengeScheduler {
             challenge.startChallenge();
         }
 
-        List<Challenge> challenges = challengeRepository.findChallengesToUpdate(today);
+        List<Challenge> completedChallenges = challengeRepository.findChallengesToUpdate(today);
 
-        for (Challenge challenge : challenges) {
+        for (Challenge challenge : completedChallenges) {
             challenge.completeChallenge();
             List<UserEntity> users = userChallengeRepository.findUsersByChallengeId(challenge.getId());
             //챌린지의 기간 동안의 내역을 가져와서 챌린지의 한도 내역과 비교
