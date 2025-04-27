@@ -88,6 +88,8 @@ public interface ChallengeApi {
     ResponseEntity<List<ChallengeReadResponse>> searchNewChallenge();
 
     @Operation(summary = "참여 챌린지 조회 API ", description = "자신이 참여한 챌린지를 조회 한다.")
-    ResponseEntity<List<ChallengeParticipantResponse>> searchMyChallenge(@AuthenticationPrincipal CustomUserDetails userDetails);
+    ResponseEntity<List<ChallengeParticipantResponse>> searchMyChallenge(@AuthenticationPrincipal CustomUserDetails userDetails
+            , @RequestParam(required = false, defaultValue = "1") int page
+            , @RequestParam(required = false, defaultValue = "10") int size);
 
 }

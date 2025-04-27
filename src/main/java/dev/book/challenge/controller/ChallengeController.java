@@ -82,7 +82,10 @@ public class ChallengeController implements ChallengeApi {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<ChallengeParticipantResponse>> searchMyChallenge(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok().body(challengeService.findMyChallenge(userDetails.user()));
+    public ResponseEntity<List<ChallengeParticipantResponse>> searchMyChallenge(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            , @RequestParam(required = false, defaultValue = "1") int page
+            , @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok().body(challengeService.findMyChallenge(userDetails.user(), page, size));
     }
 }

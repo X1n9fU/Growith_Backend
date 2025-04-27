@@ -169,9 +169,9 @@ public class ChallengeService {
         return challengeRepository.findNewChallenge(pageable, startDateTime, endDateTime);
     }
 
-    public List<ChallengeParticipantResponse> findMyChallenge(UserEntity user) {
+    public List<ChallengeParticipantResponse> findMyChallenge(UserEntity user, int page, int size) {
 
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(page - 1, size);
         List<Long> challengeIds = userChallengeRepository.findChallengeByUserId(user.getId(), pageable);
 
         List<ChallengeParticipantResponse> challengeParticipantResponses = new ArrayList<>();
