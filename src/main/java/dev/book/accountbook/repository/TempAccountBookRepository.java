@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TempAccountBookRepository extends JpaRepository<TempAccountBook, Long> {
-    List<TempAccountBook> findByUserId(Long userId);
+    List<TempAccountBook> findAllByUserId(Long userId);
 }
