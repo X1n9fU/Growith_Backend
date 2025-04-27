@@ -245,4 +245,8 @@ public class IndividualAchievementStatusService {
         return individualAchievementStatusRepository.findByUser(user)
                 .orElseGet(() -> individualAchievementStatusRepository.save(new IndividualAchievementStatus(user)));
     }
+
+    public void deleteIndividualAchievementStatus(UserEntity user) {
+        individualAchievementStatusRepository.deleteByUser(user);
+    }
 }
