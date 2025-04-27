@@ -74,7 +74,6 @@ public class UserService {
     public void deleteUser(HttpServletRequest request, HttpServletResponse response, CustomUserDetails userDetails) {
         UserEntity user = userDetails.user();
         refreshTokenService.deleteRefreshToken(user);
-        individualAchievementStatusService.deleteIndividualAchievementStatus(user);
         userRepository.delete(user);
         jwtUtil.deleteAccessTokenAndRefreshToken(request, response);
     }
