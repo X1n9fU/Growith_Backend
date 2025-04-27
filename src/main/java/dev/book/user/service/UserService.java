@@ -1,6 +1,6 @@
 package dev.book.user.service;
 
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
+import dev.book.achievement.achievement_user.service.IndividualAchievementStatusService;
 import dev.book.achievement.achievement_user.entity.AchievementUser;
 import dev.book.achievement.achievement_user.repository.AchievementUserRepository;
 import dev.book.global.config.security.dto.CustomUserDetails;

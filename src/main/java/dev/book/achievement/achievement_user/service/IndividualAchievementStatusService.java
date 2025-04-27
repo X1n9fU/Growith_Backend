@@ -1,4 +1,4 @@
-package dev.book.achievement.achievement_user;
+package dev.book.achievement.achievement_user.service;
 
 import dev.book.achievement.achievement_user.dto.event.*;
 import dev.book.achievement.achievement_user.entity.IndividualAchievementStatus;
@@ -59,7 +59,6 @@ public class IndividualAchievementStatusService {
             case 10 ->
                 achievementService.saveAchievement(3L, event.user().getId());
         }
-
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -67,9 +66,8 @@ public class IndividualAchievementStatusService {
     public void plusFailChallenge(FailChallengeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int failChallenge = achievementStatus.plusFailChallenge();
-        switch (failChallenge) {
-            case 1 ->
-                achievementService.saveAchievement(4L, event.user().getId());
+        if (failChallenge == 1) {
+            achievementService.saveAchievement(4L, event.user().getId());
         }
     }
 
@@ -133,9 +131,8 @@ public class IndividualAchievementStatusService {
     public void plusConsecutiveNoSpend(ConsecutiveNoSpendEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int consecutiveNoSpend = achievementStatus.plusConsecutiveNoSpend();
-        switch (consecutiveNoSpend) {
-            case 3 ->
-                achievementService.saveAchievement(13L, event.user().getId());
+        if (consecutiveNoSpend == 3) {
+            achievementService.saveAchievement(13L, event.user().getId());
         }
     }
 
@@ -222,9 +219,8 @@ public class IndividualAchievementStatusService {
     public void plusInviteFriendToChallenge(InviteFriendToChallengeEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
         int inviteFriendToChallenge = achievementStatus.plusInviteFriendToChallenge();
-        switch (inviteFriendToChallenge) {
-            case 1->
-                achievementService.saveAchievement(23L, event.user().getId());
+        if (inviteFriendToChallenge == 1) {
+            achievementService.saveAchievement(23L, event.user().getId());
         }
     }
 

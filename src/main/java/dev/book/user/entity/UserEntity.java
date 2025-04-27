@@ -2,14 +2,11 @@ package dev.book.user.entity;
 
 import dev.book.accountbook.entity.AccountBook;
 import dev.book.accountbook.entity.Budget;
-import dev.book.achievement.achievement_user.IndividualAchievementStatusService;
 import dev.book.achievement.achievement_user.entity.AchievementUser;
-import dev.book.achievement.achievement_user.entity.IndividualAchievementStatus;
 import dev.book.challenge.challenge_invite.entity.ChallengeInvite;
 import dev.book.challenge.entity.Challenge;
 import dev.book.challenge.user_challenge.entity.UserChallenge;
 import dev.book.global.config.security.dto.oauth2.OAuth2Attributes;
-import dev.book.global.config.security.entity.RefreshToken;
 import dev.book.global.entity.BaseTimeEntity;
 import dev.book.global.entity.Category;
 import dev.book.tip.entity.Tip;
@@ -21,7 +18,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
