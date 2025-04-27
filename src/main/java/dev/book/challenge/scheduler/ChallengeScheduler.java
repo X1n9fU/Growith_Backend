@@ -28,7 +28,7 @@ public class ChallengeScheduler {
     private final AccountBookRepository accountBookRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Scheduled(cron = " 0 * * * * * ") //매일 자정에 챌린지 close
+    @Scheduled(cron = " 0 0 0 * * * ") //매일 자정에 챌린지 close
     @Transactional
     public void closeChallenge() {
         LocalDate today = LocalDate.now();
