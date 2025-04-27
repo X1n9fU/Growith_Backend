@@ -2,13 +2,14 @@ package dev.book.global.sse.repository;
 
 import dev.book.global.sse.bean.EmitterStorage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class SseEmitterRepositoryImpl implements SseEmitterRepository{
 
