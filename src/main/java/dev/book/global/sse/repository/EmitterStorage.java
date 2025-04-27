@@ -1,21 +1,22 @@
 package dev.book.global.sse.repository;
 
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
+@Configuration
 public class EmitterStorage {
-    private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
 
-    public Map<String, SseEmitter> getEmitters() {
-        return emitters;
+    @Bean
+    public Map<String, SseEmitter> emitters() {
+        return new ConcurrentHashMap<>();
     }
 
-    public Map<String, Object> getEventCache() {
-        return eventCache;
+    @Bean
+    public Map<String, Object> eventCache() {
+        return new ConcurrentHashMap<>();
     }
 }

@@ -15,55 +15,55 @@ public class SseEmitterRepositoryImpl implements SseEmitterRepository{
 
     @Override
     public SseEmitter save(String emitterId, SseEmitter sseEmitter) {
-        emitterStorage.getEmitters().put(emitterId, sseEmitter);
+        emitterStorage.emitters().put(emitterId, sseEmitter);
         return sseEmitter;
     }
 
     @Override
     public void saveEventCache(String eventCacheId, Object event) {
-        emitterStorage.getEventCache().put(eventCacheId, event);
+        emitterStorage.eventCache().put(eventCacheId, event);
     }
 
     @Override
     public Map<String, SseEmitter> findAllEmitterStartsWithUserId(String id) {
-        return emitterStorage.getEmitters().entrySet().stream()
+        return emitterStorage.emitters().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(id))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public Map<String, Object> findAllEventCacheStartsWithUserId(String id) {
-        return emitterStorage.getEventCache().entrySet().stream()
+        return emitterStorage.eventCache().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(id))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
     public Map<String, SseEmitter> findAllEmitters() {
-        return emitterStorage.getEmitters();
+        return emitterStorage.emitters();
     }
 
     @Override
     public void deleteEmitterById(String emitterId) {
-        emitterStorage.getEmitters().remove(emitterId);
+        emitterStorage.emitters().remove(emitterId);
 
     }
 
     @Override
     public void deleteAllEmitterStartsWithUserId(String id) {
-        emitterStorage.getEmitters().keySet().removeIf(key -> key.startsWith(id));
+        emitterStorage.emitters().keySet().removeIf(key -> key.startsWith(id));
 
 
     }
 
     @Override
     public void deleteAllEventCacheStartsWithUserId(String id) {
-        emitterStorage.getEventCache().keySet().removeIf(key -> key.startsWith(id));
+        emitterStorage.eventCache().keySet().removeIf(key -> key.startsWith(id));
 
     }
 
     @Override
     public void deleteEventCacheById(String id) {
-        emitterStorage.getEventCache().remove(id);
+        emitterStorage.eventCache().remove(id);
     }
 }
