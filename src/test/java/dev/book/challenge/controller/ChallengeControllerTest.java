@@ -235,7 +235,7 @@ class ChallengeControllerTest {
         // given
         ChallengeReadResponse response = new ChallengeReadResponse(1L, "제목", 5, 40, RECRUITING);
 
-        given(challengeService.findNewChallenge()).willReturn(List.of(response));
+        given(challengeService.findNewChallenge(anyInt(),anyInt())).willReturn(List.of(response));
         mockMvc.perform(get("/api/v1/challenges/new"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))

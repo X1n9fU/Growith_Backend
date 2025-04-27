@@ -76,8 +76,11 @@ public class ChallengeController implements ChallengeApi {
     }
 
     @GetMapping("/new")
-    public ResponseEntity<List<ChallengeReadResponse>> searchNewChallenge() {
-        List<ChallengeReadResponse> challengeReadResponses = challengeService.findNewChallenge();
+    public ResponseEntity<List<ChallengeReadResponse>> searchNewChallenge(
+             @RequestParam(required = false, defaultValue = "1") int page
+            , @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        List<ChallengeReadResponse> challengeReadResponses = challengeService.findNewChallenge(page,size);
         return ResponseEntity.ok().body(challengeReadResponses);
     }
 

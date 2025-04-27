@@ -160,9 +160,9 @@ public class ChallengeService {
         return challengeRepository.findByIdAndCreatorId(id, userId).orElseThrow(() -> new ChallengeException(CHALLENGE_INVALID));
     }
 
-    public List<ChallengeReadResponse> findNewChallenge() {
+    public List<ChallengeReadResponse> findNewChallenge(int page, int size) {
 
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(page - 1, size);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime endDateTime = now.toLocalDate().atTime(23, 59, 59, 999_999_999);// 오늘 비교시 끝 부분
         LocalDateTime startDateTime = endDateTime.minusDays(3); // 3일전이 비교시 시작부분
