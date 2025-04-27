@@ -3,6 +3,7 @@ package dev.book.challenge.repository;
 import dev.book.challenge.dto.response.ChallengeReadResponse;
 import dev.book.challenge.dto.response.ChallengeTopResponse;
 import dev.book.challenge.entity.Challenge;
+import dev.book.challenge.type.Status;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -55,4 +56,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long>, Cha
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Challenge c WHERE c.id = :id")
     Optional<Challenge> findByIdWithLock(Long id);
+
+    @Query("SELECT c FROM Challenge c WHERE c.startDate = :today AND c.status IN :startStatuses")
+    List<Challenge> findChallengesToStart(@Param("today") LocalDate today, @Param("startStatuses") List<Status> startStatuses);
 }
