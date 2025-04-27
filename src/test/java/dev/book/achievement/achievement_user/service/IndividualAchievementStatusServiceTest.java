@@ -48,13 +48,50 @@ class IndividualAchievementStatusServiceTest {
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails, userDetails.getAuthorities()));
     }
 
+    /*
+    객체 생성
+     */
+    @NotNull
+    private IndividualAchievementStatus getIndividualAchievementStatus() { //실제 객체
+        IndividualAchievementStatus individualAchievementStatus = new IndividualAchievementStatus(userDetails.user());
+        given(individualAchievementStatusRepository.findByUser(userDetails.user())).willReturn(Optional.of(individualAchievementStatus));
+        return individualAchievementStatus;
+    }
+
+    @NotNull
+    private IndividualAchievementStatus getMockIndividualAchievementStatus() { //Mock 객체
+        IndividualAchievementStatus individualAchievementStatus = mock(IndividualAchievementStatus.class);
+        given(individualAchievementStatusRepository.findByUser(userDetails.user())).willReturn(Optional.of(individualAchievementStatus));
+        return individualAchievementStatus;
+    }
+
+    /*
+    then 사용
+     */
+    private void checkNotGetAchievement() { //달성한 업적이 없음
+        verifyNoInteractions(achievementService);
+        verify(achievementService, never()).saveAchievement(anyLong(), anyLong());
+    }
+
+    private void getAchievement(long num) {
+        verify(achievementService).saveAchievement(num, userDetails.user().getId());
+    }
+
+    /*
+    로그인 업적
+     */
+    private IndividualAchievementStatus setConsecutiveLogin(long value) {
+        IndividualAchievementStatus individualAchievementStatus = getIndividualAchievementStatus();
+        individualAchievementStatus.loginToday(false);
+        ReflectionTestUtils.setField(individualAchievementStatus, "consecutiveLogins", value);
+        return individualAchievementStatus;
+    }
+
     @Test
     @DisplayName("연속적으로 7번 로그인을 하여 업적을 달성한다.")
     void sevenTimesContinuousLogin() {
         //given
-        IndividualAchievementStatus individualAchievementStatus = getIndividualAchievementStatus();
-        individualAchievementStatus.loginToday(false);
-        ReflectionTestUtils.setField(individualAchievementStatus, "consecutiveLogins", 6L); // 6일 연속 중
+        IndividualAchievementStatus individualAchievementStatus = setConsecutiveLogin(6L);
 
         //when
         individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
@@ -64,20 +101,11 @@ class IndividualAchievementStatusServiceTest {
         getAchievement(7L);
     }
 
-    @NotNull
-    private IndividualAchievementStatus getIndividualAchievementStatus() {
-        IndividualAchievementStatus individualAchievementStatus = new IndividualAchievementStatus(userDetails.user());
-        given(individualAchievementStatusRepository.findByUser(userDetails.user())).willReturn(Optional.of(individualAchievementStatus));
-        return individualAchievementStatus;
-    }
-
     @Test
     @DisplayName("연속적으로 30번 로그인을 하여 업적을 달성한다.")
     void thirtyTimesContinuousLogin() {
         //given
-        IndividualAchievementStatus individualAchievementStatus = getIndividualAchievementStatus();
-        individualAchievementStatus.loginToday(false);
-        ReflectionTestUtils.setField(individualAchievementStatus, "consecutiveLogins", 29L); // 29일 연속 중
+        IndividualAchievementStatus individualAchievementStatus = setConsecutiveLogin(29L);
 
         //when
         individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
@@ -91,9 +119,7 @@ class IndividualAchievementStatusServiceTest {
     @DisplayName("연속적으로 2번 로그인을 하면 업적에 달성하지 않는다.")
     void SecondTimesContinuousLogin() {
         //given
-        IndividualAchievementStatus individualAchievementStatus = getIndividualAchievementStatus();
-        individualAchievementStatus.loginToday(false);
-        ReflectionTestUtils.setField(individualAchievementStatus, "consecutiveLogins", 1L);
+        setConsecutiveLogin(1L);
 
         //when
         individualAchievementStatusService.deterMineContinuousLogin(userDetails.user());
@@ -116,6 +142,17 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    성공한 챌린지 업적
+     */
+    @NotNull
+    private CompleteChallengeEvent getCompleteChallengeEvent(int value) {
+        IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
+        CompleteChallengeEvent event = new CompleteChallengeEvent(userDetails.user());
+        given(individualAchievementStatus.plusCompleteChallenge()).willReturn(value);
+        return event;
+    }
+
     @Test
     @DisplayName("완료한 챌린지가 1개라면 업적에 달성한다.")
     void oneCompleteChallenge() {
@@ -127,21 +164,6 @@ class IndividualAchievementStatusServiceTest {
 
         //then
         getAchievement(1L);
-    }
-
-    @NotNull
-    private CompleteChallengeEvent getCompleteChallengeEvent(int value) {
-        IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
-        CompleteChallengeEvent event = new CompleteChallengeEvent(userDetails.user());
-        given(individualAchievementStatus.plusCompleteChallenge()).willReturn(value);
-        return event;
-    }
-
-    @NotNull
-    private IndividualAchievementStatus getMockIndividualAchievementStatus() {
-        IndividualAchievementStatus individualAchievementStatus = mock(IndividualAchievementStatus.class);
-        given(individualAchievementStatusRepository.findByUser(userDetails.user())).willReturn(Optional.of(individualAchievementStatus));
-        return individualAchievementStatus;
     }
 
     @Test
@@ -183,6 +205,17 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    실패한 업적
+     */
+    @NotNull
+    private FailChallengeEvent getFailChallengeEvent(int value) {
+        IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
+        FailChallengeEvent event = new FailChallengeEvent(userDetails.user());
+        given(individualAchievementStatus.plusFailChallenge()).willReturn(value);
+        return event;
+    }
+
     @Test
     @DisplayName("실패한 챌린지가 1개라면 업적에 달성한다.")
     void oneFailChallenge() {
@@ -194,14 +227,6 @@ class IndividualAchievementStatusServiceTest {
 
         //then
         getAchievement(4L);
-    }
-
-    @NotNull
-    private FailChallengeEvent getFailChallengeEvent(int value) {
-        IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
-        FailChallengeEvent event = new FailChallengeEvent(userDetails.user());
-        given(individualAchievementStatus.plusFailChallenge()).willReturn(value);
-        return event;
     }
 
     @Test
@@ -217,9 +242,15 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
-    private void checkNotGetAchievement() {
-        verifyNoInteractions(achievementService);
-        verify(achievementService, never()).saveAchievement(anyLong(), anyLong());
+    /*
+    챌린지 생성 업적
+     */
+    @NotNull
+    private CreateChallengeEvent getCreateChallengeEvent(int value) {
+        IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
+        CreateChallengeEvent event = new CreateChallengeEvent(userDetails.user());
+        given(individualAchievementStatus.plusCreateChallenge()).willReturn(value);
+        return event;
     }
 
     @Test
@@ -233,14 +264,6 @@ class IndividualAchievementStatusServiceTest {
 
         //then
         getAchievement(5L);
-    }
-
-    @NotNull
-    private CreateChallengeEvent getCreateChallengeEvent(int value) {
-        IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
-        CreateChallengeEvent event = new CreateChallengeEvent(userDetails.user());
-        given(individualAchievementStatus.plusCreateChallenge()).willReturn(value);
-        return event;
     }
 
     @Test
@@ -269,6 +292,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    소비 분석 업적
+     */
     @NotNull
     private CheckSpendAnalysisEvent getCheckSpendAnalysisEvent(long value) {
         IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
@@ -290,10 +316,6 @@ class IndividualAchievementStatusServiceTest {
         getAchievement(9L);
     }
 
-    private void getAchievement(long num) {
-        verify(achievementService).saveAchievement(num, userDetails.user().getId());
-    }
-
     @Test
     @DisplayName("소비 분석을 처음으로 이후에 진행하면 업적에 달성하지 않는다.")
     void oneMoreCheckSpendAnalysis() {
@@ -307,6 +329,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    수입 등록 업적
+     */
     @Test
     @DisplayName("첫 정기적인 수입을 작성하면 업적에 달성한다.")
     void setCreateFirstIncomeTrue() {
@@ -337,6 +362,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    Week(주) 절약 업적
+     */
     @Test
     @DisplayName("Week(주)의 절약 정도가 5% 이상이면 업적에 달성한다.")
     void fivePercentSaveAccomplishmentOfWeek() {
@@ -386,6 +414,9 @@ class IndividualAchievementStatusServiceTest {
         getAchievement(12L);
     }
 
+    /*
+    예산 계획 생성 업적
+     */
     @NotNull
     private CreateBudgetEvent getCreateBudgetEvent(int value) {
         IndividualAchievementStatus individualAchievementStatus = getMockIndividualAchievementStatus();
@@ -433,6 +464,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    예산 계획 성공 업적
+     */
     @Test
     @DisplayName("예산 계획을 1번 성공했을 경우 업적에 달성한다.")
     void oneSuccessBudgetPlan() {
@@ -479,11 +513,14 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    과소비 알림 업적
+     */
     @Test
     @DisplayName("과소비 알림을 1번 받으면 업적에 달성한다.")
     void oneGetWarningBudget() {
         //given
-        IndividualAchievementStatus individualAchievementStatus = getIndividualAchievementStatus();
+        getIndividualAchievementStatus();
         GetWarningBudgetEvent event = new GetWarningBudgetEvent(userDetails.user());
 
         //when
@@ -508,6 +545,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    예산 계획 절약 업적
+     */
     @Test
     @DisplayName("예산 계획보다 5% 절약했을 경우 업적에 달성한다.")
     void fivePercentSaveAccomplishmentFromBudget() {
@@ -573,6 +613,9 @@ class IndividualAchievementStatusServiceTest {
         getAchievement(20L);
     }
 
+    /*
+    친구 서비스 초대 업적
+     */
     @Test
     @DisplayName("친구를 서비스에 1번 초대할 경우 업적에 달성한다.")
     void oneInviteFriendToService() {
@@ -617,6 +660,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    친구 챌린지 초대 업적
+     */
     @Test
     @DisplayName("친구를 챌린지에 1번 초대할 경우 업적에 달성한다.")
     void oneInviteFriendToChallenge() {
@@ -646,6 +692,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    팁 공유 업적
+     */
     @Test
     @DisplayName("팁을 1번 공유하면 업적에 달성한다.")
     void oneShareTips() {
@@ -690,6 +739,9 @@ class IndividualAchievementStatusServiceTest {
         checkNotGetAchievement();
     }
 
+    /*
+    삭제
+     */
     @Test
     @DisplayName("개인 업적 상태를 삭제합니다.")
     void deleteIndividualAchievementStatus() {
@@ -700,6 +752,9 @@ class IndividualAchievementStatusServiceTest {
         verify(individualAchievementStatusRepository).deleteByUser(userDetails.user());
     }
 
+    /*
+    조회 에러
+     */
     @Test
     @DisplayName("개인 업적 상태 테이블이 존재하지 않을 경우 새로 생성한다.")
     void getNewIndividualAchievementStatus(){
