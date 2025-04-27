@@ -1,4 +1,4 @@
-package dev.book.global.sse.repository;
+package dev.book.global.sse.bean;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

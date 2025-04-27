@@ -1,5 +1,6 @@
 package dev.book.global.sse.repository;
 
+import dev.book.global.sse.bean.EmitterStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
