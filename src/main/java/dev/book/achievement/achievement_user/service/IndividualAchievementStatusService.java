@@ -86,9 +86,9 @@ public class IndividualAchievementStatusService {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void pluCheckSpendAnalysis(CheckSpendAnalysisEvent event) {
+    public void plusCheckSpendAnalysis(CheckSpendAnalysisEvent event) {
         IndividualAchievementStatus achievementStatus = getIndividualAchievementStatus(event.user());
-        long checkSpendAnalysis = achievementStatus.pluCheckSpendAnalysis();
+        long checkSpendAnalysis = achievementStatus.plusCheckSpendAnalysis();
         if (checkSpendAnalysis == 1L)
             achievementService.saveAchievement(9L, event.user().getId());
     }
@@ -187,7 +187,7 @@ public class IndividualAchievementStatusService {
         //절약 %가 상한선 이상이면서, 사전에 업적 달성한 적이 없는 경우를 판단
         if (event.saveRate() >= 10.0 && !achievementStatus.isSaveTenPercentFromBudget())
             saveTenPercentFromBudget(event.user().getId(), achievementStatus);
-        else if (event.saveRate() >= 5.0 && !achievementStatus.isSaveFivePercentFromBudget())
+        if (event.saveRate() >= 5.0 && !achievementStatus.isSaveFivePercentFromBudget())
             saveFivePercentFromBudget(event.user().getId(), achievementStatus);
     }
 
