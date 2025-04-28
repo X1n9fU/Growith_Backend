@@ -209,9 +209,6 @@ class ChallengeServiceTest {
     @DisplayName("만든 사람만 챌린지를 삭제 할수 있다.")
     void deleteChallenge() {
         //given
-        ChallengeCreateRequest challengeCreateRequest = createRequest();
-        UserEntity creator = UserBuilder.of("이메일1", "작성자");
-
         UserEntity noCreator = UserBuilder.of("이메일2", "사용자");
 
         given(userRepository.findByEmail(any())).willReturn(Optional.of(noCreator));

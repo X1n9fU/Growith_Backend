@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.book.challenge.dto.request.ChallengeCreateRequest;
 import dev.book.challenge.dto.request.ChallengeUpdateRequest;
 import dev.book.challenge.dto.response.*;
+import dev.book.challenge.service.ChallengeLockService;
 import dev.book.challenge.service.ChallengeService;
 import dev.book.challenge.type.Release;
 import dev.book.global.config.security.dto.CustomUserDetails;
@@ -46,14 +47,18 @@ class ChallengeControllerTest {
     @MockitoBean
     private ChallengeService challengeService;
 
+    @MockitoBean
+    private ChallengeLockService challengeLockService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     private Long challengeId = 1L;
-    UserEntity creator;
+
+    private UserEntity creator;
 
     @BeforeEach
-    void setUP() {
+    void setUp() {
         creator = UserEntity.builder()
                 .name("작성자")
                 .email("이메일")
@@ -235,7 +240,7 @@ class ChallengeControllerTest {
         // given
         ChallengeReadResponse response = new ChallengeReadResponse(1L, "제목", 5, 40, RECRUITING);
 
-        given(challengeService.findNewChallenge(anyInt(),anyInt())).willReturn(List.of(response));
+        given(challengeService.findNewChallenge(anyInt(), anyInt())).willReturn(List.of(response));
         mockMvc.perform(get("/api/v1/challenges/new"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
