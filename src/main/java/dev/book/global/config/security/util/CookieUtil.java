@@ -21,9 +21,10 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); //개발용
+        cookie.setSecure(true);
         cookie.setMaxAge(maxAge);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setDomain("localhost");
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 
