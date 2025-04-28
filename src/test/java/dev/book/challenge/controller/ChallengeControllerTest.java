@@ -108,12 +108,10 @@ class ChallengeControllerTest {
     void searchChallenge() throws Exception {
         // given
         ChallengeReadResponse response1 = new ChallengeReadResponse(
-                1L, "제목", 10, 1, RECRUITING
-        );
+                1L, "제목", 10, 1, RECRUITING);
 
         ChallengeReadResponse response2 = new ChallengeReadResponse(
-                2L, "제목", 5, 1, RECRUITING
-        );
+                2L, "제목", 5, 1, RECRUITING);
 
         List<ChallengeReadResponse> list = List.of(response1, response2);
         Page<ChallengeReadResponse> pageResponse = new PageImpl<>(list);
@@ -147,8 +145,7 @@ class ChallengeControllerTest {
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 2, 1),
                 LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
 
         given(challengeService.searchChallengeById(any())).willReturn(response);
 
@@ -167,8 +164,7 @@ class ChallengeControllerTest {
         // given
         ChallengeUpdateRequest request = new ChallengeUpdateRequest(
                 "수정된 제목", "수정된 내용", "PUBLIC", 2000, 20, List.of("SHOPPING"),
-                LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)
-        );
+                LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1));
 
         ChallengeUpdateResponse response = new ChallengeUpdateResponse(1L, "수정된 제목", "수정된 내용", Release.PUBLIC, 2000,
                 20,
@@ -177,8 +173,7 @@ class ChallengeControllerTest {
                 LocalDate.of(2024, 5, 1),
                 LocalDate.of(2024, 5, 31),
                 LocalDateTime.now(),
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
 
         given(challengeService.updateChallenge(any(), any(), any())).willReturn(response);
 
@@ -230,7 +225,6 @@ class ChallengeControllerTest {
                 .andExpect(jsonPath("$[0].capacity").value(5))
                 .andExpect(jsonPath("$[0].participants").value(40))
                 .andExpect(jsonPath("$[0].status").value("RECRUITING"));
-
     }
 
     @Test
@@ -248,7 +242,6 @@ class ChallengeControllerTest {
                 .andExpect(jsonPath("$[0].capacity").value(5))
                 .andExpect(jsonPath("$[0].participants").value(40))
                 .andExpect(jsonPath("$[0].status").value("RECRUITING"));
-
     }
 
     @Test
