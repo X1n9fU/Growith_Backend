@@ -92,12 +92,10 @@ class TipServiceTest {
 
         TipRequest tipRequest = new TipRequest(challenge.getId(), "가끔은 대중교통도 좋아요!");
 
-        //when
+        //when, then
         assertThatThrownBy(() -> tipService.createTip(userDetails, tipRequest))
                 .isInstanceOf(TipErrorException.class)
                 .hasMessageContaining("이미 팁이 작성된 챌린지입니다.");
-
-        //then
         verify(sseService, never()).sendTipToAllUsers(any());
     }
 
@@ -108,24 +106,25 @@ class TipServiceTest {
         given(userChallengeRepository.findByUserIdAndChallengeId(anyLong(), anyLong())).willThrow(new ChallengeException(ErrorCode.CHALLENGE_NOT_FOUND_USER));
         TipRequest tipRequest = new TipRequest(challenge.getId(), "가끔은 대중교통도 좋아요!");
 
-        //when
+        //when, then
         assertThatThrownBy(() -> tipService.createTip(userDetails, tipRequest))
                 .isInstanceOf(ChallengeException.class)
                 .hasMessageContaining("챌린지에 속해있지 않은 사용자 입니다.");
-
-        //then
         verify(tipRepository,never()).save(any());
         verify(sseService, never()).sendTipToAllUsers(any());
     }
 
     @Test
     void getTips() {
+        //given
         String content = "가끔은 대중교통도 좋아요!";
         List<Tip> tips = List.of(new Tip(content, userDetails.user()));
         given(tipRepository.find20RandomTips()).willReturn(tips);
 
+        //when
         List<TipResponse> tipResponses = tipService.getTips();
 
+        //then
         assertThat(tipResponses.get(0).content()).isEqualTo(content);
         assertThat(tipResponses.get(0).writer()).isEqualTo(userDetails.user().getNickname());
     }

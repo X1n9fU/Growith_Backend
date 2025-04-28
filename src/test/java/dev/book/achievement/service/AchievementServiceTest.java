@@ -30,7 +30,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -40,7 +39,7 @@ import static org.mockito.Mockito.*;
 class AchievementServiceTest {
 
     @Mock
-    private FcmTokenRepository fcmTokenRepository;
+    FcmTokenRepository fcmTokenRepository;
 
     @Mock
     AchievementUserRepository achievementUserRepository;
