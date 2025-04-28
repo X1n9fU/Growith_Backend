@@ -30,7 +30,7 @@ public class StatController implements StatApi {
     }
 
     @Override
-    @GetMapping("/{frequency}")
+    @GetMapping("/category/{frequency}")
     public ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @RequestParam String category) {
         Long userId = userDetails.user().getId();
         List<AccountBookSpendResponse> list = statService.categoryList(userId, frequency, category);
