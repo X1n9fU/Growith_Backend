@@ -14,15 +14,11 @@ import java.util.Optional;
 @Repository
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
 
-    @Query("SELECT COUNT(u) FROM UserChallenge u WHERE u.challenge.id=:id")
-    int countByChallengeId(Long id);
-
     boolean existsByUserIdAndChallengeId(Long id, Long challengeId);
 
     Optional<UserChallenge> findByUserIdAndChallengeId(Long id, Long challengeId);
 
     void deleteByUserIdAndChallengeId(Long userId, Long challengeId);
-
 
     @Query("SELECT uc.user.id FROM UserChallenge uc WHERE uc.challenge.id=:challengeId")
     List<Long> findUserIdByChallengeId(Long challengeId);

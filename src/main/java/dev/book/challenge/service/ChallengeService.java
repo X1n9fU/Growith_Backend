@@ -83,7 +83,7 @@ public class ChallengeService {
         List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
         challenge.updateInfo(challengeUpdateRequest, categories);
         challengeRepository.flush();
-        return ChallengeUpdateResponse.fromEntity(challenge, categories);
+        return ChallengeUpdateResponse.fromEntity(challenge);
     }
 
     @Transactional
@@ -96,7 +96,7 @@ public class ChallengeService {
 
         for (UserEntity participant : users) {
             participant.minusParticipatingChallenge();
-        } // 만약에 챌린지가 완료후 챌린지가 삭제 되면 이것도 삭제되는데
+        }
 
         challengeRepository.delete(challenge);
 
@@ -118,7 +118,6 @@ public class ChallengeService {
         userChallengeRepository.save(userChallenge);
     }
 
-
     @Transactional
     public void leaveChallenge(UserEntity user, Long challengeId) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
@@ -132,14 +131,12 @@ public class ChallengeService {
     }
 
     public List<ChallengeTopResponse> findTopChallenge() {
-
         Pageable pageable = PageRequest.of(0, 10);
         return challengeRepository.findTopChallenge(pageable);
 
     }
 
     private void checkExist(UserEntity user, Long id) {
-
         boolean isExist = userChallengeRepository.existsByUserIdAndChallengeId(user.getId(), id);
 
         if (isExist) {
@@ -201,9 +198,7 @@ public class ChallengeService {
 
             );
             challengeParticipantResponses.add(response);
-
         }
         return challengeParticipantResponses;
-
     }
 }
