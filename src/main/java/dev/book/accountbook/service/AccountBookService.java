@@ -315,7 +315,7 @@ public class AccountBookService {
     public List<TempAccountBookResponse> getTempList(Long userId) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
 
-        return tempAccountBookRepository.findByUserId(user.getId()).stream()
+        return tempAccountBookRepository.findAllByUserId(user.getId()).stream()
                 .map(TempAccountBookResponse::from)
                 .toList();
     }
