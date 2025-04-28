@@ -133,6 +133,7 @@ public class ChallengeService {
         return challengeRepository.findTopChallenge(pageable);
     }
 
+    // 오늘 기준 3일전까지의 챌린지를 신규 챌린지로 본다,
     public List<ChallengeReadResponse> findNewChallenge(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         LocalDateTime now = LocalDateTime.now();
