@@ -17,10 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@Tag(name = "Stat", description = "소비 많은 카테고리 3개 조회, 카테고리 별 소비 항목 조회, 직전 일간 / 주간 / 월간 소비 비교")
+@Tag(name = "통계 API", description = "소비 많은 카테고리 3개 조회, 카테고리 별 소비 항목 조회, 직전 일간 / 주간 / 월간 소비 비교")
 public interface StatApi {
 
     @Operation(
@@ -117,7 +118,7 @@ public interface StatApi {
                     )
             )
     )
-    ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @PathVariable String category);
+    ResponseEntity<List<AccountBookSpendResponse>> categoryList(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Frequency frequency, @RequestParam String category);
 
     @Operation(
             summary = "소비 증감량 조회",
