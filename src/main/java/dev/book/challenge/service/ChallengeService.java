@@ -103,7 +103,7 @@ public class ChallengeService {
     }
 
     @Transactional
-    public void participate(UserEntity user, Long id) {
+    public void participateWithLock(UserEntity user, Long id) {
         UserEntity userEntity = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new UserErrorException(USER_NOT_FOUND));
         Challenge challenge = challengeRepository.findByIdWithLock(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         challenge.checkAlreadyStartOrEnd();
@@ -111,6 +111,7 @@ public class ChallengeService {
 
         challenge.isParticipantsMoreThanCapacity();
         challenge.plusCurrentCapacity();
+        challengeRepository.flush();
 
         userEntity.plusParticipatingChallenge();
         UserChallenge userChallenge = UserChallenge.of(userEntity, challenge);

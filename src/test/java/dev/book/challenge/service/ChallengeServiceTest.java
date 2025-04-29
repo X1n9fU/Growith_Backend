@@ -237,7 +237,7 @@ class ChallengeServiceTest {
         given(userRepository.findByEmail(any())).willReturn(Optional.of(noCreator));
         given(challengeRepository.findByIdWithLock(any())).willReturn(Optional.of(challenge));
         // when
-        challengeService.participate(noCreator, 1L);
+        challengeService.participateWithLock(noCreator, 1L);
         // then
         verify(userChallengeRepository, times(1)).save(any());
     }
@@ -255,7 +255,7 @@ class ChallengeServiceTest {
         given(userChallengeRepository.existsByUserIdAndChallengeId(any(), any())).willReturn(true);
         // when
         // then
-        assertThatThrownBy(() -> challengeService.participate(user, 1L)).isInstanceOf(ChallengeException.class)
+        assertThatThrownBy(() -> challengeService.participateWithLock(user, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("이미 참여된 챌린지 입니다.");
 
     }
@@ -274,7 +274,7 @@ class ChallengeServiceTest {
                 .when(challenge).isParticipantsMoreThanCapacity();
         //when
         // then
-        assertThatThrownBy(() -> challengeService.participate(noCreator, 1L)).isInstanceOf(ChallengeException.class)
+        assertThatThrownBy(() -> challengeService.participateWithLock(noCreator, 1L)).isInstanceOf(ChallengeException.class)
                 .hasMessage("참여 인원이 초과 하였습니다.");
 
     }
