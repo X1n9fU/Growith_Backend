@@ -63,6 +63,7 @@ public class ChallengeConcurrencyTest {
         //given
         int numThreads = 10; //10명
         CountDownLatch countDownLatch = new CountDownLatch(numThreads);
+        CountDownLatch startCountDownLatch = new CountDownLatch(1);
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
         List<UserEntity> users = new ArrayList<>();
@@ -100,6 +101,7 @@ public class ChallengeConcurrencyTest {
 
                     context.setAuthentication(authentication);
                     SecurityContextHolder.setContext(context);
+                    startCountDownLatch.await(); // 동시에 출발할려고 기다림
                     challengeLockService.participate(userEntity, challenge.getId());
                 } catch (Exception e) {
                     log.error(e.getMessage());
@@ -108,6 +110,7 @@ public class ChallengeConcurrencyTest {
                 }
             });
         }
+        startCountDownLatch.countDown(); // 1->0으로 변하고 participate을 거의 동시에 호출
         countDownLatch.await();
         //when
         Challenge updatedChallenge = challengeRepository.findById(savedChallenge.getId()).orElseThrow();
