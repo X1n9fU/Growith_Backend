@@ -18,6 +18,7 @@ import dev.book.user.entity.UserEntity;
 import dev.book.user.exception.UserErrorException;
 import dev.book.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,7 @@ import static dev.book.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
@@ -48,6 +50,7 @@ public class ChallengeService {
     @Transactional
     public ChallengeCreateResponse createChallenge(UserEntity user, ChallengeCreateRequest challengeCreateRequest) {
         UserEntity creator = getUser(user);
+        log.info("챌린지 생성하려는 사용자 : {}", creator.getEmail());
         List<Category> categories = categoryRepository.findByCategoryIn(challengeCreateRequest.categoryList());
 
         Challenge challenge = Challenge.of(challengeCreateRequest, creator);
@@ -75,7 +78,7 @@ public class ChallengeService {
 
     @Transactional
     public ChallengeUpdateResponse updateChallenge(UserEntity user, Long id, ChallengeUpdateRequest challengeUpdateRequest) {
-
+        log.info("챌린지 수정 할려고 하는 사용자 : {}, 삭제 할려고 하는 챌린지 : {}", user.getEmail(),id);
         Challenge challenge = getMyChallenge(user.getId(), id);
         List<Category> categories = categoryRepository.findByCategoryIn(challengeUpdateRequest.categoryList());
         challenge.updateInfo(challengeUpdateRequest, categories);
@@ -85,14 +88,16 @@ public class ChallengeService {
 
     @Transactional
     public void deleteChallenge(UserEntity user, Long id) {
-
+        log.info("챌린지 삭제 할려고 하는 사용자 : {}, 삭제 할려고 하는 챌린지 : {}", user.getEmail(), id);
         UserEntity creator = getUser(user);
         Challenge challenge = getMyChallenge(creator.getId(), id);
+        log.info("삭제 할려고 하는 챌린지 : {}", user.getEmail());
         List<Long> userIds = userChallengeRepository.findUserIdByChallengeId(challenge.getId());
         List<UserEntity> users = userRepository.findAllById(userIds);
 
         // 챌린지가 삭제되어 user들의 참가한 챌린지 수를 감소 시킨다.
         for (UserEntity participant : users) {
+            log.info("챌린지에 속해있던 유저:{}", participant.getEmail());
             participant.minusParticipatingChallenge();
         }
 
@@ -158,6 +163,7 @@ public class ChallengeService {
             LocalDate currentDate = LocalDate.now();
             LocalDate endDate = challenge.getEndDate();
             int endDay = (int) ChronoUnit.DAYS.between(currentDate, endDate);
+            log.info("두날짜의 차이 : {}", endDay);
             boolean isSuccess = userChallenge.isSuccess();
             boolean isWriteTip = userChallenge.isWriteTip();
 
