@@ -65,12 +65,13 @@ public class ChallengeService {
         return ChallengeCreateResponse.fromEntity(challenge);
 
     }
-
+    @Transactional(readOnly = true)
     public Page<ChallengeReadResponse> searchChallenge(String title, String text, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         return challengeRepository.search(title, text, pageable);
     }
 
+    @Transactional(readOnly = true)
     public ChallengeReadDetailResponse searchChallengeById(Long id) {
         Challenge challenge = challengeRepository.findWithCreatorById(id).orElseThrow(() -> new ChallengeException(CHALLENGE_NOT_FOUND));
         return ChallengeReadDetailResponse.fromEntity(challenge);
@@ -139,6 +140,7 @@ public class ChallengeService {
     }
 
     // 오늘 기준 3일전까지의 챌린지를 신규 챌린지로 본다,
+    @Transactional(readOnly = true)
     public List<ChallengeReadResponse> findNewChallenge(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         LocalDateTime now = LocalDateTime.now();
@@ -147,6 +149,7 @@ public class ChallengeService {
         return challengeRepository.findNewChallenge(pageable, startDateTime, endDateTime);
     }
 
+    @Transactional(readOnly = true)
     public List<ChallengeParticipantResponse> findMyChallenge(UserEntity user, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         //user가 속한 챌린지들을 불러온다.
