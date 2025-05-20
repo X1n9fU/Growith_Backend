@@ -26,6 +26,7 @@ public class BudgetService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    @Transactional(readOnly = true)
     public BudgetResponse getBudget(Long userId, int month) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
         Budget budget = budgetRepository.findByMonthAndUserId(month, user.getId()).orElseThrow(() -> new AccountBookErrorException(AccountBookErrorCode.NOT_FOUND_BUDGET));
@@ -36,7 +37,7 @@ public class BudgetService {
     @Transactional
     public BudgetResponse createBudget(Long userId, BudgetRequest budgetRequest) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserErrorException(UserErrorCode.USER_NOT_FOUND));
-        validAlreadyExistBudget(userEntity.getId());
+        validateAlreadyExistBudget(userEntity.getId());
 
         int date = getThisMonth();
         Budget budget = budgetRepository.save(new Budget(budgetRequest.budget(), date, userEntity));
@@ -61,7 +62,7 @@ public class BudgetService {
         budgetRepository.deleteById(budget.getId());
     }
 
-    private void validAlreadyExistBudget(Long userId) {
+    private void validateAlreadyExistBudget(Long userId) {
         if (budgetRepository.existsByUserId(userId)) {
             throw new AccountBookErrorException(AccountBookErrorCode.DUPLICATE_BUDGET);
         }
