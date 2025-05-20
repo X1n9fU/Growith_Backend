@@ -1,6 +1,5 @@
 # 더함
-![image](https://github.com/user-attachments/assets/99247821-e535-4508-bcdd-b36066954037)
-
+![image](https://github.com/user-attachments/assets/fee1201b-8225-4b26-be88-a0eaf84837ca)
 
 더함은 사용자들이 함께 목표를 설정하고 지속적으로 돈을 모으는 절약 챌린지 서비스입니다. 매일, 주간, 월간으로 카테고리별 Top3 소비 내역을 파악하고, 챌린지를 통해 목표 예산을 설정하고 사람들과 함께 절약하는 재미를 느끼고 실제로 절약되는 효과까지 경험할 수 있습니다.
 
