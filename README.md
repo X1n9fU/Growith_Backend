@@ -103,7 +103,7 @@
  - 카카오톡으로 초대 링크를 보내고 '더함'에 친구를 초대할 수 있어요.
  - 친구는 내가 만든 챌린지에 초대하여 함께 참여할 수 있어요.
 
-<img src="https://github.com/user-attachments/assets/77a268d9-b754-4208-aba9-397ceadb0051" alt="친구 초대" width="600"/>
+<img src="https://github.com/user-attachments/assets/77a268d9-b754-4208-aba9-397ceadb0051" alt="친구 초대" width="450"/>
 
 ### 6. 마이페이지
  - 나의 프로필을 관리할 수 있어요.
